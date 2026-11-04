@@ -2,6 +2,20 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.6.0
+- **Tutto in italiano, davvero**: prima restavano in inglese lo schermo del desktop (menu "Start / Reconnect Desktop",
+  "Use iPhone as Trackpad", stato "Desktop ready · … display updates/s"), le righe di Impostazioni del desktop
+  (Sessione, Temperatura del telefono, Utente Linux, Server grafico, Memoria dell'app, Immagine ricevuta, Schermo
+  esterno…), gli avvisi di avvio e installazione, gli stati del JIT e della GPU, gli errori di account e file.
+  Ora la parte Objective-C (che prima non passava dalla traduzione) viene tradotta nel momento in cui va a schermo
+  (`app/FMLAB/FMLABLingua.inc.m`), senza riscrivere i file dell'originale, così gli aggiornamenti di LinuxRunner
+  si portano dentro facilmente. **971 testi**, controllati a ogni compilazione anche nei casi che prima sfuggivano
+  (scelte "a ? b : c", testi con numeri, righe valore, messaggi messi in variabili, menu e avvisi Objective-C).
+- **Schermo intero vero**: a schermo intero il desktop ora va da bordo a bordo (anche sotto la Dynamic Island e
+  l'indicatore Home), senza i margini neri della zona sicura e senza i 12 punti di bordo. Il pulsante per far
+  tornare i comandi resta nella zona sicura. Con la tastiera iOS aperta il desktop si sposta sopra.
+- Foto del prima in [docs/images/0.6.0](docs/images/0.6.0).
+
 ## 0.5.0
 - **Uguale all'originale anche nella grafica**: GPU Metal (virglrenderer, libepoxy e ANGLE alle stesse versioni di
   LinuxRunner) oltre al JIT. In Impostazioni → Grafica si può scegliere "GPU Metal · Sperimentale" come in LinuxRunner.

@@ -74,7 +74,7 @@ private final class InstallCancellation: @unchecked Sendable {
                 var paths: [String] = []
                 for (index, package) in manifest.packages.enumerated() {
                     try Task.checkCancellation(); if token.check() { throw CancellationError() }
-                    message = "Downloading/verifying \(package.Package) (\(index + 1)/\(manifest.packages.count))"
+                    message = String(format: LF("Downloading/verifying %@ (%lld/%lld)"), package.Package, index + 1, manifest.packages.count)
                     fraction = Double(index) / Double(manifest.packages.count) * 0.55
                     let destination = cache.appendingPathComponent(package.Package + ".deb")
                     let cached = try? Self.verification(destination, package: package)
@@ -155,10 +155,10 @@ struct DebianInstallerView: View {
         List {
             Text("Debian GNU/Linux 13.7 (trixie) · ARM64")
             Text("Downloads official Debian packages from a bundled manifest authenticated against Debian's signed release and SHA-256 package index. Requires at least 1 GB free space. Alpine remains installed.").font(.footnote)
-            Text(installer.message)
+            Text(LF(installer.message))
             if installer.running { ProgressView(value: installer.fraction); Button("Cancel Installation") { installer.cancel() } }
             else { Button("Install Debian ARM64") { installer.install(completion: completion) } }
-            if let failure = installer.failure { Text(failure).foregroundColor(.red) }
+            if let failure = installer.failure { Text(LF(failure)).foregroundColor(.red) }
             NavigationLink("Export Installer Diagnostics", destination: DeveloperDiagnosticsView())
             Text("Choose Export Full Diagnostic Bundle in diagnostics. It includes a bounded Debian installer log. DEBUG enables per-entry archive tracing.").font(.footnote)
         }.navigationTitle("Install Debian")

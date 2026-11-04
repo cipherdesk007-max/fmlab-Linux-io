@@ -16,6 +16,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <time.h>
+NSString *FMLABTr(NSString *s);   // FMLAB: traduzione (app/FMLAB/FMLABLingua.inc.m)
 static double LRGUIClock(void){struct timespec t;clock_gettime(CLOCK_MONOTONIC,&t);return t.tv_sec+t.tv_nsec*1e-9;}
 
 @interface TerminalViewController (LRGUIProcessStatus)
@@ -529,6 +530,7 @@ static NSString *ApplicationPreflightFailure(NSURL *session) {
 @end
 
 @interface LRGUIViewController ()
+@property NSArray<NSLayoutConstraint *> *fmlabBordiNormali,*fmlabBordiPieni;   // FMLAB: tutto schermo vero
 @property LRFramebufferView *surface;
 @property UILabel *status;
 @property UIStackView *stack;
@@ -810,7 +812,12 @@ static NSString *DesktopDegradedNotice(NSString *state);
     UIBarButtonItem *profiles=[[UIBarButtonItem alloc] initWithTitle:@"Profiles" style:UIBarButtonItemStylePlain target:self action:@selector(savedProfiles:)];
     self.navigationItem.rightBarButtonItems=_desktopMode?@[[[UIBarButtonItem alloc] initWithTitle:@"Desktop" style:UIBarButtonItemStylePlain target:self action:@selector(desktopOptions:)]]:@[logs,profiles];
     _stack=[UIStackView new];_stack.axis=UILayoutConstraintAxisVertical;_stack.spacing=10;_stack.translatesAutoresizingMaskIntoConstraints=NO;[self.view addSubview:_stack];
-    [NSLayoutConstraint activateConstraints:@[[_stack.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:8],[_stack.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],[_stack.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],[_stack.bottomAnchor constraintEqualToAnchor:self.view.keyboardLayoutGuide.topAnchor constant:-8]]];
+    // FMLAB: due insiemi di bordi. Normale: dentro la zona sicura con un po' di margine (comandi visibili).
+    // Schermo intero: il desktop va da bordo a bordo dello schermo (anche sotto la Dynamic Island e l'indicatore
+    // Home), così l'immagine 1168×540 riempie tutto l'iPhone senza bande nere.
+    _fmlabBordiNormali=@[[_stack.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:8],[_stack.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],[_stack.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],[_stack.bottomAnchor constraintEqualToAnchor:self.view.keyboardLayoutGuide.topAnchor constant:-8]];
+    _fmlabBordiPieni=@[[_stack.topAnchor constraintEqualToAnchor:self.view.topAnchor],[_stack.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],[_stack.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],[_stack.bottomAnchor constraintEqualToAnchor:self.view.keyboardLayoutGuide.topAnchor]];
+    [NSLayoutConstraint activateConstraints:_fmlabBordiNormali];
     UIStackView *actions=[UIStackView new];actions.spacing=12;actions.distribution=UIStackViewDistributionFillEqually;
     for(NSArray *item in @[@[@"Install GUI Support",@"install"],@[@"Run X11 Test",@"runTest"],@[@"Run xterm",@"runXterm"]]){UIButton *b=[UIButton buttonWithType:UIButtonTypeSystem];[b setTitle:item[0] forState:UIControlStateNormal];b.titleLabel.font=[UIFont systemFontOfSize:13];b.accessibilityIdentifier=item[0];[b addTarget:self action:NSSelectorFromString(item[1]) forControlEvents:UIControlEventTouchUpInside];[actions addArrangedSubview:b];}
     [_stack addArrangedSubview:actions];
@@ -864,12 +871,12 @@ static NSString *DesktopDegradedNotice(NSString *state);
     _exitObserver=[NSNotificationCenter.defaultCenter addObserverForName:@"ProcessExitedNotification" object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *n){typeof(self) self=weak;if(self&&self.sessionTerminal.sessionPid>0&&[n.userInfo[@"pid"] intValue]==self.sessionTerminal.sessionPid){BOOL starting=self.startState==LRStartSession;[self stop];NSString *detail=[NSString stringWithContentsOfURL:[self.sessionURL URLByAppendingPathComponent:@"session.log"] encoding:NSUTF8StringEncoding error:nil];
         NSString *last=@"GUI session exited";for(NSString *line in [detail componentsSeparatedByString:@"\n"])if([line hasPrefix:@"GUI_SESSION:"]&&![line containsString:@"cleaned up"])last=line;
         if(self.desktopMode){[self traceSessionLog:detail];[LRRuntimeBridge desktopTrace:@"09 desktop" result:@"fail" detail:[NSString stringWithFormat:@"session process exited code=%@ while start-state=%ld painted=%d last=%@",n.userInfo[@"code"],(long)self.startState,self.desktopPainted,last]];}
-        self.status.text=ApplicationPreflightFailure(self.sessionURL)?:[NSString stringWithFormat:@"%@. CLI remains available. GUI Logs includes application stdout/stderr.",last];
+        self.status.text=ApplicationPreflightFailure(self.sessionURL)?:[NSString stringWithFormat:FMLABTr(@"%@. CLI remains available. GUI Logs includes application stdout/stderr."),last];
         if(self.desktopMode){
             // Missing components reported by session.sh: check again and repair (once per request).
             if([detail containsString:@"GUI_SESSION: support missing"]||[detail containsString:@"run Install Desktop Support"]||[detail containsString:@"DESKTOP_STARTUP: missing="]){self.profileReady=NO;[self beginDesktopCheck];}
-            else if([detail containsString:@"GUI_SESSION: X server"]||[detail containsString:@"GUI_SESSION: focus manager"])[self desktopStartFailed:@"The display could not start" detail:[NSString stringWithFormat:@"%@\n\nError: DISPLAY_INITIALIZATION_ERROR. Tap Retry; Details shows the display log.",last]];
-            else if(starting)[self desktopStartFailed:@"The desktop could not start" detail:[NSString stringWithFormat:@"%@\n\nError: DESKTOP_STARTUP_ERROR. Tap Retry; Details shows the session log.",last]];
+            else if([detail containsString:@"GUI_SESSION: X server"]||[detail containsString:@"GUI_SESSION: focus manager"])[self desktopStartFailed:@"The display could not start" detail:[NSString stringWithFormat:FMLABTr(@"%@\n\nError: DISPLAY_INITIALIZATION_ERROR. Tap Retry; Details shows the display log."),last]];
+            else if(starting)[self desktopStartFailed:@"The desktop could not start" detail:[NSString stringWithFormat:FMLABTr(@"%@\n\nError: DESKTOP_STARTUP_ERROR. Tap Retry; Details shows the session log."),last]];
             else{
                 // Name the desktop component that ended and its last error line.
                 NSString *app=[NSString stringWithContentsOfURL:[self.sessionURL URLByAppendingPathComponent:@"application.log"] encoding:NSUTF8StringEncoding error:nil],*component=nil;
@@ -880,7 +887,7 @@ static NSString *DesktopDegradedNotice(NSString *state);
                         NSString *componentLog=[NSString stringWithContentsOfURL:[self.sessionURL URLByAppendingPathComponent:logName] encoding:NSUTF8StringEncoding error:nil];NSString *errorLine=nil;
                         for(NSString *line in [componentLog componentsSeparatedByString:@"\n"])if([line containsString:@"ERROR"]||[line containsString:@"Bail out"]||[line containsString:@"rror:"])errorLine=line;
                         if(errorLine)cause=[NSString stringWithFormat:@"%@\n%@",component,[errorLine substringToIndex:MIN(errorLine.length,(NSUInteger)300)]];}}
-                [self desktopStartFailed:@"The desktop stopped" detail:[NSString stringWithFormat:@"%@\n\nError: DESKTOP_STARTUP_ERROR. Tap Retry to start it again, or Details for the logs.",cause]];
+                [self desktopStartFailed:@"The desktop stopped" detail:[NSString stringWithFormat:FMLABTr(@"%@\n\nError: DESKTOP_STARTUP_ERROR. Tap Retry to start it again, or Details for the logs."),cause]];
             }
         }}}];
 }
@@ -955,7 +962,7 @@ static NSString *DesktopDegradedNotice(NSString *state);
     [self runProfile:@[@"check"]];
 }
 - (void)beginDesktopRepair:(NSString *)missing{
-    if(_repairAttempted){[self desktopStartFailed:@"Desktop components are still missing" detail:[NSString stringWithFormat:@"Missing after installation: %@. Check the network and tap Retry; Details shows the installer log.",missing]];return;}
+    if(_repairAttempted){[self desktopStartFailed:@"Desktop components are still missing" detail:[NSString stringWithFormat:FMLABTr(@"Missing after installation: %@. Check the network and tap Retry; Details shows the installer log."),missing]];return;}
     _repairAttempted=YES;_startState=LRStartRepairing;[self desktopStartLog:[@"stage=repair missing=" stringByAppendingString:missing]];[LRRuntimeBridge desktopTrace:@"repair" result:@"start" detail:[@"missing=" stringByAppendingString:missing]];
     [self showStartStage:@"Installing desktop components" detail:@"First start in this environment, or components were missing. This needs the network once and can take several minutes. Keep LinuxRunner open." busy:YES];
     // Setup, account tools, Plasma and Open Desktop share one native runner.
@@ -1006,7 +1013,7 @@ static NSString *DesktopDegradedNotice(NSString *state);
         @"FILESYSTEM_ERROR":@[@"Files could not be written in Linux",@"Details shows the path; check free storage and tap Retry."],
     };
     NSArray *message=messages[category]?:@[@"Installing desktop components failed",@"Tap Retry; Details shows the installer log."];
-    return @[message[0],[NSString stringWithFormat:@"%@\n\n%@\nError: %@",message[1],detail,category]];
+    return @[message[0],[NSString stringWithFormat:FMLABTr(@"%@\n\n%@\nError: %@"),message[1],detail,category]];
 }
 - (void)profileTick{
     NSTimeInterval age=-[_profileStarted timeIntervalSinceNow];BOOL ended=_profileTerminal.sessionPid<=0;
@@ -1036,7 +1043,7 @@ static NSString *DesktopDegradedNotice(NSString *state);
             [_profileTimer invalidate];_profileTimer=nil;_profileTerminal=nil;_startState=LRStartIdle;[self desktopStartLog:[@"repair exit=" stringByAppendingString:result]];
             [LRRuntimeBridge desktopTrace:@"repair" result:[result isEqual:@"0"]?@"ok":@"fail" detail:[NSString stringWithFormat:@"exit=%@ after %.0fs last-stage=%@",result,age,stage?:@"none"]];
             if([result isEqual:@"0"]){_profileReady=YES;[self run:@"desktop"];}
-            else{NSArray *failure=[self profileFailureMessage];[self desktopStartFailed:failure[0] detail:[NSString stringWithFormat:@"%@\n\nStage: %@",failure[1],stage?:@"starting"]];}
+            else{NSArray *failure=[self profileFailureMessage];[self desktopStartFailed:failure[0] detail:[NSString stringWithFormat:FMLABTr(@"%@\n\nStage: %@"),failure[1],stage?:@"starting"]];}
             return;
         }
         // installer-run.sh writes install-result last; ending without it means
@@ -1044,7 +1051,7 @@ static NSString *DesktopDegradedNotice(NSString *state);
         if((ended&&age>5)||age>3600){[_profileTimer invalidate];_profileTimer=nil;_profileTerminal=nil;
             [LRRuntimeBridge desktopTrace:@"repair" result:@"fail" detail:[NSString stringWithFormat:@"installer ended without a result after %.0fs",age]];
             NSString *lock=[[NSString stringWithContentsOfURL:[_supportURL URLByAppendingPathComponent:@"desktop-profile.sh.log"] encoding:NSUTF8StringEncoding error:nil] containsString:@"PACKAGE_LOCK"]?@" Another package operation was running.":@"";
-            [self desktopStartFailed:@"The installer stopped early" detail:[NSString stringWithFormat:@"It ended without a result.%@ Tap Retry.",lock]];}
+            [self desktopStartFailed:@"The installer stopped early" detail:[NSString stringWithFormat:FMLABTr(@"It ended without a result.%@ Tap Retry."),lock]];}
     }
 }
 // ---- Open Desktop timeline and report --------------------------------------
@@ -1358,7 +1365,7 @@ static NSString *LRSessionGraphicsMode(void){
     }
     if(_client){[self message:@"A display session is already running. Close it first."];return;}
     if(_desktopMode&&_sessionTerminal.sessionPid>0&&_sessionURL&&![NSFileManager.defaultManager fileExistsAtPath:[_sessionURL URLByAppendingPathComponent:@"stop"].path]){[self connectDesktopViewer];return;}
-    if(![LRRuntimeBridge isRunning]){if(_desktopMode)[self desktopStartFailed:@"Linux is not running" detail:[NSString stringWithFormat:@"%@\n\nError: RUNTIME_NOT_RUNNING. Tap Retry once Linux has started.",LRRuntimeBridge.runtimeStatus]];else [self message:LRRuntimeBridge.runtimeStatus];return;}
+    if(![LRRuntimeBridge isRunning]){if(_desktopMode)[self desktopStartFailed:@"Linux is not running" detail:[NSString stringWithFormat:FMLABTr(@"%@\n\nError: RUNTIME_NOT_RUNNING. Tap Retry once Linux has started."),LRRuntimeBridge.runtimeStatus]];else [self message:LRRuntimeBridge.runtimeStatus];return;}
     NSError *error=nil;_supportURL=PrepareSupport(&error);if(!_supportURL){if(_desktopMode)[self desktopStartFailed:@"Desktop files could not be prepared" detail:[error.localizedDescription stringByAppendingString:@"\n\nError: FILESYSTEM_ERROR"]];else [self message:error.localizedDescription];return;}
     if(_desktopMode&&(_startState==LRStartChecking||_startState==LRStartRepairing)){[self.view bringSubviewToFront:_startPanel];return;} // already working on it
     if(_desktopMode&&![self profileVerified]){[self beginDesktopCheck];return;}
@@ -1435,7 +1442,7 @@ static NSString *DesktopDegradedNotice(NSString *state){
     for(NSString *line in [state componentsSeparatedByString:@"\n"])if([line hasPrefix:@"degraded="]&&line.length>9){
         NSMutableArray *names=[NSMutableArray array];
         for(NSString *role in [[line substringFromIndex:9] componentsSeparatedByString:@","])[names addObject:[role isEqual:@"panel"]?@"panel (panel.log)":[role isEqual:@"surface"]?@"desktop icons and wallpaper (desktop.log)":role];
-        return [NSString stringWithFormat:@"Desktop running without the %@ — it kept crashing. Apps still work; Details has the log.",[names componentsJoinedByString:@" and "]];}
+        return [NSString stringWithFormat:FMLABTr(@"Desktop running without the %@ — it kept crashing. Apps still work; Details has the log."),[names componentsJoinedByString:@" and "]];}
     return nil;
 }
 - (NSDictionary *)desktopSessionSummary {
@@ -1587,7 +1594,7 @@ static NSString *DesktopDegradedNotice(NSString *state){
     double now=LRGUIClock();
     if(_rateTime>0&&now-_rateTime>=0.9){_updateRate=(double)(_frames-_rateFrames)/(now-_rateTime);_rateFrames=_frames;_rateTime=now;}
     else if(_rateTime<=0||_frames<_rateFrames){_rateFrames=_frames;_rateTime=now;}
-    _status.text=[NSString stringWithFormat:@"%@ · %.0fs · %.1f display updates/s",progress,elapsed,_updateRate];
+    _status.text=[NSString stringWithFormat:FMLABTr(@"%@ · %.0fs · %.1f display updates/s"),FMLABTr(progress),elapsed,_updateRate];
 }
 - (void)metrics{
     [LRRuntimeBridge logCategory:@"GUI_PRESENTATION" event:[NSString stringWithFormat:@"component counters (guest rendering unchanged): %@",[self.surface presentationStatistics]]];
@@ -1645,7 +1652,7 @@ static NSString *DesktopDegradedNotice(NSString *state){
                 [timer invalidate];self.queuedLaunchTimer=nil;self->_queuedDesktopApplication=nil;[self launchDesktopApplication:held];}}];}
         return;}
     NSString *selected=LRRuntimeBridge.defaultLinuxUser;
-    if(_sessionGuestUser && ![_sessionGuestUser isEqual:selected]){[self message:[NSString stringWithFormat:@"This desktop belongs to %@, but the selected login is %@. Save your work, stop the old desktop from Sessions, then open a new desktop. The application was not launched under the old identity.",_sessionGuestUser,selected]];return;}
+    if(_sessionGuestUser && ![_sessionGuestUser isEqual:selected]){[self message:[NSString stringWithFormat:FMLABTr(@"This desktop belongs to %@, but the selected login is %@. Save your work, stop the old desktop from Sessions, then open a new desktop. The application was not launched under the old identity."),_sessionGuestUser,selected]];return;}
     NSString *executable=config[@"executable"],*directory=config[@"directory"];
     if(![executable hasPrefix:@"/"]||![directory hasPrefix:@"/"]||![config[@"arguments"] isKindOfClass:NSArray.class]){[self message:@"Invalid desktop application configuration"];return;}
     NSMutableString *command=[NSMutableString stringWithString:@"#!/bin/sh\nset -eu\n"];
@@ -1665,7 +1672,14 @@ static NSString *DesktopDegradedNotice(NSString *state){
     _lastLaunchRequest=config[@"requestID"];
     [LRRuntimeBridge logCategory:@"DESKTOP_LAUNCH" event:[NSString stringWithFormat:@"executable=%@ request=%@",executable,target.lastPathComponent]];
 }
-- (void)setImmersive:(BOOL)hide{_inputToolbar.hidden=hide;_status.hidden=hide;_immersiveButton.hidden=!hide;[self.navigationController setNavigationBarHidden:hide animated:YES];[self setNeedsStatusBarAppearanceUpdate];}
+- (void)setImmersive:(BOOL)hide{_inputToolbar.hidden=hide;_status.hidden=hide;_immersiveButton.hidden=!hide;[self.navigationController setNavigationBarHidden:hide animated:YES];
+    // FMLAB: a schermo intero niente margini né zona sicura; la tastiera iOS, se aperta, spinge su il desktop.
+    if(_desktopMode&&_fmlabBordiNormali){[NSLayoutConstraint deactivateConstraints:hide?_fmlabBordiNormali:_fmlabBordiPieni];[NSLayoutConstraint activateConstraints:hide?_fmlabBordiPieni:_fmlabBordiNormali];
+        if(@available(iOS 17.0,*))self.view.keyboardLayoutGuide.usesBottomSafeArea=!hide;
+        self.view.backgroundColor=hide?UIColor.blackColor:UIColor.systemBackgroundColor;_stack.spacing=hide?0:10;
+        [self.view setNeedsLayout];[self.surface fitViewport];}
+    [self setNeedsStatusBarAppearanceUpdate];[self setNeedsUpdateOfHomeIndicatorAutoHidden];[self setNeedsUpdateOfScreenEdgesDeferringSystemGestures];}
+- (BOOL)prefersStatusBarHidden{return _desktopMode&&_inputToolbar.hidden;}
 - (void)toggleImmersive{[self setImmersive:!_inputToolbar.hidden];}
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];

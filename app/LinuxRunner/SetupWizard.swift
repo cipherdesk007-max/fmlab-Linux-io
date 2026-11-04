@@ -95,19 +95,19 @@ struct SetupWizardView: View {
         }
         if distribution == "debian" {
             Section {
-                if debian.running { Text(debian.message); ProgressView(value: debian.fraction); Button("Cancel", role: .destructive) { debian.cancel() } }
+                if debian.running { Text(LF(debian.message)); ProgressView(value: debian.fraction); Button("Cancel", role: .destructive) { debian.cancel() } }
                 else { Button("Install Debian") { startInstall() }.disabled(free < max(Int64(1 << 30), download + installed)) }
-                if let failure = debian.failure { Text(failure).foregroundStyle(.red); Button("Try Again") { startInstall() } }
+                if let failure = debian.failure { Text(LF(failure)).foregroundStyle(.red); Button("Try Again") { startInstall() } }
             } footer: { Text("Official Debian packages, checked against Debian's signed index. The desktop, sound and account tools are added in the next steps.") }
         } else if distribution == "arch" {
             Section {
-                if arch.running { Text(arch.message); ProgressView(value: arch.fraction); Button("Cancel", role: .destructive) { arch.cancel() } }
+                if arch.running { Text(LF(arch.message)); ProgressView(value: arch.fraction); Button("Cancel", role: .destructive) { arch.cancel() } }
                 else { Button("Install Arch Linux ARM") { startInstall() }.disabled(free < Int64(1_500_000_000)) }
-                if let failure = arch.failure { Text(failure).foregroundStyle(.red); Button("Try Again") { startInstall() } }
+                if let failure = arch.failure { Text(LF(failure)).foregroundStyle(.red); Button("Try Again") { startInstall() } }
             } footer: { Text("Official signed Arch Linux ARM packages. Verified downloads are kept for retry. First-start configuration finishes before desktop packages are installed.") }
         } else {
             Section { if manager.busy { ProgressView("Unpacking Alpine Linux…") } else { Button("Install Alpine") { startInstall() } }
-                if let error = manager.error { Text(error).foregroundStyle(.red) } }
+                if let error = manager.error { Text(LF(error)).foregroundStyle(.red) } }
         }
     }
 
@@ -157,7 +157,7 @@ struct SetupWizardView: View {
         }
     }
 
-    private func row(_ title: String, _ value: String) -> some View { HStack { Text(title); Spacer(); Text(value).foregroundStyle(.secondary) } }
+    private func row(_ title: String, _ value: String) -> some View { HStack { Text(LF(title)); Spacer(); Text(LF(value)).foregroundStyle(.secondary) } }
 
     private func resume() {
         if step == .relaunch, LRRuntimeBridge.isRunning(), LRRuntimeBridge.activeRootName() == setupRoot { stepRaw = SetupStep.account.rawValue }
@@ -208,7 +208,7 @@ struct SetupWizardView: View {
     }
 
     @ViewBuilder private func extraDesktopRow(_ title: String, _ tag: String, installed: Bool, install: @escaping (@escaping (String) -> Void, @escaping (Error?) -> Void) -> Void) -> some View {
-        if installed || extraDesktops.contains(tag) { Label(title + " installed", systemImage: "checkmark") }
+        if installed || extraDesktops.contains(tag) { Label(String(format: LF("%@ installed"), LF(title)), systemImage: "checkmark") }
         else {
             Button("Install " + title) {
                 problem = nil; working = "Starting"

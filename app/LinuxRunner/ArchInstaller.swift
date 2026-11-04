@@ -257,7 +257,7 @@ private final class ArchCancellation: @unchecked Sendable {
                           let sig = Data(base64Encoded: (package.fields["PGPSIG"] ?? []).joined()) else {
                         throw ArchInstallError.failure("Unsupported or unsigned package entry: \(package.name)")
                     }
-                    message = "Downloading/verifying \(package.name) (\(index + 1)/\(order.count))"
+                    message = String(format: LF("Downloading/verifying %@ (%lld/%lld)"), package.name, index + 1, order.count)
                     fraction = total > 0 ? Double(done) / Double(total) * 0.6 : 0
                     let destination = cache.appendingPathComponent(package.filename)
                     if (try? DebianInstaller.sha256(destination)) != package.sha256 {
@@ -312,10 +312,10 @@ struct ArchInstallerView: View {
         List {
             Text("Arch Linux ARM · aarch64 · rolling release")
             Text("Experimental. Downloads official Arch Linux ARM packages; each must match its SHA-256 and carry a valid signature by the Arch Linux ARM Build System key. Use Set Up Linux to configure an account and install X11 desktop components. Wayland is not supported. Requires 1.5 GB free space. Existing environments are kept.").font(.footnote)
-            Text(installer.message)
+            Text(LF(installer.message))
             if installer.running { ProgressView(value: installer.fraction); Button("Cancel Installation") { installer.cancel() } }
             else { Button("Install Arch Linux ARM") { installer.install(completion: completion) } }
-            if let failure = installer.failure { Text(failure).foregroundColor(.red) }
+            if let failure = installer.failure { Text(LF(failure)).foregroundColor(.red) }
         }.navigationTitle("Install Arch Linux ARM")
     }
 }

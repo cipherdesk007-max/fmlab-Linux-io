@@ -10,6 +10,7 @@
 #import "ExceptionExfiltrator.h"
 #ifdef LINUXRUNNER
 #import "LinuxRunner/BootLog.h"
+#include "FMLAB/FMLABLingua.inc.m"   // FMLAB: traduzione italiana della parte Objective-C
 static void LRUncaughtException(NSException *exception) {
     LRBootEvent("uncaught Objective-C exception; retaining upstream termination behavior");
     iSHExceptionHandler(exception);
@@ -31,6 +32,7 @@ int main(int argc, char * argv[]) {
             NSString *lingua = [d stringForKey:@"FMLAB.lingua"];
             if (lingua == nil) { lingua = @"en"; [d setObject:lingua forKey:@"FMLAB.lingua"]; }
             [d setObject:@[lingua] forKey:@"AppleLanguages"];
+            FMLABAttivaTraduzione(lingua);   // traduce anche schermo del desktop, menu e avvisi
         }
         LRBootEvent("application initialization: entering UIApplicationMain");
 #endif

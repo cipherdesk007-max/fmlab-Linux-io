@@ -205,9 +205,10 @@ static void instructionFailure(int pid, uint64_t pc, uint32_t instruction) {
     }
 }
 
+NSString *FMLABTr(NSString *s);   // FMLAB: traduzione (app/FMLAB/FMLABLingua.inc.m)
 static NSError *lrError(int code, NSString *message) {
     return [NSError errorWithDomain:@"dev.linuxrunner.runtime" code:code
-                          userInfo:@{NSLocalizedDescriptionKey:message}];
+                          userInfo:@{NSLocalizedDescriptionKey:FMLABTr(message)}];   // FMLAB: in italiano se scelto
 }
 static BOOL validRoot(NSString *name) {
     return name.length && ![name isEqual:@"."] && ![name isEqual:@".."] &&
@@ -524,7 +525,7 @@ static NSString *LRThermalState(void) {
 }
 + (NSString *)runtimeStatus {
     if (!bootAttempted) return @"Not started";
-    return bootResult < 0 ? [NSString stringWithFormat:@"Boot failed (%d)", bootResult] :
+    return bootResult < 0 ? [NSString stringWithFormat:FMLABTr(@"Boot failed (%d)"), bootResult] :
         ([self isRunning] ? @"Running" : @"Stopped — relaunch required");
 }
 + (void)recordBoot:(NSString *)root error:(int)error {
@@ -591,7 +592,7 @@ static NSString *LRJITLastFailure;   // reason of the last refused or failed act
     NSString *mode=self.gpuMode,*active,*detail;
     if(!self.virglCompiledIn){active=@"Software";detail=@"This build has no Metal GPU device";}
     else if(LRVirglActive){active=@"Metal GPU (virgl) · Experimental";detail=[NSString stringWithFormat:@"virtio-gpu device active · %@",LRVirglStatus?:@"ANGLE/Metal"];}
-    else if(LRVirglStatus.length){active=@"Software (fallback)";detail=[NSString stringWithFormat:@"Metal GPU did not start: %@",LRVirglStatus];}
+    else if(LRVirglStatus.length){active=@"Software (fallback)";detail=[NSString stringWithFormat:FMLABTr(@"Metal GPU did not start: %@"),LRVirglStatus];}
     else if([mode isEqual:@"metal"]){active=@"Software";detail=@"Metal GPU selected · takes effect after LinuxRunner restarts";}
     else if([mode isEqual:@"automatic"]){active=@"Software";detail=@"Automatic uses software rendering until Metal is validated on iPhone";}
     else {active=@"Software";detail=@"Software rendering selected";}
@@ -660,8 +661,8 @@ static NSString *LRJITLastFailure;   // reason of the last refused or failed act
     uint64_t blocks=0,segments=0,bytes=0;jit_counters(&blocks,&segments,&bytes);
     r[@"blocks"]=@(blocks);r[@"segments"]=@(segments);r[@"code_kb"]=@(bytes/1024);
     if(LRJITActive&&segments>0){state=@"JIT Active";detail=[NSString stringWithFormat:@"%@ · %llu guest blocks translated, %llu native segments installed, %llu KB generated code",LRJITDetail,blocks,segments,bytes/1024];}
-    else if(LRJITActive){state=@"JIT Initializing";detail=[NSString stringWithFormat:@"%@ · code region verified (test code returned the expected value); no guest code translated yet — start or use Linux",LRJITDetail];}
-    else if(crashed.count&&!LRJITLastFailure){state=@"JIT Failed";detail=[NSString stringWithFormat:@"A previous activation (%@) ended LinuxRunner; that method is disabled. Interpreter fallback active.",[crashed componentsJoinedByString:@", "]];}
+    else if(LRJITActive){state=@"JIT Initializing";detail=[NSString stringWithFormat:FMLABTr(@"%@ · code region verified (test code returned the expected value); no guest code translated yet — start or use Linux"),LRJITDetail];}
+    else if(crashed.count&&!LRJITLastFailure){state=@"JIT Failed";detail=[NSString stringWithFormat:FMLABTr(@"A previous activation (%@) ended LinuxRunner; that method is disabled. Interpreter fallback active."),[crashed componentsJoinedByString:@", "]];}
     else if([self.executionMode isEqual:@"interpreter"]){state=@"Interpreter Active";detail=self.debuggerAttached?@"A debugger is attached: choose Automatic or JIT to use it":@"Interpreter selected";}
     else if(LRJITLastFailure){state=@"JIT Unavailable";detail=[LRJITLastFailure stringByAppendingString:@" · interpreter fallback active"];}
     else if(self.debuggerAttached){state=@"JIT Available";detail=@"Debugger attached · tap Activate JIT Now";}
@@ -710,7 +711,7 @@ static NSString *LRJITLastFailure;   // reason of the last refused or failed act
         NSArray *crashed=[defaults stringArrayForKey:LRJITCrashedPathsKey]?:@[];
         [defaults setObject:[crashed arrayByAddingObject:crashedPath] forKey:LRJITCrashedPathsKey];
         [defaults removeObjectForKey:LRJITAttemptKey];[defaults synchronize];
-        LRJITDetail=[NSString stringWithFormat:@"Interpreter · the last JIT activation (%@) ended LinuxRunner; that method is disabled",crashedPath];
+        LRJITDetail=[NSString stringWithFormat:FMLABTr(@"Interpreter · the last JIT activation (%@) ended LinuxRunner; that method is disabled"),crashedPath];
         [self logCategory:@"JIT" event:LRJITDetail];
     }
     NSString *mode=self.executionMode;
@@ -1313,7 +1314,7 @@ static NSString *LRInstallFailureMessage(NSString *category, NSString *detail) {
         @"ACCOUNT_TOOL_BROKEN": @"The account tools were installed but do not run. Export the Open Desktop Report and send it.",
     };
     NSString *base = advice[category] ?: @"The installation failed.";
-    return detail.length ? [NSString stringWithFormat:@"%@\n\nDetail: %@", base, detail] : base;
+    return detail.length ? [NSString stringWithFormat:FMLABTr(@"%@\n\nDetail: %@"), base, detail] : base;
 }
 + (void)postInstall:(NSString *)title phase:(NSString *)phase stage:(NSString *)stage detail:(NSString *)detail fraction:(double)fraction elapsed:(NSTimeInterval)elapsed error:(NSString *)error log:(NSString *)log {
     NSMutableDictionary *info = [@{@"title": title, @"phase": phase, @"stage": stage ?: @"", @"detail": detail ?: @"", @"fraction": @(fraction), @"elapsed": @(elapsed)} mutableCopy];
@@ -1322,7 +1323,7 @@ static NSString *LRInstallFailureMessage(NSString *category, NSString *detail) {
     [NSNotificationCenter.defaultCenter postNotificationName:LRInstallProgressNotification object:nil userInfo:info];
 }
 + (void)runSupportInstall:(NSArray<NSString *> *)arguments title:(NSString *)title progress:(void (^)(NSString *))progress completion:(void (^)(NSError * _Nullable))completion {
-    if (LRActiveInstall) { completion(lrError(EBUSY, [NSString stringWithFormat:@"“%@” is already running. Wait for it to finish, then try again.", LRActiveInstall])); return; }
+    if (LRActiveInstall) { completion(lrError(EBUSY, [NSString stringWithFormat:FMLABTr(@"“%@” is already running. Wait for it to finish, then try again."), LRActiveInstall])); return; }
     NSError *error = nil; NSURL *support = [LRGUIViewController prepareSupport:&error];
     if (!support) { completion(error); return; }
     for (NSString *name in @[@"install-result", @"apt-status"]) [NSFileManager.defaultManager removeItemAtURL:[support URLByAppendingPathComponent:name] error:nil];
@@ -1380,7 +1381,7 @@ static NSString *LRInstallFailureMessage(NSString *category, NSString *detail) {
                 return;
             }
             NSString *message = category ? LRInstallFailureMessage(category, failureDetail) :
-                result.length ? [NSString stringWithFormat:@"The installation failed at “%@”. Export the Open Desktop Report and try again.", stage ?: @"start"] :
+                result.length ? [NSString stringWithFormat:FMLABTr(@"The installation failed at “%@”. Export the Open Desktop Report and try again."), stage ?: @"start"] :
                 endedAt ? @"The installer stopped before finishing. Try again; if it repeats, export the Open Desktop Report." :
                 @"The installation did not finish within an hour. Restart LinuxRunner and try again.";
             NSArray *lines = [log componentsSeparatedByString:@"\n"];

@@ -24,6 +24,11 @@
 #ifdef LINUXRUNNER
 #import "LinuxRunner/RuntimeBridge.h"
 #endif
+#ifdef LINUXRUNNER
+NSString *FMLABTr(NSString *s);   // FMLAB: traduzione (app/FMLAB/FMLABLingua.inc.m)
+#else
+#define FMLABTr(s) (s)
+#endif
 
 @interface TerminalViewController () <UIGestureRecognizerDelegate>
 
@@ -376,9 +381,9 @@ session_failed:
     if (self.runnerReportsExit) {
         // Keep the rendered output visible after a one-shot command exits.
         NSString *status = (code & 0x7f) ?
-            [NSString stringWithFormat:@"Process ended by signal %d%@", code & 0x7f,
+            [NSString stringWithFormat:FMLABTr(@"Process ended by signal %d%@"), code & 0x7f,
              (code & 0x7f) == 4 ? @" (unsupported instruction; see diagnostics)" : @""] :
-            [NSString stringWithFormat:@"Exit status: %d", (code >> 8) & 255];
+            [NSString stringWithFormat:FMLABTr(@"Exit status: %d"), (code >> 8) & 255];
         NSString *line = [NSString stringWithFormat:@"\r\n[%@]\r\n", status];
         NSData *data = [line dataUsingEncoding:NSUTF8StringEncoding];
         [self.sessionTerminal sendOutput:data.bytes length:(int)data.length];
