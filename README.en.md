@@ -21,7 +21,10 @@ refresh by themselves on every release in [docs/screenshots/ultima-versione](doc
 <p align="center">
   <img src="docs/images/0.9.5/home.png" width="24%" alt="Home">
   <img src="docs/images/0.9.5/distribuzioni.png" width="24%" alt="Distributions with Game Emulator">
-  <img src="docs/images/0.9.5/game-emulator-console.png" width="24%" alt="Game Emulator: consoles">
+  <img src="docs/images/0.9.6/console.png" width="24%" alt="Game Emulator: consoles with notes and game count">
+  <img src="docs/images/0.9.6/dati-del-motore.png" width="24%" alt="Engine data updated from fmlab-retro without a new app">
+</p>
+<p align="center">
   <img src="docs/images/0.9.5/game-emulator-cartelle.png" width="24%" alt="Game Emulator: folders and controls">
 </p>
 <p align="center">
@@ -63,7 +66,7 @@ Base: LinuxRunner 1.1.0 (build 900) with the same engine (ARM64 interpreter, JIT
 
 | Improvement | Original LinuxRunner |
 |---|---|
-| **Native Game Emulator**: NES, Game Boy/Color, GBA, SNES, PlayStation, DS inside the app, no Linux, no JIT; on-screen controls that follow rotation and fit every iPhone and iPad, controllers and keyboards, saves, fast forward, your own game folders (iCloud too) sorted by console, *Games Only* mode; you add your own games — cores from [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) (0.9.0) | No emulator |
+| **Native Game Emulator**: NES, Game Boy/Color, GBA, SNES, PlayStation, DS inside the app, no Linux, no JIT; on-screen controls that follow rotation and fit every iPhone and iPad, controllers and keyboards, saves, fast forward, your own game folders (iCloud too) sorted by console, *Games Only* mode, resume where you left off, checked BIOS files; extensions, options and notes come from fmlab-retro without a new app; you add your own games — cores from [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) (0.9.0) | No emulator |
 | **One-tap distribution switch from Home**: tap the one you want in *Installed Distributions*, confirm, close and reopen; it shows which one is running and which starts next (0.8.7) | You go to Distributions → distribution → Use on Next Launch |
 | **Every distribution can be deleted**, even the built-in Alpine, and shows how much space it uses | Alpine is inside the app and can't be removed |
 | **Cleanup** (Settings → Cleanup): installation temp files, the app's temp folder and caches, with the space freed | — |

@@ -22,7 +22,10 @@ aggiornano da sole a ogni versione in [docs/screenshots/ultima-versione](docs/sc
 <p align="center">
   <img src="docs/images/0.9.5/home.png" width="24%" alt="Home">
   <img src="docs/images/0.9.5/distribuzioni.png" width="24%" alt="Distribuzioni con Game Emulator">
-  <img src="docs/images/0.9.5/game-emulator-console.png" width="24%" alt="Game Emulator: console">
+  <img src="docs/images/0.9.6/console.png" width="24%" alt="Game Emulator: console con note e numero di giochi">
+  <img src="docs/images/0.9.6/dati-del-motore.png" width="24%" alt="Dati del motore aggiornati da fmlab-retro senza nuova app">
+</p>
+<p align="center">
   <img src="docs/images/0.9.5/game-emulator-cartelle.png" width="24%" alt="Game Emulator: cartelle e comandi">
 </p>
 <p align="center">
@@ -74,7 +77,7 @@ Base: LinuxRunner 1.1.0 (build 900), con lo stesso motore (interprete ARM64, JIT
 
 | Miglioria | Com'è in LinuxRunner originale |
 |---|---|
-| **Game Emulator nativo**: NES, Game Boy/Color, GBA, SNES, PlayStation, DS dentro l'app, senza Linux e senza JIT; comandi a schermo che seguono la rotazione e si adattano a ogni iPhone e iPad, controller e tastiera, salvataggi, avanti veloce, cartelle di giochi tue (anche iCloud) divise per console, modalità *Solo giochi*; i giochi li metti tu — core da [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) (0.9.0) | Nessun emulatore |
+| **Game Emulator nativo**: NES, Game Boy/Color, GBA, SNES, PlayStation, DS dentro l'app, senza Linux e senza JIT; comandi a schermo che seguono la rotazione e si adattano a ogni iPhone e iPad, controller e tastiera, salvataggi, avanti veloce, cartelle di giochi tue (anche iCloud) divise per console, modalità *Solo giochi*, riprendi da dove eri, BIOS controllati; estensioni, opzioni e note arrivano da fmlab-retro senza nuova app; i giochi li metti tu — core da [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) (0.9.0) | Nessun emulatore |
 | **Cambio distribuzione con un tocco dalla Home**: tocchi quella che vuoi in *Distribuzioni installate*, confermi, chiudi e riapri; si vede quale è in funzione e quale partirà al prossimo avvio (0.8.7) | Bisogna andare in Distribuzioni → distribuzione → Usa al prossimo avvio |
 | **Ogni distribuzione si elimina**, anche Alpine di base, e mostra quanto occupa | Alpine è dentro l'app e non si toglie |
 | **Pulizia** (Impostazioni → Pulizia): file temporanei di installazione, cartella temporanea e cache dell'app, con lo spazio liberato | — |
