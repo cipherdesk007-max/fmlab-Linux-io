@@ -18,8 +18,11 @@ def run(*a):
 
 
 def misura():
-    out = run("xdpyinfo").stdout
-    return next(l.split()[1] for l in out.splitlines() if "dimensions:" in l)
+    """Misura della finestra principale (come la legge desktop-components.sh con xwininfo -root)."""
+    out = run("xwininfo", "-root").stdout
+    w = next(l.split()[1] for l in out.splitlines() if l.strip().startswith("Width:"))
+    h = next(l.split()[1] for l in out.splitlines() if l.strip().startswith("Height:"))
+    return f"{w}x{h}"
 
 
 def leggi(s, n):
