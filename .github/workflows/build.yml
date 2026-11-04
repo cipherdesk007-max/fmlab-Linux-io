@@ -35,7 +35,7 @@ jobs:
           echo "$(brew --prefix lld)/bin" >> "$GITHUB_PATH"
       - name: Controllo prerequisiti
         run: scripts/bootstrap-macos.sh
-      - name: Compila (senza firma: LiveContainer/SideStore la firmano)
+      - name: "Compila, senza firma (la mettono LiveContainer o SideStore)"
         env:
           BUNDLE_ID: dev.fmlab.linux
           ARTIFACT_NAME: FMLAB-Linux
