@@ -258,6 +258,21 @@ static __weak FMLABEmulatore *G_attivo;
 + (NSURL *)cartellaBIOS { NSURL *d = [self.cartellaGiochi URLByAppendingPathComponent:@"BIOS" isDirectory:YES]; [NSFileManager.defaultManager createDirectoryAtURL:d withIntermediateDirectories:YES attributes:nil error:nil]; return d; }
 + (NSURL *)cartellaSalvataggi { NSURL *d = [self.cartellaGiochi URLByAppendingPathComponent:@"Salvataggi" isDirectory:YES]; [NSFileManager.defaultManager createDirectoryAtURL:d withIntermediateDirectories:YES attributes:nil error:nil]; return d; }
 
++ (void)preparaCartelle {
+    (void)self.cartellaBIOS; (void)self.cartellaSalvataggi;
+    NSURL *leggimi = [self.cartellaGiochi URLByAppendingPathComponent:@"LEGGIMI - README.txt"];
+    if (![NSFileManager.defaultManager fileExistsAtPath:leggimi.path]) {
+        NSString *t = @"FMLAB Linux · Game Emulator\n\n"
+            "IT  Metti qui i tuoi giochi (anche in sottocartelle): NES .nes, Game Boy .gb .gbc, GBA .gba, SNES .sfc .smc,\n"
+            "    PlayStation .cue/.bin .chd .pbp, Nintendo DS .nds. Gli zip vanno decompressi. I BIOS (se servono) in BIOS,\n"
+            "    i salvataggi finiscono in Salvataggi. FMLAB non include né scarica giochi: usa solo file che possiedi.\n\n"
+            "EN  Put your games here (subfolders are fine): NES .nes, Game Boy .gb .gbc, GBA .gba, SNES .sfc .smc,\n"
+            "    PlayStation .cue/.bin .chd .pbp, Nintendo DS .nds. Unzip zipped games. BIOS files (if needed) go in BIOS,\n"
+            "    saves go to Salvataggi. FMLAB neither ships nor downloads games: only use files you own.\n";
+        [t writeToURL:leggimi atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    }
+}
+
 + (NSArray<FMLABCore *> *)core {
     static NSArray *tutti; static dispatch_once_t una;
     dispatch_once(&una, ^{
@@ -427,6 +442,24 @@ static uint32_t fmlabPad(GCExtendedGamepad *g) {
     return t;
 }
 
+static uint32_t fmlabTastiera(void) {
+    if (@available(iOS 14.0, *)) {
+        GCKeyboardInput *k = GCKeyboard.coalescedKeyboard.keyboardInput; if (!k) return 0;
+        uint32_t t = 0;
+        #define K(codice, id) if ([k buttonForKeyCode:codice].pressed) t |= 1u << id;
+        K(GCKeyCodeUpArrow, RETRO_DEVICE_ID_JOYPAD_UP) K(GCKeyCodeDownArrow, RETRO_DEVICE_ID_JOYPAD_DOWN)
+        K(GCKeyCodeLeftArrow, RETRO_DEVICE_ID_JOYPAD_LEFT) K(GCKeyCodeRightArrow, RETRO_DEVICE_ID_JOYPAD_RIGHT)
+        K(GCKeyCodeKeyX, RETRO_DEVICE_ID_JOYPAD_A) K(GCKeyCodeKeyZ, RETRO_DEVICE_ID_JOYPAD_B)
+        K(GCKeyCodeKeyS, RETRO_DEVICE_ID_JOYPAD_X) K(GCKeyCodeKeyA, RETRO_DEVICE_ID_JOYPAD_Y)
+        K(GCKeyCodeKeyQ, RETRO_DEVICE_ID_JOYPAD_L) K(GCKeyCodeKeyW, RETRO_DEVICE_ID_JOYPAD_R)
+        K(GCKeyCodeReturnOrEnter, RETRO_DEVICE_ID_JOYPAD_START) K(GCKeyCodeSpacebar, RETRO_DEVICE_ID_JOYPAD_SELECT)
+        K(GCKeyCodeRightShift, RETRO_DEVICE_ID_JOYPAD_SELECT)
+        #undef K
+        return t;
+    }
+    return 0;
+}
+
 - (void)giro {
     mach_timebase_info_data_t tb; mach_timebase_info(&tb);
     double secondi = (double)tb.numer / tb.denom / 1e9;
@@ -438,6 +471,7 @@ static uint32_t fmlabPad(GCExtendedGamepad *g) {
         if (self.inPausa) { usleep(20000); prossimo = mach_absolute_time(); continue; }
         uint32_t pad = 0;
         for (GCController *c in GCController.controllers) pad |= fmlabPad(c.extendedGamepad);
+        pad |= fmlabTastiera();
         atomic_store(&G_tastiController, pad);
         @autoreleasepool { F.run(); }
         if (G_avCambiato) { G_avCambiato = NO; periodo = 1.0 / self.fps; }

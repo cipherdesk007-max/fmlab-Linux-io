@@ -732,6 +732,20 @@ TR.update({
 "This game cannot be saved right now.": "Questo gioco ora non si può salvare.",
 "The saved state could not be loaded.": "Non è stato possibile caricare lo stato salvato.",
 "Fast Forward": "Avanti veloce",
+"Add Games": "Aggiungi giochi",
+"Choose Games Folder…": "Scegli la cartella dei giochi…",
+"Choose the folder where you keep your games (On My iPhone, iCloud Drive, a USB drive…): FMLAB reads them from there and sorts them by console. Or import single files, or put them in Files › FMLAB Linux › Giochi.": "Scegli la cartella dove tieni i tuoi giochi (Sul mio iPhone, iCloud Drive, una chiavetta…): FMLAB li legge da lì e li divide per console. Oppure importa singoli file, o mettili in File › FMLAB Linux › Giochi.",
+"Downloading from iCloud. Pull down to refresh in a moment.": "Download da iCloud in corso. Tra poco tira giù la lista per aggiornarla.",
+"FMLAB Linux opens straight into the Game Emulator. The Linux button brings back everything else.": "FMLAB Linux si apre direttamente nel Game Emulator. Il tasto Linux riporta tutto il resto.",
+"FMLAB Linux › Giochi": "FMLAB Linux › Giochi",
+"FMLAB could not keep access to this folder.": "FMLAB non riesce a tenere l'accesso a questa cartella.",
+"Game Folders": "Cartelle dei giochi",
+"Games Only": "Solo giochi",
+"In iCloud: tap to download": "In iCloud: tocca per scaricarlo",
+"Linux": "Linux",
+"Looking for games…": "Cerco i giochi…",
+"Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers and hardware keyboards work too.": "Emulatori nativi (core libretro), senza bisogno del JIT. I salvataggi vanno in Giochi/Salvataggi; i BIOS, se una console li vuole, in Giochi/BIOS. I comandi a schermo seguono la rotazione; funzionano anche controller e tastiere.",
+"Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched).": "Le tue cartelle restano dove sono: FMLAB le legge e basta. Scorri a sinistra per togliere una cartella dall'elenco (i file non vengono toccati).",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

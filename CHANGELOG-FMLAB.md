@@ -2,6 +2,20 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.9.3
+- Game Emulator, **cartelle dei giochi**: *Scegli la cartella dei giochi…* collega una tua cartella (Sul mio iPhone,
+  iCloud Drive, chiavetta). FMLAB la legge da lì senza copiare nulla, anche nelle sottocartelle, e divide i giochi
+  per console (con il numero per console). I giochi in iCloud non ancora scaricati si scaricano con un tocco. Le
+  cartelle si tolgono dall'elenco con uno scorrimento, senza toccare i file.
+- La cartella **FMLAB Linux › Giochi** (con BIOS, Salvataggi e un LEGGIMI) la crea l'app da sola all'avvio: si vede
+  subito nell'app File.
+- **Solo giochi**: interruttore nel Game Emulator. FMLAB Linux si apre direttamente sui giochi; il tasto *Linux*
+  riporta Home, Distribuzioni, Sessioni e Impostazioni.
+- **Ogni dispositivo**: i comandi a schermo sono in proporzione allo schermo (iPhone SE/mini fino a iPad, anche in
+  Split View); menu e avanti veloce non coprono più L/R in orizzontale.
+- **Tastiera fisica** (iPad, tastiere Bluetooth): frecce, X = A, Z = B, S = X, A = Y, Q/W = L/R, Invio = Start,
+  Spazio = Select.
+
 ## 0.9.2
 - Game Emulator: **Importa giochi** funziona. Prima il file scelto finiva all'importatore dei file di Linux (due
   importatori SwiftUI nella stessa schermata) e non succedeva nulla; ora usa direttamente il selettore di iOS,

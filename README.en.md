@@ -6,7 +6,7 @@ Real Linux on the iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), the FMLAB e
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. No jailbreak, no virtual machine: ARM64 Linux programs
 run inside the app through an interpreter and a layer that translates system calls.
 
-> **Status: 0.9.2.** LinuxRunner 1.1.0 (build 900), same engine (ARM64 interpreter, JIT, Metal GPU), with the FMLAB
+> **Status: 0.9.3.** LinuxRunner 1.1.0 (build 900), same engine (ARM64 interpreter, JIT, Metal GPU), with the FMLAB
 > name, logo and red-and-black colours, its own identifier (`dev.fmlab.linux`, so it installs **next to**
 > LinuxRunner without touching its data), in-app updates and the improvements listed below.
 
@@ -54,7 +54,7 @@ Base: LinuxRunner 1.1.0 (build 900) with the same engine (ARM64 interpreter, JIT
 
 | Improvement | Original LinuxRunner |
 |---|---|
-| **Native Game Emulator**: NES, Game Boy/Color, GBA, SNES, PlayStation, DS inside the app, no Linux, no JIT; on-screen controls that follow rotation, game controllers, saves, fast forward; you add your own games — cores from [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) (0.9.0) | No emulator |
+| **Native Game Emulator**: NES, Game Boy/Color, GBA, SNES, PlayStation, DS inside the app, no Linux, no JIT; on-screen controls that follow rotation and fit every iPhone and iPad, controllers and keyboards, saves, fast forward, your own game folders (iCloud too) sorted by console, *Games Only* mode; you add your own games — cores from [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) (0.9.0) | No emulator |
 | **One-tap distribution switch from Home**: tap the one you want in *Installed Distributions*, confirm, close and reopen; it shows which one is running and which starts next (0.8.7) | You go to Distributions → distribution → Use on Next Launch |
 | **Every distribution can be deleted**, even the built-in Alpine, and shows how much space it uses | Alpine is inside the app and can't be removed |
 | **Cleanup** (Settings → Cleanup): installation temp files, the app's temp folder and caches, with the space freed | — |

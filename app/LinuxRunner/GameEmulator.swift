@@ -12,9 +12,60 @@ struct FMLABGioco: Identifiable, Hashable {
     var id: String { url.path }
     let url: URL
     let core: FMLABCore
+    /// Cartella scelta dall'utente (fuori dall'app): va aperta con il permesso di iOS mentre si gioca.
+    var cartella: URL? = nil
+    var nomeCartella: String? = nil
+    /// Su iCloud e non ancora scaricato sull'iPhone.
+    var inDownload = false
     var nome: String { url.deletingPathExtension().lastPathComponent }
-    static func == (a: Self, b: Self) -> Bool { a.url == b.url }
+    static func == (a: Self, b: Self) -> Bool { a.url == b.url && a.inDownload == b.inDownload }
     func hash(into h: inout Hasher) { h.combine(url) }
+}
+
+/// Cartelle di giochi scelte dall'utente (Sul mio iPhone, iCloud Drive, chiavetta…): l'app ricorda il permesso
+/// di iOS (segnalibro) e legge i giochi da lì, senza copiarli.
+struct FMLABCartellaGiochi: Codable, Identifiable, Hashable {
+    var id = UUID()
+    var nome: String
+    var segnalibro: Data
+    static let chiave = "FMLAB.cartelleGiochi"
+    static func tutte() -> [Self] { (try? JSONDecoder().decode([Self].self, from: UserDefaults.standard.data(forKey: chiave) ?? Data())) ?? [] }
+    static func salva(_ c: [Self]) { UserDefaults.standard.set(try? JSONEncoder().encode(c), forKey: chiave) }
+    func url() -> URL? {
+        var vecchio = false
+        guard let u = try? URL(resolvingBookmarkData: segnalibro, options: [], relativeTo: nil, bookmarkDataIsStale: &vecchio) else { return nil }
+        return u
+    }
+}
+
+enum FMLABArchivioGiochi {
+    /// Cerca i giochi in una cartella (fino a 4 livelli): solo i file che un emulatore apre, niente roba di Linux.
+    static func cerca(in base: URL, cartella: URL?, nomeCartella: String?) -> [FMLABGioco] {
+        var trovati: [FMLABGioco] = []
+        let interna = cartella == nil
+        let salta: Set<String> = ["BIOS", "Salvataggi", "Shared", ".linuxrunner"]
+        guard let e = FileManager.default.enumerator(at: base, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsPackageDescendants]) else { return [] }
+        for case let u as URL in e {
+            if e.level > 4 { e.skipDescendants(); continue }
+            let nome = u.lastPathComponent
+            if (try? u.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true {
+                if (interna && e.level == 1 && salta.contains(nome)) || nome.hasPrefix(".") { e.skipDescendants() }
+                continue
+            }
+            // iCloud: ".Gioco.nds.icloud" = c'è ma non è ancora sull'iPhone
+            var vero = u, scaricare = false
+            if nome.hasPrefix("."), nome.hasSuffix(".icloud") {
+                vero = u.deletingLastPathComponent().appendingPathComponent(String(nome.dropFirst().dropLast(7)))
+                scaricare = true
+            } else if nome.hasPrefix(".") { continue }
+            guard let c = FMLABEmulatore.core(per: vero.lastPathComponent) else { continue }
+            let est = vero.pathExtension.lowercased()
+            // le tracce .bin di un disco con .cue accanto non sono giochi a sé
+            if est == "bin", (try? FileManager.default.contentsOfDirectory(atPath: vero.deletingLastPathComponent().path))?.contains(where: { $0.lowercased().hasSuffix(".cue") }) == true { continue }
+            trovati.append(FMLABGioco(url: vero, core: c, cartella: cartella, nomeCartella: nomeCartella, inDownload: scaricare))
+        }
+        return trovati
+    }
 }
 
 /// Riga della sezione "Game Emulator" in Distribuzioni.
@@ -33,12 +84,28 @@ struct GameEmulatorRow: View {
     }
 }
 
+/// Modalità "Solo giochi": l'app si apre sul Game Emulator; il tasto Linux riporta al resto dell'app.
+struct GameEmulatorSoloGiochi: View {
+    @AppStorage("FMLAB.soloGiochi") private var soloGiochi = false
+    var body: some View {
+        NavigationView {
+            GameEmulatorView(soloGiochi: true)
+                .toolbar { ToolbarItem(placement: .navigationBarLeading) {
+                    Button { soloGiochi = false } label: { Label("Linux", systemImage: "terminal") }.accessibilityIdentifier("torna-linux")
+                } }
+        }.navigationViewStyle(.stack)
+    }
+}
+
 struct GameEmulatorView: View {
+    var soloGiochi = false
+    @AppStorage("FMLAB.soloGiochi") private var modoSoloGiochi = false
     @State private var giochi: [FMLABGioco] = []
-    @State private var importa = false
+    @State private var cartelle: [FMLABCartellaGiochi] = FMLABCartellaGiochi.tutte()
     @State private var inGioco: FMLABGioco?
     @State private var daTogliere: FMLABGioco?
     @State private var errore: String?
+    @State private var cercando = false
 
     private var perConsole: [(String, [FMLABGioco])] {
         let ordine = FMLABEmulatore.core().map(\.console)
@@ -50,48 +117,61 @@ struct GameEmulatorView: View {
             if FMLABEmulatore.core().isEmpty {
                 Section { Text("This build of FMLAB Linux has no emulators inside. Update the app from the latest release.").foregroundColor(.orange) }
             }
-            if giochi.isEmpty {
+            if giochi.isEmpty && !cercando {
                 Section {
                     VStack(alignment: .leading, spacing: 10) {
                         Label("No games yet", systemImage: "gamecontroller").font(.headline)
-                        Text("Put your own game files in the Files app › On My iPhone › FMLAB Linux › Giochi, or tap Import. Zipped games must be unzipped first (tap the zip in Files).").font(.callout).foregroundColor(.secondary)
+                        Text("Choose the folder where you keep your games (On My iPhone, iCloud Drive, a USB drive…): FMLAB reads them from there and sorts them by console. Or import single files, or put them in Files › FMLAB Linux › Giochi.").font(.callout).foregroundColor(.secondary)
                         Text("No games are included or downloaded by FMLAB: only use files you own or free homebrew.").font(.footnote).foregroundColor(.secondary)
                     }.padding(.vertical, 6)
-                    Button { importa = true } label: { Label("Import Games…", systemImage: "square.and.arrow.down") }
                 }
             }
+            if cercando { Section { HStack(spacing: 12) { ProgressView(); Text("Looking for games…") } } }
             ForEach(perConsole, id: \.0) { console, lista in
-                Section(LF(console)) {
+                Section(LF(console) + " · \(lista.count)") {
                     ForEach(lista) { gioco in
-                        Button { inGioco = gioco } label: {
-                            HStack { Image(systemName: "play.circle.fill").foregroundColor(.accentColor).font(.title3)
-                                Text(gioco.nome).foregroundColor(.primary).lineLimit(2); Spacer()
-                                Text(gioco.url.pathExtension.uppercased()).font(.caption2).foregroundColor(.secondary) }
+                        Button { apri(gioco) } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: gioco.inDownload ? "icloud.and.arrow.down" : "play.circle.fill").foregroundColor(.accentColor).font(.title3)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(gioco.nome).foregroundColor(.primary).lineLimit(2)
+                                    Text(gioco.inDownload ? LF("In iCloud: tap to download") : (gioco.nomeCartella ?? "FMLAB Linux › Giochi")).font(.caption2).foregroundColor(.secondary).lineLimit(1)
+                                }
+                                Spacer()
+                                Text(gioco.url.pathExtension.uppercased()).font(.caption2).foregroundColor(.secondary)
+                            }
                         }
-                        .swipeActions { Button(role: .destructive) { daTogliere = gioco } label: { Label("Delete", systemImage: "trash") } }
+                        .swipeActions { if gioco.cartella == nil { Button(role: .destructive) { daTogliere = gioco } label: { Label("Delete", systemImage: "trash") } } }
                     }
                 }
             }
             Section {
+                ForEach(cartelle) { c in
+                    Label(c.nome, systemImage: "folder").swipeActions { Button(role: .destructive) { togliCartella(c) } label: { Label("Remove", systemImage: "minus.circle") } }
+                }
+                Label("FMLAB Linux › Giochi", systemImage: "folder.badge.gearshape").foregroundColor(.secondary)
+                Button { FMLABSceltaFile.apri(cartella: true) { aggiungiCartella($0.first) } } label: { Label("Choose Games Folder…", systemImage: "folder.badge.plus") }
+                Button { FMLABSceltaFile.apri(cartella: false) { importaFile($0) } } label: { Label("Import Games…", systemImage: "square.and.arrow.down") }
+            } header: { Text("Game Folders") } footer: {
+                Text("Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched).")
+            }
+            Section {
+                Toggle(isOn: $modoSoloGiochi) { VStack(alignment: .leading, spacing: 3) { Text("Games Only"); Text("FMLAB Linux opens straight into the Game Emulator. The Linux button brings back everything else.").font(.caption).foregroundColor(.secondary) } }
                 ForEach(FMLABEmulatore.core(), id: \.nome) { c in
-                    HStack { Text(LF(c.console)); Spacer(); Text(c.estensioni.map { "." + $0 }.joined(separator: " ")).font(.caption).foregroundColor(.secondary) }
+                    HStack { Text(LF(c.console)); Spacer(); Text(c.estensioni.map { "." + $0 }.joined(separator: " ")).font(.caption).foregroundColor(.secondary).lineLimit(1) }
                 }
             } header: { Text("Consoles") } footer: {
-                Text("Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers work too.")
+                Text("Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers and hardware keyboards work too.")
             }
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Game Emulator")
-        .toolbar { Button { importa = true } label: { Image(systemName: "plus") }.accessibilityLabel(LF("Import Games…")) }
+        .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Menu {
+            Button { FMLABSceltaFile.apri(cartella: true) { aggiungiCartella($0.first) } } label: { Label("Choose Games Folder…", systemImage: "folder.badge.plus") }
+            Button { FMLABSceltaFile.apri(cartella: false) { importaFile($0) } } label: { Label("Import Games…", systemImage: "square.and.arrow.down") }
+        } label: { Image(systemName: "plus") }.accessibilityLabel(LF("Add Games")) } }
         .onAppear(perform: aggiorna)
         .refreshable { aggiorna() }
-        // FMLAB: selettore di iOS diretto. Il .fileImporter di SwiftUI qui non funziona: più in alto
-        // nell'app ce n'è già un altro (file di Linux) e il file scelto finiva a quello.
-        .onChange(of: importa) { apri in
-            guard apri else { return }
-            importa = false
-            FMLABSceltaFile.apri { urls in importaFile(urls) }
-        }
         .fullScreenCover(item: $inGioco) { gioco in FMLABGiocoSchermo(gioco: gioco).ignoresSafeArea() }
         .alert(String(format: LF("Delete %@?"), daTogliere?.nome ?? ""), isPresented: Binding(get: { daTogliere != nil }, set: { if !$0 { daTogliere = nil } })) {
             Button("Delete", role: .destructive) { if let g = daTogliere { try? FileManager.default.removeItem(at: g.url) }; daTogliere = nil; aggiorna() }
@@ -99,6 +179,25 @@ struct GameEmulatorView: View {
         } message: { Text("The game file is deleted. Its saves in Giochi/Salvataggi are kept.") }
         .alert("Game Emulator", isPresented: Binding(get: { errore != nil }, set: { if !$0 { errore = nil } })) { Button("OK") { errore = nil } } message: { Text(errore ?? "") }
     }
+
+    private func apri(_ gioco: FMLABGioco) {
+        guard gioco.inDownload else { inGioco = gioco; return }
+        let accesso = gioco.cartella?.startAccessingSecurityScopedResource() ?? false
+        defer { if accesso { gioco.cartella?.stopAccessingSecurityScopedResource() } }
+        do { try FileManager.default.startDownloadingUbiquitousItem(at: gioco.url); errore = LF("Downloading from iCloud. Pull down to refresh in a moment.") }
+        catch { errore = error.localizedDescription }
+    }
+
+    private func aggiungiCartella(_ u: URL?) {
+        guard let u else { return }
+        let accesso = u.startAccessingSecurityScopedResource(); defer { if accesso { u.stopAccessingSecurityScopedResource() } }
+        guard let dati = try? u.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil) else { errore = LF("FMLAB could not keep access to this folder."); return }
+        cartelle.removeAll { $0.url()?.standardizedFileURL == u.standardizedFileURL }
+        cartelle.append(FMLABCartellaGiochi(nome: u.lastPathComponent, segnalibro: dati))
+        FMLABCartellaGiochi.salva(cartelle)
+        aggiorna()
+    }
+    private func togliCartella(_ c: FMLABCartellaGiochi) { cartelle.removeAll { $0.id == c.id }; FMLABCartellaGiochi.salva(cartelle); aggiorna() }
 
     private func importaFile(_ urls: [URL]) {
         let base = FMLABEmulatore.cartellaGiochi()
@@ -121,36 +220,38 @@ struct GameEmulatorView: View {
     }
 
     private func aggiorna() {
-        let base = FMLABEmulatore.cartellaGiochi()
-        _ = FMLABEmulatore.cartellaBIOS(); _ = FMLABEmulatore.cartellaSalvataggi()
-        var trovati: [FMLABGioco] = []
-        let salta: Set<String> = ["BIOS", "Salvataggi"]
-        if let e = FileManager.default.enumerator(at: base, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles]) {
-            for case let u as URL in e {
-                if salta.contains(u.lastPathComponent), u.deletingLastPathComponent() == base { e.skipDescendants(); continue }
-                guard (try? u.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true, let c = FMLABEmulatore.core(per: u.lastPathComponent) else { continue }
-                // le tracce .bin di un disco con .cue non sono giochi a sé
-                if u.pathExtension.lowercased() == "bin", FileManager.default.fileExists(atPath: u.deletingPathExtension().appendingPathExtension("cue").path) { continue }
-                if u.pathExtension.lowercased() == "bin", (try? FileManager.default.contentsOfDirectory(atPath: u.deletingLastPathComponent().path))?.contains(where: { $0.lowercased().hasSuffix(".cue") }) == true { continue }
-                trovati.append(FMLABGioco(url: u, core: c))
+        FMLABEmulatore.preparaCartelle()
+        let elenco = cartelle
+        cercando = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            var tutti = FMLABArchivioGiochi.cerca(in: FMLABEmulatore.cartellaGiochi(), cartella: nil, nomeCartella: nil)
+            for c in elenco {
+                guard let u = c.url() else { continue }
+                let accesso = u.startAccessingSecurityScopedResource(); defer { if accesso { u.stopAccessingSecurityScopedResource() } }
+                tutti += FMLABArchivioGiochi.cerca(in: u, cartella: u, nomeCartella: c.nome)
             }
+            var visti = Set<String>()
+            tutti = tutti.filter { visti.insert($0.url.standardizedFileURL.path).inserted }
+            DispatchQueue.main.async { giochi = tutti; cercando = false }
         }
-        giochi = trovati
     }
 }
 
-/// Selettore di file di iOS (copia i file scelti nell'app), presentato sopra quello che c'è a schermo.
+/// Selettore di iOS (file o cartella), presentato sopra quello che c'è a schermo.
+/// Il .fileImporter di SwiftUI qui non funziona: più in alto nell'app ce n'è già un altro (file di Linux).
 final class FMLABSceltaFile: NSObject, UIDocumentPickerDelegate {
     private static var attivo: FMLABSceltaFile?
     private let fatto: ([URL]) -> Void
     private init(_ fatto: @escaping ([URL]) -> Void) { self.fatto = fatto }
-    static func apri(_ fatto: @escaping ([URL]) -> Void) {
+    static func apri(cartella: Bool, _ fatto: @escaping ([URL]) -> Void) {
         let scelta = FMLABSceltaFile(fatto); attivo = scelta
-        let p = UIDocumentPickerViewController(forOpeningContentTypes: [.data, .item], asCopy: true)
-        p.allowsMultipleSelection = true
+        let p = cartella ? UIDocumentPickerViewController(forOpeningContentTypes: [.folder], asCopy: false)
+                         : UIDocumentPickerViewController(forOpeningContentTypes: [.data, .item], asCopy: true)
+        p.allowsMultipleSelection = !cartella
         p.delegate = scelta
         guard var cima = UIApplication.shared.connectedScenes.compactMap({ ($0 as? UIWindowScene)?.keyWindow }).first?.rootViewController else { return }
         while let sopra = cima.presentedViewController { cima = sopra }
+        p.popoverPresentationController?.sourceView = cima.view
         cima.present(p, animated: true)
     }
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) { fatto(urls); Self.attivo = nil }
@@ -173,6 +274,7 @@ final class FMLABGiocoController: UIViewController {
     private let pad = FMLABPad()
     private let avviso = UILabel()
     private var osservatori: [NSObjectProtocol] = []
+    private var accessoCartella = false
     deinit { osservatori.forEach { NotificationCenter.default.removeObserver($0) } }
 
     init(gioco: FMLABGioco, chiudi: @escaping () -> Void) { self.gioco = gioco; self.chiudi = chiudi; super.init(nibName: nil, bundle: nil); modalPresentationStyle = .fullScreen }
@@ -186,6 +288,7 @@ final class FMLABGiocoController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
+        accessoCartella = gioco.cartella?.startAccessingSecurityScopedResource() ?? false
         do {
             let e = try FMLABEmulatore(conCore: gioco.core, gioco: gioco.url.path)
             emulatore = e
@@ -211,7 +314,10 @@ final class FMLABGiocoController: UIViewController {
         super.viewDidAppear(animated)
         if let e = emulatore { e.avvia() } else { apriMenu() }
     }
-    override func viewWillDisappear(_ animated: Bool) { super.viewWillDisappear(animated); emulatore?.ferma() }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated); emulatore?.ferma()
+        if accessoCartella { gioco.cartella?.stopAccessingSecurityScopedResource(); accessoCartella = false }
+    }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -347,46 +453,53 @@ final class FMLABPad: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         let w = bounds.width, h = bounds.height
-        let alfa: CGFloat = modo == .orizzontale && spazioLato < 150 ? 0.45 : 0.9
+        // misura dei comandi in proporzione allo schermo: iPhone SE/mini, Pro Max, iPad (anche in Split View)
+        let lato0 = min(window?.bounds.width ?? w, window?.bounds.height ?? h)
+        let k = min(max(lato0 / 390, 0.85), 1.5)
+        let alfa: CGFloat = modo == .orizzontale && spazioLato < 150 * k ? 0.45 : 0.9
         let fondo = UIColor(white: 0.22, alpha: alfa)
+        let pillola = CGSize(width: 72 * k, height: 26 * k), spalla = CGSize(width: 76 * k, height: 30 * k), tondo = CGSize(width: 44 * k, height: 30 * k)
         var centroCroce: CGPoint, centroTasti: CGPoint, lato: CGFloat
         if modo == .verticale {
             let utile = CGRect(x: areaSicura.left, y: 0, width: w - areaSicura.left - areaSicura.right, height: h - areaSicura.bottom)
-            lato = min(utile.width * 0.36, utile.height * 0.5, 170)
+            lato = min(utile.width * 0.36, utile.height * 0.5, 170 * k)
             centroCroce = CGPoint(x: utile.minX + utile.width * 0.25, y: utile.minY + utile.height * 0.48)
             centroTasti = CGPoint(x: utile.minX + utile.width * 0.75, y: centroCroce.y)
-            let piccolo = CGSize(width: 72, height: 26)
-            posa(.select, CGRect(x: utile.midX - piccolo.width - 8, y: utile.maxY - piccolo.height - 14, width: piccolo.width, height: piccolo.height), fondo)
-            posa(.start, CGRect(x: utile.midX + 8, y: utile.maxY - piccolo.height - 14, width: piccolo.width, height: piccolo.height), fondo)
-            posa(.l, CGRect(x: utile.minX + 12, y: 10, width: 76, height: 30), fondo)
-            posa(.r, CGRect(x: utile.maxX - 88, y: 10, width: 76, height: 30), fondo)
-            bottoneMenu.frame = CGRect(x: utile.midX - 22, y: 10, width: 44, height: 30)
+            posa(.select, CGRect(x: utile.midX - pillola.width - 8, y: utile.maxY - pillola.height - 14, width: pillola.width, height: pillola.height), fondo)
+            posa(.start, CGRect(x: utile.midX + 8, y: utile.maxY - pillola.height - 14, width: pillola.width, height: pillola.height), fondo)
+            posa(.l, CGRect(x: utile.minX + 12, y: 10, width: spalla.width, height: spalla.height), fondo)
+            posa(.r, CGRect(x: utile.maxX - 12 - spalla.width, y: 10, width: spalla.width, height: spalla.height), fondo)
+            bottoneMenu.frame = CGRect(x: utile.midX - tondo.width - 5, y: 10, width: tondo.width, height: tondo.height)
+            bottoneVeloce.frame = CGRect(x: utile.midX + 5, y: 10, width: tondo.width, height: tondo.height)
         } else {
             let sinistra = areaSicura.left, destra = w - areaSicura.right
-            lato = min(max(spazioLato - 20, 120), h * 0.42, 170)
+            lato = min(max(spazioLato - 20, 120 * k), h * 0.42, 170 * k)
             let margine = max(spazioLato / 2, lato / 2 + 12)
             centroCroce = CGPoint(x: sinistra + margine, y: h * 0.62)
             centroTasti = CGPoint(x: destra - margine, y: h * 0.62)
-            posa(.l, CGRect(x: sinistra + 12, y: areaSicura.top + 12, width: 76, height: 30), fondo)
-            posa(.r, CGRect(x: destra - 88, y: areaSicura.top + 12, width: 76, height: 30), fondo)
-            posa(.select, CGRect(x: centroCroce.x - 36, y: h - areaSicura.bottom - 34, width: 72, height: 26), fondo)
-            posa(.start, CGRect(x: centroTasti.x - 36, y: h - areaSicura.bottom - 34, width: 72, height: 26), fondo)
-            bottoneMenu.frame = CGRect(x: centroTasti.x - 22, y: areaSicura.top + 12, width: 44, height: 30)
-            if disposizione >= 1 { bottoneMenu.frame.origin.x = destra - 88 - 54 }
+            let alto = areaSicura.top + 12
+            posa(.l, CGRect(x: sinistra + 12, y: alto, width: spalla.width, height: spalla.height), fondo)
+            posa(.r, CGRect(x: destra - 12 - spalla.width, y: alto, width: spalla.width, height: spalla.height), fondo)
+            posa(.select, CGRect(x: centroCroce.x - pillola.width / 2, y: h - areaSicura.bottom - pillola.height - 8, width: pillola.width, height: pillola.height), fondo)
+            posa(.start, CGRect(x: centroTasti.x - pillola.width / 2, y: h - areaSicura.bottom - pillola.height - 8, width: pillola.width, height: pillola.height), fondo)
+            // menu e avanti veloce in alto, accanto alle spalle (o al centro del lato se non ci sono L/R)
+            let xMenu = disposizione >= 1 ? destra - 12 - spalla.width - 10 - tondo.width : centroTasti.x - tondo.width / 2
+            bottoneMenu.frame = CGRect(x: xMenu, y: alto, width: tondo.width, height: tondo.height)
+            let xVeloce = disposizione >= 1 ? sinistra + 12 + spalla.width + 10 : centroCroce.x - tondo.width / 2
+            bottoneVeloce.frame = CGRect(x: xVeloce, y: alto, width: tondo.width, height: tondo.height)
         }
-        bottoneMenu.layer.cornerRadius = 10; bottoneMenu.alpha = alfa < 0.5 ? 0.6 : 1
-        bottoneVeloce.frame = bottoneMenu.frame.offsetBy(dx: modo == .verticale ? 54 : -54, dy: 0)
-        bottoneVeloce.layer.cornerRadius = 10; bottoneVeloce.alpha = bottoneMenu.alpha
+        for b in [bottoneMenu, bottoneVeloce] { b.layer.cornerRadius = 10 * k; b.alpha = alfa < 0.5 ? 0.6 : 1 }
         croce.isHidden = soloMenu
-        pulsanti.forEach { $0.vista.isHidden = soloMenu }
+        pulsanti.forEach { $0.vista.isHidden = soloMenu; $0.vista.font = .systemFont(ofSize: ($0.vista.text?.count ?? 1) > 1 ? 11 * k : 22 * k, weight: .bold) }
         // croce
         croce.frame = CGRect(x: centroCroce.x - lato / 2, y: centroCroce.y - lato / 2, width: lato, height: lato)
         croce.backgroundColor = fondo
+        croce.layer.cornerRadius = 18 * k
         let f = lato / 3
         frecce[0].frame = CGRect(x: f, y: 4, width: f, height: f - 8); frecce[1].frame = CGRect(x: f, y: lato - f + 4, width: f, height: f - 8)
         frecce[2].frame = CGRect(x: 4, y: f, width: f - 8, height: f); frecce[3].frame = CGRect(x: lato - f + 4, y: f, width: f - 8, height: f)
         // A B (X Y): a rombo come le console Nintendo
-        let d = min(lato * 0.42, 74), passo = lato * 0.34
+        let d = min(lato * 0.42, 74 * k), passo = lato * 0.34
         if disposizione >= 2 {
             posaTondo(.x, CGPoint(x: centroTasti.x, y: centroTasti.y - passo), d, fondo)
             posaTondo(.a, CGPoint(x: centroTasti.x + passo, y: centroTasti.y), d, fondo)

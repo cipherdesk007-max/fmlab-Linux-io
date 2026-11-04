@@ -28,6 +28,8 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 + (NSURL *)cartellaGiochi;
 + (NSURL *)cartellaBIOS;
 + (NSURL *)cartellaSalvataggi;
+/// Crea Giochi, Giochi/BIOS, Giochi/Salvataggi e un LEGGIMI, così la cartella si vede subito nell'app File.
++ (void)preparaCartelle;
 
 - (nullable instancetype)initConCore:(FMLABCore *)core gioco:(NSString *)gioco error:(NSError **)error NS_SWIFT_NAME(init(conCore:gioco:));
 /// La vista con l'immagine del gioco (si ingrandisce a pixel netti).

@@ -182,6 +182,7 @@
 "Add Environment" = "Aggiungi ambiente";
 "Add Favorite" = "Aggiungi ai preferiti";
 "Add Folder…" = "Aggiungi cartella…";
+"Add Games" = "Aggiungi giochi";
 "Add applications any time from Packages › App Catalog." = "Aggiungi applicazioni quando vuoi da Pacchetti › Catalogo app.";
 "Add or Manage Shared Folders" = "Aggiungi o gestisci cartelle condivise";
 "Adding sound support" = "Aggiunta dell'audio";
@@ -286,8 +287,10 @@
 "Chiudi FMLAB Linux dal multitasking e riaprila per vederla in italiano." = "Chiudi FMLAB Linux dal multitasking e riaprila per vederla in italiano.";
 "Choose Destination & Import" = "Scegli destinazione e importa";
 "Choose Export Full Diagnostic Bundle in diagnostics. It includes a bounded Debian installer log. DEBUG enables per-entry archive tracing." = "Nella diagnostica scegli Esporta pacchetto diagnostico completo. Include un registro limitato dell'installazione di Debian. DEBUG attiva la traccia di ogni voce dell'archivio.";
+"Choose Games Folder…" = "Scegli la cartella dei giochi…";
 "Choose a single folder name." = "Scegli un solo nome di cartella.";
 "Choose an application first." = "Prima scegli un'applicazione.";
+"Choose the folder where you keep your games (On My iPhone, iCloud Drive, a USB drive…): FMLAB reads them from there and sorts them by console. Or import single files, or put them in Files › FMLAB Linux › Giochi." = "Scegli la cartella dove tieni i tuoi giochi (Sul mio iPhone, iCloud Drive, una chiavetta…): FMLAB li legge da lì e li divide per console. Oppure importa singoli file, o mettili in File › FMLAB Linux › Giochi.";
 "Classic" = "Classico";
 "Clean Temporary Files" = "Pulisci file temporanei";
 "Clean Up" = "Pulisci";
@@ -436,6 +439,7 @@
 "Distributions" = "Distribuzioni";
 "Done" = "Fine";
 "Download" = "Download";
+"Downloading from iCloud. Pull down to refresh in a moment." = "Download da iCloud in corso. Tra poco tira giù la lista per aggiornarla.";
 "Downloading/verifying %@ (%lld/%lld)" = "Download e verifica di %@ (%lld/%lld)";
 "Downloading/verifying %lf (%lld/%lld)" = "Download e verifica di %lf (%lld/%lld)";
 "Downloading/verifying %lld (%lld/%lld)" = "Download e verifica di %lld (%lld/%lld)";
@@ -508,9 +512,12 @@
 "FMLAB Linux %lf available" = "FMLAB Linux %lf disponibile";
 "FMLAB Linux %lld available" = "FMLAB Linux %lld disponibile";
 "FMLAB Linux is based on LinuxRunner by Leminos, derived from iSH and ios-linuxkit. GPL-3.0 license." = "FMLAB Linux è basata su LinuxRunner di Leminos, che deriva da iSH e ios-linuxkit. Licenza GPL-3.0.";
+"FMLAB Linux opens straight into the Game Emulator. The Linux button brings back everything else." = "FMLAB Linux si apre direttamente nel Game Emulator. Il tasto Linux riporta tutto il resto.";
+"FMLAB Linux › Giochi" = "FMLAB Linux › Giochi";
 "FMLAB Retro" = "FMLAB Retro";
 "FMLAB Retro installed" = "FMLAB Retro installata";
 "FMLAB Retro — Debian 13 for classic consoles (FMLAB)" = "FMLAB Retro — Debian 13 per le console classiche (FMLAB)";
+"FMLAB could not keep access to this folder." = "FMLAB non riesce a tenere l'accesso a questa cartella.";
 "FMlab - RunnerKit" = "FMlab - RunnerKit";
 "Failed" = "Non riuscito";
 "Failed: %@. Close LinuxRunner and try again." = "Non riuscito: %@. Chiudi LinuxRunner e riprova.";
@@ -566,6 +573,8 @@
 "GUI: %lld" = "Grafica: %lld";
 "Game Emulator" = "Game Emulator";
 "Game Emulator · FMLAB" = "Game Emulator · FMLAB";
+"Game Folders" = "Cartelle dei giochi";
+"Games Only" = "Solo giochi";
 "General" = "Generali";
 "Graphics" = "Grafica";
 "Guest Graphics Backend" = "Motore grafico di Linux";
@@ -610,6 +619,7 @@
 "Imported. Select Debian for the next launch; package configuration runs automatically." = "Importata. Scegli Debian per il prossimo avvio; la configurazione dei pacchetti parte da sola.";
 "Importing isolated Arch Linux ARM filesystem" = "Importazione dei file di Arch Linux ARM";
 "Importing isolated Debian filesystem" = "Importazione dei file di Debian";
+"In iCloud: tap to download" = "In iCloud: tocca per scaricarlo";
 "Increase Font Size" = "Testo più grande";
 "Input" = "Comandi";
 "Inspection" = "Ispezione";
@@ -727,6 +737,7 @@
 "Light" = "Chiaro";
 "Link Copied" = "Link copiato";
 "Link copied. Now close FMLAB Linux, then in LiveContainer tap + → Install from URL → Paste → OK. It installs over this one; Linux and your data stay." = "Link copiato. Ora chiudi FMLAB Linux, poi in LiveContainer tocca + → Installa dall'URL → Incolla → OK. Si installa sopra questa; Linux e i dati restano.";
+"Linux" = "Linux";
 "Linux App Manager" = "Gestione app Linux";
 "Linux Applications" = "Applicazioni Linux";
 "Linux Desktop" = "Desktop Linux";
@@ -777,6 +788,7 @@
 "Log test keystrokes (includes typed text)" = "Registra i tasti di prova (anche il testo scritto)";
 "Logging" = "Registro";
 "Login account" = "Account di accesso";
+"Looking for games…" = "Cerco i giochi…";
 "Low-latency input (experimental, next session)" = "Input a bassa latenza (sperimentale, dalla prossima sessione)";
 "Lowercase letters, digits, - and _. LinuxRunner stores only Linux's own password hash, never the password." = "Lettere minuscole, numeri, - e _. FMLAB Linux salva solo l'hash della password di Linux, mai la password.";
 "Main fallbacks: " = "Ritorni al software principali: ";
@@ -818,6 +830,7 @@
 "Name" = "Nome";
 "Native Terminal" = "Terminale dell'app";
 "Native Theme" = "Tema dell'app";
+"Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers and hardware keyboards work too." = "Emulatori nativi (core libretro), senza bisogno del JIT. I salvataggi vanno in Giochi/Salvataggi; i BIOS, se una console li vuole, in Giochi/BIOS. I comandi a schermo seguono la rotazione; funzionano anche controller e tastiere.";
 "Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers work too." = "Emulatori nativi (core libretro), senza bisogno del JIT. I salvataggi vanno in Giochi/Salvataggi; i BIOS, se una console li vuole, in Giochi/BIOS. I comandi a schermo seguono la rotazione; funzionano anche i controller.";
 "Native emulators inside the app: no Linux, no JIT, nothing to install. You add your own games." = "Emulatori nativi dentro l'app: niente Linux, niente JIT, niente da installare. I giochi li metti tu.";
 "Navigating away retains windows. iOS may suspend or terminate the app; saved files remain persistent." = "Uscendo, le finestre restano. iOS può sospendere o chiudere l'app; i file salvati restano.";
@@ -1340,6 +1353,7 @@
 "You already have the latest version (%lld)." = "Hai già l'ultima versione (%lld).";
 "You already have these distributions in LinuxRunner. Take them here without reinstalling anything (close LinuxRunner first)." = "Hai già queste distribuzioni in LinuxRunner. Prendile qui senza reinstallare niente (chiudi prima LinuxRunner).";
 "You stay on this distribution: the change you chose is cancelled." = "Resti su questa distribuzione: il cambio che avevi scelto viene annullato.";
+"Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched)." = "Le tue cartelle restano dove sono: FMLAB le legge e basta. Scorri a sinistra per togliere una cartella dall'elenco (i file non vengono toccati).";
 "iOS 26 and later: StikDebug attaches with its universal script; return here and LinuxRunner prepares its code region while it is attached. Support on iOS 26 has not been verified on a device yet." = "iOS 26 e successivi: StikDebug si collega con il suo script universale; torna qui e FMLAB Linux prepara la sua zona di codice mentre è collegato. Su iOS 26 non è ancora stato provato su un dispositivo.";
 "iOS Files: On My iPhone/iPad → LinuxRunner → Shared → " = "App File: Sul mio iPhone/iPad → FMLAB Linux → Shared → ";
 "iOS Network Path" = "Rete di iOS";
