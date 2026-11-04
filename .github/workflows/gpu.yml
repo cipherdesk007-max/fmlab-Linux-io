@@ -64,7 +64,9 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           export DEPOT_TOOLS_UPDATE=0
-          scripts/build-gpu-deps.sh iphoneos
+          # stessa procedura, ma con tutti i messaggi visibili (l'originale li nasconde)
+          sed 's# >/dev/null##g' scripts/build-gpu-deps.sh > scripts/build-gpu-deps-verbose.sh
+          bash -x scripts/build-gpu-deps-verbose.sh iphoneos 2>&1 | tail -150; test -f build/gpu/iphoneos/lib/libvirglrenderer.a || test -n "$(ls build/gpu/iphoneos/lib/libvirgl* 2>/dev/null)"
           cat build/gpu/iphoneos/REVISIONS
           rm -rf build/gpu/iphoneos/work
       - name: Risultato
