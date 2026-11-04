@@ -531,6 +531,7 @@ static NSString *ApplicationPreflightFailure(NSURL *session) {
 
 @interface LRGUIViewController ()
 @property NSArray<NSLayoutConstraint *> *fmlabBordiNormali,*fmlabBordiPieni;   // FMLAB: tutto schermo vero
+@property NSString *fmlabUltimiMargini;   // FMLAB: ultimo contenuto di fmlab-schermo scritto
 @property LRFramebufferView *surface;
 @property UILabel *status;
 @property UIStackView *stack;
@@ -1616,6 +1617,7 @@ static NSString *DesktopDegradedNotice(NSString *state){
     if(_rateTime>0&&now-_rateTime>=0.9){_updateRate=(double)(_frames-_rateFrames)/(now-_rateTime);_rateFrames=_frames;_rateTime=now;}
     else if(_rateTime<=0||_frames<_rateFrames){_rateFrames=_frames;_rateTime=now;}
     _status.text=[NSString stringWithFormat:FMLABTr(@"%@ · %.0fs · %.1f display updates/s"),FMLABTr(progress),elapsed,_updateRate];
+    [self fmlabScriviMargini];
 }
 - (void)metrics{
     [LRRuntimeBridge logCategory:@"GUI_PRESENTATION" event:[NSString stringWithFormat:@"component counters (guest rendering unchanged): %@",[self.surface presentationStatistics]]];
@@ -1701,6 +1703,22 @@ static NSString *DesktopDegradedNotice(NSString *state){
         [self.view setNeedsLayout];[self.surface fitViewport];}
     [self setNeedsStatusBarAppearanceUpdate];[self setNeedsUpdateOfHomeIndicatorAutoHidden];[self setNeedsUpdateOfScreenEdgesDeferringSystemGestures];}
 - (BOOL)prefersStatusBarHidden{return _desktopMode&&_inputToolbar.hidden;}
+// FMLAB 0.7.2: a schermo intero il desktop va sotto la Dynamic Island, gli angoli arrotondati e l'indicatore
+// Home. Si scrive nella cartella della sessione quanta parte del desktop (in pixel di Linux) cade lì, così
+// RunnerKit/TouchPad tiene i suoi pallini e finestre nella parte visibile. Si scrive solo se cambia.
+- (void)fmlabScriviMargini{
+    if(!_desktopMode||!_sessionURL||!_surface.pixelWidth||!_surface.pixelHeight)return;
+    BOOL pieno=_inputToolbar.hidden;CGSize v=self.view.bounds.size;UIEdgeInsets m=pieno?self.view.safeAreaInsets:UIEdgeInsetsZero;
+    if(v.width<1||v.height<1)return;
+    CGFloat sx=_surface.pixelWidth/v.width,sy=_surface.pixelHeight/v.height;
+    NSString *testo=[NSString stringWithFormat:@"# FMLAB Linux: parte del desktop coperta da Dynamic Island, angoli e indicatore Home (pixel di Linux)\nmargini=%d %d %d %d\nschermo_intero=%d\nlarghezza=%u\naltezza=%u\n",
+        (int)ceil(m.left*sx),(int)ceil(m.top*sy),(int)ceil(m.right*sx),(int)ceil(m.bottom*sy),pieno?1:0,_surface.pixelWidth,_surface.pixelHeight];
+    if([testo isEqualToString:_fmlabUltimiMargini])return;
+    NSURL *url=[_sessionURL URLByAppendingPathComponent:@"fmlab-schermo"];
+    if([testo writeToURL:url atomically:YES encoding:NSUTF8StringEncoding error:nil]){
+        [NSFileManager.defaultManager setAttributes:@{NSFilePosixPermissions:@0644} ofItemAtPath:url.path error:nil];_fmlabUltimiMargini=testo;}
+}
+- (void)viewDidLayoutSubviews{[super viewDidLayoutSubviews];[self fmlabScriviMargini];}
 - (void)toggleImmersive{[self setImmersive:!_inputToolbar.hidden];}
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];

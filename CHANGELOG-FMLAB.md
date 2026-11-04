@@ -2,6 +2,13 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.7.2
+- **RunnerKit si adatta a FMLAB Linux**: a schermo intero l'app scrive nella cartella della sessione
+  (`fmlab-schermo`) quanta parte del desktop cade sotto Dynamic Island, angoli e indicatore Home, in pixel di
+  Linux. TouchPad (RunnerKit 2026.11.04-1) tiene lì fuori la colonna di pallini e le sue finestre.
+- Linux sa di girare in FMLAB Linux: `/proc/ish/version` dice anche `FMLAB-Linux/<versione> base=LinuxRunner/<versione>`
+  (RunnerKit lo usa per nomi, percorsi e controlli).
+
 ## 0.7.1
 - **Corretto**: in italiano l'app si chiudeva toccando **Desktop** per vedere i comandi (e con ogni altro avviso).
   Il traduttore dei titoli usava lo stesso nome per le schermate e per gli avvisi, e il titolo richiamava sé stesso

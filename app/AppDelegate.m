@@ -531,6 +531,10 @@ void NetworkReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
     NSString *ishVersion = [NSString stringWithFormat:@"ios-linuxkit %@ (%@)",
                          [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],
                          [NSBundle.mainBundle objectForInfoDictionaryKey:(NSString *) kCFBundleVersionKey]];
+    // FMLAB: Linux sa di girare in FMLAB Linux (RunnerKit legge /proc/ish/version e si adatta).
+    NSString *fmlab = [NSBundle.mainBundle objectForInfoDictionaryKey:@"FMLABVersion"];
+    if (fmlab.length) ishVersion = [ishVersion stringByAppendingFormat:@" FMLAB-Linux/%@ base=LinuxRunner/%@", fmlab,
+                         [NSBundle.mainBundle objectForInfoDictionaryKey:@"FMLABBaseLinuxRunner"] ?: @"?"];
     extern const char *proc_ish_version;
     proc_ish_version = strdup(ishVersion.UTF8String);
 #ifdef ISH_AOT_BOOTSTRAP
