@@ -2,6 +2,12 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.8.6
+- **Terminale nitido**: a volte (anche in LinuxRunner originale) il terminale si apriva col testo sfocato. Su iOS
+  recenti la schermata si apre con un'animazione che la ingrandisce da piccola, e il testo restava disegnato alla
+  risoluzione di quel momento. Ora, finita l'apertura, il testo si ridisegna alla risoluzione vera dello schermo
+  (senza cambiare righe e colonne della shell).
+
 ## 0.8.5
 - **Niente desktop sotto la fotocamera**: in orizzontale a schermo intero il lato della Dynamic Island resta una banda
   nera (le icone non finiscono più lì sotto), l'altro lato va fino al bordo. L'app capisce da sola da che parte è la

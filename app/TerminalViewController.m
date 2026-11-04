@@ -161,6 +161,10 @@ NSString *FMLABTr(NSString *s);   // FMLAB: traduzione (app/FMLAB/FMLABLingua.in
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self.termView becomeFirstResponder];
+    // FMLAB: testo nitido anche se l'animazione di apertura l'aveva disegnato piccolo
+    __weak typeof(self) fmlabSe = self;
+    for (NSNumber *dopo in @[@0.35, @1.2])
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(dopo.doubleValue * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [fmlabSe.termView fmlabRidisegna]; });
 #ifdef LINUXRUNNER
     [self.awakeTimer invalidate];
     __weak typeof(self) weakSelf = self;

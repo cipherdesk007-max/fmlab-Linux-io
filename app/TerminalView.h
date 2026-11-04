@@ -29,4 +29,6 @@ enum OverrideAppearance {
 
 @property (nonatomic) Terminal *terminal;
 
+/// FMLAB: ridisegna il testo a piena risoluzione (dopo l'animazione di apertura poteva restare sfocato).
+- (void)fmlabRidisegna;
 @end

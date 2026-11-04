@@ -164,6 +164,19 @@ static NSString *const HANDLERS[] = {@"syncFocus", @"focus", @"newScrollHeight",
     [self.scrollbarView addSubview:webView];
 }
 
+// FMLAB: su iOS recenti la schermata del terminale si apre con un'animazione che la ingrandisce da piccola; WebKit
+// disegnava il testo alla risoluzione di quel momento e a volte restava sfocato (anche in LinuxRunner originale).
+// Portare il contenuto su un livello nuovo per un fotogramma lo fa ridisegnare alla risoluzione vera dello schermo,
+// senza cambiare misura (niente righe/colonne diverse per la shell).
+- (void)fmlabRidisegna {
+    WKWebView *w = self.terminal.webView;
+    if (w == nil || w.window == nil) return;
+    [w evaluateJavaScript:@"(function(){var b=document.body;if(!b)return;b.style.transform='translateZ(0)';"
+                          @"requestAnimationFrame(function(){requestAnimationFrame(function(){b.style.transform='';});});})()"
+        completionHandler:nil];
+    [w setNeedsDisplay];
+}
+
 - (void)uninstallTerminalView {
     // remove old terminal
     UIView *superview = _terminal.webView.superview;
