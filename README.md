@@ -12,7 +12,7 @@ i programmi Linux ARM64 girano dentro l'app grazie a un interprete e a uno strat
 ## Installazione
 
 LiveContainer → **+** → **Installa dall'URL** e incolla:
-`https://github.com/cipherdesk007-max/new-app/releases/download/ultima/FMLAB-Linux.ipa`
+`https://github.com/cipherdesk007-max/fmlab-Linux-io/releases/download/ultima/FMLAB-Linux.ipa`
 
 ## Cosa cambierà rispetto a LinuxRunner
 
@@ -51,5 +51,5 @@ scheda App di FMLAB Cleaner. I numeri finiscono in questo README.
 - **iSH** — Theodore Dubois e collaboratori ([ish-app/ish](https://github.com/ish-app/ish)).
 - **ios-linuxkit** — Rui Carmo e collaboratori ([rcarmo/ios-linuxkit](https://github.com/rcarmo/ios-linuxkit)).
 
-Problemi e idee per FMLAB Linux: [segnalazioni](https://github.com/cipherdesk007-max/new-app/issues/new).
+Problemi e idee per FMLAB Linux: [segnalazioni](https://github.com/cipherdesk007-max/fmlab-Linux-io/issues/new).
 Un problema che c'è anche in LinuxRunner originale va segnalato anche [a loro](https://github.com/mxhm11cr/LinuxRunner/issues).

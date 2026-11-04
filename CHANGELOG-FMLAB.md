@@ -2,6 +2,9 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.2.1
+- Link degli aggiornamenti e del codice sul nome nuovo del repository (fmlab-Linux-io).
+
 ## 0.2.0
 - **Logo FMLAB** come icona dell'app e in cima alla schermata Home, con il titolo "FMLAB Linux".
 - **Colori rosso e nero FMLAB**: colore d'accento rosso del logo (#BF6D6F) al posto dell'azzurro, pulsanti principali

@@ -42,6 +42,8 @@ jobs:
           git clone -q https://chromium.googlesource.com/chromium/tools/depot_tools.git "$G/depot_tools"
           git -C "$G/depot_tools" checkout -q --detach a20039648c0de69d8156906b18052bd47e9bf230
           echo "$G/depot_tools" >> "$GITHUB_PATH"
+          (cd "$G/depot_tools" && DEPOT_TOOLS_UPDATE=0 ./ensure_bootstrap)
+          ls "$G/depot_tools"/python3_bin_reldir.txt
           git clone -q https://gitlab.freedesktop.org/virgl/virglrenderer.git "$G/virglrenderer"
           git -C "$G/virglrenderer" checkout -q --detach e0a1caf3b147bb26dfe524dbb85ded1177e7e49e
           git clone -q https://github.com/anholt/libepoxy.git "$G/libepoxy"

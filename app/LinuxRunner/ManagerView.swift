@@ -2752,7 +2752,7 @@ private struct ProcessDetailView: View {
 // LiveContainer lo installa sopra questa versione con "+ → Installa dall'URL" (i dati restano).
 @MainActor
 final class FMLABAggiornamenti: ObservableObject {
-    static let repo = "https://github.com/cipherdesk007-max/new-app"
+    static let repo = "https://github.com/cipherdesk007-max/fmlab-Linux-io"
     static let urlVersione = URL(string: repo + "/releases/download/ultima/VERSIONE.txt")!
     static let urlIpa = URL(string: repo + "/releases/download/ultima/FMLAB-Linux.ipa")!
 
