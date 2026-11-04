@@ -16,5 +16,13 @@ jobs:
         run: sudo apt-get update -q && sudo apt-get install -y -q xvfb x11vnc x11-xserver-utils x11-utils python3-xlib
       - name: Script della sessione
         run: sh -n app/LinuxRunner/GUISupport.bundle/session.sh && sh -n app/LinuxRunner/GUISupport.bundle/fmlab-ruota.sh && python3 scripts/generate-gui-support-manifest.py --check
+      - name: La sessione sopravvive al caricamento di fmlab-ruota.sh (errore della 0.8.0)
+        run: |
+          cd app/LinuxRunner/GUISupport.bundle
+          # come session.sh: due parametri qualsiasi (modo e cartella della sessione), poi ". ./fmlab-ruota.sh"
+          sh -c 'set -e; FMLAB_RUOTA_SORGENTE=1; . ./fmlab-ruota.sh; command -v fmlab_modo >/dev/null; echo SESSIONE_VIVA' sessione desktop /tmp/sessione-prova | grep -q SESSIONE_VIVA
+          # e nessuna riga di session.sh carica lo script senza la protezione
+          grep -n "fmlab-ruota.sh" session.sh | grep -v "FMLAB_RUOTA_SORGENTE=1" | grep -v "^[0-9]*:#" | grep "\. ./fmlab-ruota.sh" && exit 1 || true
+          echo "ok: la sessione resta viva"
       - name: Rotazione del desktop senza riavvio (Xvfb + xrandr + x11vnc + visore RFB)
         run: timeout 120 /usr/bin/python3 strumenti/prova_rotazione.py

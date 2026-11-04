@@ -2,6 +2,12 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.8.2
+- **Corretto (grave)**: nella 0.8.0–0.8.1 il desktop non partiva ("Il desktop non è partito",
+  `FMLAB_ROTAZIONE: misura non valida`). Lo script della rotazione, caricato all'avvio della sessione, leggeva i
+  parametri della sessione come se fossero la misura dello schermo e la chiudeva. Ora sa quando è caricato dalla
+  sessione e non fa niente da solo. Nuova prova automatica proprio su questo caso (workflow `prove-linux`).
+
 ## 0.8.1
 - **File condivisi: elimina da qui**. Tocca un file → menu **sul file** con *Salva in File…* ed *Elimina*; scorri a
   sinistra su un file o una cartella per eliminarlo (le cartelle con quello che contengono). Chiede sempre conferma.

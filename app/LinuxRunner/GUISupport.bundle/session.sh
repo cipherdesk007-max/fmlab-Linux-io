@@ -227,7 +227,7 @@ if [ "$mode" = desktop ] && [ -f "$session/fmlab-rotazione" ] && [ -f ./fmlab-ru
     case "$desktop_environment" in linuxrunner|lxqt|plasma)
         fmlab_ruota=yes; screen_w=$((width > height ? width : height)); screen_h=$screen_w;; esac
 fi
-if [ -f ./fmlab-ruota.sh ]; then . ./fmlab-ruota.sh; else fmlab_ruota=no screen_w=$width screen_h=$height; fi   # fmlab_modo L A
+if [ -f ./fmlab-ruota.sh ]; then FMLAB_RUOTA_SORGENTE=1; . ./fmlab-ruota.sh; else fmlab_ruota=no screen_w=$width screen_h=$height; fi   # fmlab_modo L A
 Xvfb "$DISPLAY" -screen 0 "${screen_w}x${screen_h}x24" $([ "$fmlab_ruota" = yes ] && echo -noreset) -nolisten tcp -auth "$XAUTHORITY" "$shm_switch" MIT-SHM "$glx_switch" GLX > "$session/xvfb.log" 2>&1 & xpid=$!
 i=0
 while [ ! -S "/tmp/.X11-unix/X$display" ]; do

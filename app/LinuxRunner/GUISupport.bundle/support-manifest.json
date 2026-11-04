@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "2",
+  "version": "3",
   "resources": [
     {
       "name": "audio-relay.c",
@@ -124,7 +124,7 @@
     },
     {
       "name": "fmlab-ruota.sh",
-      "sha256": "a05e9e714bdc4554568419effde7a624385ad33aa865666d503a7c2ca8648221",
+      "sha256": "288e5dc9348152a62bd2feeddc82396ad46b424f0555e36059cf53f1e2b615b1",
       "mode": "0755"
     },
     {
@@ -419,7 +419,7 @@
     },
     {
       "name": "session.sh",
-      "sha256": "3a020792fa8ebd08db5f06cc82bd58ecf91464738e234a1a4812186dd6626c08",
+      "sha256": "90544b4caaa8c5f3ef8acee29be7b205c7f9882d2ecbbd3131cf7363805bc28c",
       "mode": "0755"
     },
     {
@@ -439,7 +439,7 @@
     },
     {
       "name": "support-version",
-      "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+      "sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2",
       "mode": "0644"
     },
     {
