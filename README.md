@@ -78,8 +78,16 @@ Base: LinuxRunner 1.1.0 (build 900), con lo stesso motore (interprete ARM64, JIT
 | **Si gira col telefono senza riavviare**: orizzontale ↔ verticale dal vivo (RandR), le finestre si rimpiccioliscono e restano dentro lo schermo nuovo; provato su Linux a ogni modifica | Misura fissa: per cambiarla si riavvia il desktop |
 | **Dice a RunnerKit cosa copre lo schermo** (Dynamic Island, indicatore Home) e che gira in FMLAB Linux (`/proc/ish/version`) | — |
 
-**Correzioni** (difetti dell'adattamento che non ci sono più): chiusura dell'app aprendo il menu Desktop in italiano
-(0.7.1), desktop che non partiva (0.8.2), menu del file che compariva in cima allo schermo (0.8.1).
+**Correzioni di difetti che c'erano anche in LinuxRunner originale**
+
+| Difetto | Com'è ora |
+|---|---|
+| **Terminale che a volte si apriva sfocato** (l'animazione di apertura lo disegnava piccolo e il testo restava a bassa risoluzione; chiudere e riaprire non sempre bastava) | Finita l'apertura il testo si ridisegna alla risoluzione vera dello schermo, senza cambiare righe e colonne (0.8.6) |
+| **Desktop rimpicciolito con bande nere** su tutti i lati anche "a schermo intero" | Riempie lo schermo, banda solo dal lato della fotocamera (0.8.3, 0.8.5) |
+| **Menu Desktop, impostazioni, avvisi ed errori solo in inglese** | Tradotti tutti, con controllo a ogni compilazione (0.6.0) |
+
+**Correzioni dell'adattamento** (difetti delle prime versioni FMLAB, già risolti): chiusura dell'app aprendo il menu
+Desktop in italiano (0.7.1), desktop che non partiva (0.8.2), menu del file che compariva in cima allo schermo (0.8.1).
 
 ## Cosa fa RunnerKit al posto dell'app
 
@@ -93,7 +101,7 @@ la prima volta che Debian è pronto (Home → FMlab - RunnerKit; da Gestione app
 | **Pulizia dentro Linux** (cache di apt, registri, file temporanei, sessioni vecchie del desktop) | RunnerKit; l'app la lancia da Impostazioni → Pulizia → *Pulisci anche dentro Linux* |
 | **Centro prestazioni e sistema** (RAM, CPU, disco, GPU, JIT, app), **RunnerBoost** | RunnerKit |
 | **Linux in italiano** (menu, programmi, Firefox, data) e tastiera secondo la lingua di Linux | RunnerKit (`rk italiano`) |
-| **Terminale** con barra di stato fissa e comandi `rk` | RunnerKit |
+| **Terminale** con barra di stato fissa e comandi `rk`: la barra si adatta alla larghezza del telefono, `clear` non toglie il riquadro, niente righe doppie all'apertura | RunnerKit |
 | **Backup del Debian** | RunnerKit (`rk backup`) |
 | **Rotazione dello schermo** | L'app la comanda; dentro Linux usa Python + Xlib, che installa RunnerKit (senza, lo schermo resta fisso come nell'originale) |
 

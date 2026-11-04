@@ -67,8 +67,16 @@ Base: LinuxRunner 1.1.0 (build 900) with the same engine (ARM64 interpreter, JIT
 | **Rotates with the phone without restarting**: landscape ↔ portrait live (RandR); windows shrink and stay inside the new screen; tested on Linux on every change | Fixed size: changing it restarts the desktop |
 | **Tells RunnerKit what the screen covers** (Dynamic Island, Home indicator) and that it runs in FMLAB Linux (`/proc/ish/version`) | — |
 
-**Fixes** (bugs in the port that are gone): the app closing when opening the Desktop menu in Italian (0.7.1), the
-desktop not starting (0.8.2), the file menu appearing at the top of the screen (0.8.1).
+**Fixes for bugs that were also in the original LinuxRunner**
+
+| Bug | Now |
+|---|---|
+| **Terminal sometimes opening blurry** (the opening animation drew it small and the text stayed low-resolution; closing and reopening didn't always help) | Once it has opened, the text is redrawn at the screen's real resolution, without changing the shell's rows and columns (0.8.6) |
+| **Shrunken desktop with black bars** on every side even in "full screen" | Fills the screen, with a strip only on the camera side (0.8.3, 0.8.5) |
+| **Desktop menu, settings, alerts and errors in English only** | All translated, checked on every build (0.6.0) |
+
+**Fixes in the port** (bugs in early FMLAB versions, already solved): the app closing when opening the Desktop menu
+in Italian (0.7.1), the desktop not starting (0.8.2), the file menu appearing at the top of the screen (0.8.1).
 
 ## What RunnerKit does instead of the app
 
@@ -83,7 +91,7 @@ removes it):
 | **Cleanup inside Linux** (apt cache, logs, temp files, old desktop sessions) | RunnerKit; the app runs it from Settings → Cleanup → *Clean Up Inside Linux (RunnerKit)* |
 | **Performance and system Center** (RAM, CPU, disk, GPU, JIT, app), **RunnerBoost** | RunnerKit |
 | **Linux in Italian** (menus, programs, Firefox, date) and keyboard following Linux's language | RunnerKit (`rk italiano`) |
-| **Terminal** with a fixed status bar and `rk` commands | RunnerKit |
+| **Terminal** with a fixed status bar and `rk` commands: the bar fits the phone's width, `clear` keeps the header, no doubled lines on opening | RunnerKit |
 | **Debian backup** | RunnerKit (`rk backup`) |
 | **Screen rotation** | The app drives it; inside Linux it uses Python + Xlib, installed by RunnerKit (without it the screen stays fixed, as in the original) |
 
