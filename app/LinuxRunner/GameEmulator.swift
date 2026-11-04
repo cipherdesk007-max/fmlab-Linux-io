@@ -164,7 +164,9 @@ final class FMLABGiocoController: UIViewController {
         }
         pad.menu = { [weak self] in self?.apriMenu() }
         pad.veloce = { [weak self] attivo in self?.emulatore?.veloce = attivo }
-        let controller = { [weak self] (_: Notification) in self?.pad.soloMenu = !GCController.controllers().compactMap(\.extendedGamepad).isEmpty }
+        let controller: @Sendable (Notification) -> Void = { [weak self] _ in
+            DispatchQueue.main.async { self?.pad.soloMenu = !GCController.controllers().compactMap(\.extendedGamepad).isEmpty }
+        }
         osservatori = [NotificationCenter.default.addObserver(forName: .GCControllerDidConnect, object: nil, queue: .main, using: controller),
                        NotificationCenter.default.addObserver(forName: .GCControllerDidDisconnect, object: nil, queue: .main, using: controller)]
         controller(Notification(name: .GCControllerDidConnect))
