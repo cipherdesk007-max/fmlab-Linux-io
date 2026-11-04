@@ -1,0 +1,78 @@
+name: build
+
+# FMLAB Linux: compilata gratis sui Mac di GitHub (repo pubblico), variante interprete + grafica software.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build
+  cancel-in-progress: true
+
+jobs:
+  ipa:
+    runs-on: macos-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - name: Sottomoduli (quelli che servono, alle versioni fissate)
+        run: git submodule update --init --recursive --checkout -- deps/libapps deps/libarchive deps/glslang deps/spirv-cross
+      - name: Xcode più recente e strumenti
+        run: |
+          X=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Xcode scelto: $X"
+          sudo xcode-select -s "$X/Contents/Developer"
+          echo "DEVELOPER_DIR=$X/Contents/Developer" >> "$GITHUB_ENV"
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+          brew install meson ninja lld >/dev/null || true
+          echo "$(brew --prefix lld)/bin" >> "$GITHUB_PATH"
+      - name: Controllo prerequisiti
+        run: scripts/bootstrap-macos.sh
+      - name: Compila (senza firma: LiveContainer/SideStore la firmano)
+        env:
+          BUNDLE_ID: dev.fmlab.linux
+          ARTIFACT_NAME: FMLAB-Linux
+        run: |
+          mkdir -p build
+          scripts/build-ipa.sh --unsigned > build/compila.log 2>&1 && ok=1 || ok=0
+          grep -E "error:|\*\* (ARCHIVE|BUILD)|IPA:|Signing:" build/compila.log | tail -60 || true
+          tail -25 build/compila.log
+          [ "$ok" = 1 ]
+      - name: Log se fallisce
+        if: failure()
+        run: |
+          grep -n -B3 -A8 "error:" build/releases/archive.log | head -200 || true
+          tail -60 build/compila.log || true
+      - name: Verifica IPA
+        env:
+          ARTIFACT_NAME: FMLAB-Linux
+        run: |
+          python3 scripts/verify-ipa.py build/releases | tail -30
+          unzip -p build/releases/FMLAB-Linux.ipa Payload/LinuxRunner.app/Info.plist > /tmp/Info.plist
+          plutil -p /tmp/Info.plist | grep -E "CFBundleIdentifier|CFBundleDisplayName|CFBundleShortVersionString"
+          plutil -p /tmp/Info.plist | grep -q '"CFBundleIdentifier" => "dev.fmlab.linux"'
+          plutil -p /tmp/Info.plist | grep -q '"CFBundleDisplayName" => "FMLAB Linux"'
+          ls -la build/releases/FMLAB-Linux.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FMLAB-Linux
+          path: build/releases/FMLAB-Linux.ipa
+      - name: Pubblica (versione numerata + "ultima")
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V=$(tr -d '[:space:]' < VERSIONE-FMLAB)
+          NOTE=$(awk '/^## /{n++} n==1' CHANGELOG-FMLAB.md | tail -n +2)
+          gh release view "v$V" >/dev/null 2>&1 || gh release create "v$V" build/releases/FMLAB-Linux.ipa --target "$GITHUB_SHA" --title "FMLAB Linux $V" --notes "$NOTE"
+          gh release delete ultima --yes --cleanup-tag 2>/dev/null || true
+          cp VERSIONE-FMLAB VERSIONE.txt
+          gh release create ultima build/releases/FMLAB-Linux.ipa VERSIONE.txt --target "$GITHUB_SHA" --latest \
+            --title "FMLAB Linux $V (ultima)" \
+            --notes "Installazione: LiveContainer → + → Installa dall'URL → https://github.com/${GITHUB_REPOSITORY}/releases/download/ultima/FMLAB-Linux.ipa. $NOTE"
