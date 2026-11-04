@@ -27,6 +27,10 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 + (NSArray<FMLABCore *> *)core NS_SWIFT_NAME(core());
 /// Il core giusto per un file, dall'estensione (nil se nessuno).
 + (nullable FMLABCore *)corePer:(NSString *)file NS_SWIFT_NAME(core(per:));
+/// Archivi (.zip, .7z, .rar): il core giusto guardando i file dentro (senza estrarre).
++ (nullable FMLABCore *)coreDentroArchivio:(NSString *)archivio NS_SWIFT_NAME(core(dentroArchivio:));
+/// Estrae l'archivio (una volta sola, nella cache dell'app) e dà il file del gioco da aprire.
++ (nullable NSString *)preparaArchivio:(NSString *)archivio error:(NSError **)error NS_SWIFT_NAME(prepara(archivio:));
 /// Cartelle in Documenti (visibili nell'app File): Giochi, Giochi/BIOS, Giochi/Salvataggi.
 + (NSURL *)cartellaGiochi;
 + (NSURL *)cartellaBIOS;
@@ -58,6 +62,15 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 - (void)salvaStato:(void (^)(NSError * _Nullable))fatto;
 - (void)caricaStato:(void (^)(NSError * _Nullable))fatto;
 @property (readonly) BOOL statoEsiste;
+/// Stati salvati a posti (1…3), ognuno con la foto della schermata.
+- (void)salvaStato:(NSInteger)posto fatto:(void (^)(NSError * _Nullable))fatto NS_SWIFT_NAME(salvaStato(posto:fatto:));
+- (void)caricaStato:(NSInteger)posto fatto:(void (^)(NSError * _Nullable))fatto NS_SWIFT_NAME(caricaStato(posto:fatto:));
+- (nullable NSDate *)dataStato:(NSInteger)posto;
+- (nullable UIImage *)fotoStato:(NSInteger)posto;
+/// La schermata del gioco adesso (per le foto della partita).
+- (nullable UIImage *)fotografia;
+/// Avanti veloce: quante volte più svelto (2…4).
+@property (nonatomic) double velocita;
 /// Salvataggio automatico all'uscita (per "riprendi da dove eri"). Di base sì.
 @property (nonatomic) BOOL salvaUscita;
 @property (readonly) BOOL statoAutomaticoEsiste;

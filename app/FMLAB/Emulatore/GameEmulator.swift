@@ -20,6 +20,8 @@ struct FMLABGioco: Identifiable, Hashable {
     var inDownload = false
     /// Icona del gioco (dentro i giochi DS) o copertina messa dall'utente accanto al gioco.
     var icona: UIImage? = nil
+    /// .zip/.7z/.rar: si estrae al momento di giocare (nella cache dell'app, l'archivio resta com'è).
+    var archivio: Bool { ["zip", "7z", "rar"].contains(url.pathExtension.lowercased()) }
     var nome: String { url.deletingPathExtension().lastPathComponent }
     static func == (a: Self, b: Self) -> Bool { a.url == b.url && a.inDownload == b.inDownload }
     func hash(into h: inout Hasher) { h.combine(url) }
@@ -61,8 +63,9 @@ enum FMLABArchivioGiochi {
                 vero = u.deletingLastPathComponent().appendingPathComponent(String(nome.dropFirst().dropLast(7)))
                 scaricare = true
             } else if nome.hasPrefix(".") { continue }
-            guard let c = FMLABEmulatore.core(per: vero.lastPathComponent) else { continue }
             let est = vero.pathExtension.lowercased()
+            let archivio = ["zip", "7z", "rar"].contains(est)
+            guard let c = archivio ? (scaricare ? nil : FMLABEmulatore.core(dentroArchivio: vero.path)) : FMLABEmulatore.core(per: vero.lastPathComponent) else { continue }
             // le tracce .bin di un disco con .cue accanto non sono giochi a sé
             if est == "bin", (try? FileManager.default.contentsOfDirectory(atPath: vero.deletingLastPathComponent().path))?.contains(where: { $0.lowercased().hasSuffix(".cue") }) == true { continue }
             trovati.append(FMLABGioco(url: vero, core: c, cartella: cartella, nomeCartella: nomeCartella, inDownload: scaricare,
@@ -111,6 +114,54 @@ enum FMLABIcona {
                                 bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue), provider: prov, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
         else { return nil }
         return UIImage(cgImage: img)
+    }
+}
+
+/// Copertine automatiche dalla raccolta pubblica libretro-thumbnails (la stessa di RetroArch), cercate col nome del
+/// file (funziona coi nomi standard No-Intro/Redump, es. "Super Mario World (USA)"). Si salvano in Giochi/Copertine;
+/// un gioco senza copertina trovata non si ricerca più.
+enum FMLABCopertine {
+    static let chiaveAttive = "FMLAB.copertine.automatiche", chiaveMancanti = "FMLAB.copertine.mancanti"
+    static var attive: Bool { UserDefaults.standard.object(forKey: chiaveAttive) as? Bool ?? true }
+    static func sistema(_ g: FMLABGioco) -> String? {
+        switch g.core.nome {
+        case "fceumm": return "Nintendo_-_Nintendo_Entertainment_System"
+        case "gambatte": return g.url.pathExtension.lowercased() == "gbc" ? "Nintendo_-_Game_Boy_Color" : "Nintendo_-_Game_Boy"
+        case "mgba": return "Nintendo_-_Game_Boy_Advance"
+        case "bsnes": return "Nintendo_-_Super_Nintendo_Entertainment_System"
+        case "pcsx_rearmed": return "Sony_-_PlayStation"
+        case "desmume": return "Nintendo_-_Nintendo_DS"
+        default: return nil
+        }
+    }
+    /// Cerca le copertine che mancano; chiama `fatto` se ne ha trovata almeno una.
+    static func cerca(_ giochi: [FMLABGioco], fatto: @escaping () -> Void) {
+        guard attive else { return }
+        var mancanti = Set(UserDefaults.standard.stringArray(forKey: chiaveMancanti) ?? [])
+        let cartella = FMLABEmulatore.cartellaGiochi().appendingPathComponent("Copertine")
+        let daCercare = giochi.filter { $0.icona == nil && !$0.inDownload && !mancanti.contains($0.nome) }.prefix(24)
+        guard !daCercare.isEmpty else { return }
+        let gruppo = DispatchGroup(); var trovate = 0; let lock = NSLock()
+        for g in daCercare {
+            guard let sis = sistema(g) else { continue }
+            // regola di libretro-thumbnails: questi caratteri diventano _
+            let nome = String(g.nome.map { "&*/:`<>?\\|\"".contains($0) ? "_" : $0 })
+            guard let n = nome.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
+                  let u = URL(string: "https://raw.githubusercontent.com/libretro-thumbnails/\(sis)/master/Named_Boxarts/\(n).png") else { continue }
+            gruppo.enter()
+            URLSession.shared.dataTask(with: u) { d, risposta, _ in
+                defer { gruppo.leave() }
+                lock.lock(); defer { lock.unlock() }
+                if (risposta as? HTTPURLResponse)?.statusCode == 200, let d, UIImage(data: d) != nil {
+                    try? FileManager.default.createDirectory(at: cartella, withIntermediateDirectories: true)
+                    try? d.write(to: cartella.appendingPathComponent(g.nome).appendingPathExtension("png")); trovate += 1
+                } else if (risposta as? HTTPURLResponse)?.statusCode == 404 { mancanti.insert(g.nome) }
+            }.resume()
+        }
+        gruppo.notify(queue: .main) {
+            UserDefaults.standard.set(Array(mancanti), forKey: chiaveMancanti)
+            if trovate > 0 { fatto() }
+        }
     }
 }
 
@@ -191,19 +242,6 @@ struct FMLABBarraDati: View {
     }
 }
 
-/// La stessa barra in un riquadro sopra tutta l'app (all'apertura, qualunque scheda tu stia guardando).
-struct FMLABBarraDatiFluttuante: View {
-    @ObservedObject private var stato = FMLABStatoDati.shared
-    var body: some View {
-        if stato.fase != nil {
-            FMLABBarraDati().padding(.horizontal, 14).padding(.vertical, 8)
-                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.ultraThinMaterial))
-                .padding(.horizontal, 16).padding(.top, 4)
-                .transition(.move(edge: .top).combined(with: .opacity))
-        }
-    }
-}
-
 // MARK: - Dati del motore (fmlab-retro/dati/emulatore.json)
 // Solo dati, niente codice: estensioni, opzioni dei core, BIOS controllati, avvisi. Si aggiornano da GitHub senza
 // nuova versione dell'app; se la rete manca valgono l'ultima copia scaricata o quella scritta qui sotto.
@@ -268,7 +306,7 @@ enum FMLABDati {
     /// scarica, controlla e usa i dati nuovi. Il file è di pochi KB.
     static func aggiorna(forza: Bool = false, fatto: (() -> Void)? = nil) {
         let chiave = "FMLAB.dati.ultimoControllo"
-        if !forza, Date().timeIntervalSince1970 - UserDefaults.standard.double(forKey: "FMLAB.dati.ultimoTentativo") < 10 * 60 { fatto?(); return }
+        if !forza, Date().timeIntervalSince1970 - UserDefaults.standard.double(forKey: "FMLAB.dati.ultimoTentativo") < 2 * 60 { fatto?(); return }
         UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "FMLAB.dati.ultimoTentativo")
         let stato = FMLABStatoDati.shared
         stato.imposta(.controllo, 0.1)
@@ -361,25 +399,6 @@ enum FMLABRecenti {
     }
 }
 
-/// Riga della sezione "Game Emulator" in Distribuzioni.
-struct GameEmulatorRow: View {
-    @AppStorage(FMLABDati.chiaveNuovi) private var nuovi = ""
-    var body: some View {
-        NavigationLink(destination: GameEmulatorView()) {
-            HStack(spacing: 14) {
-                Image(systemName: "gamecontroller.fill").font(.title2).foregroundColor(.accentColor)
-                    .overlay(alignment: .topTrailing) { if !nuovi.isEmpty { Circle().fill(Color.red).frame(width: 10, height: 10).offset(x: 4, y: -3) } }
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack { Text("Game Emulator").font(.headline); if !nuovi.isEmpty { Text("New data").font(.caption2.weight(.bold)).foregroundColor(.white).padding(.horizontal, 6).padding(.vertical, 2).background(Capsule().fill(Color.red)) } }
-                    Text(FMLABEmulatore.core().isEmpty ? LF("Emulators not included in this build") : FMLABEmulatore.core().map(\.console).joined(separator: " · "))
-                        .font(.caption).foregroundColor(.secondary).lineLimit(2)
-                    FMLABBarraDati()
-                }
-            }.padding(.vertical, 6)
-        }.accessibilityIdentifier("game-emulator")
-    }
-}
-
 /// Modalità "Solo giochi": l'app si apre sul Game Emulator; il tasto Linux riporta al resto dell'app.
 struct GameEmulatorSoloGiochi: View {
     @AppStorage("FMLAB.soloGiochi") private var soloGiochi = false
@@ -404,6 +423,8 @@ struct GameEmulatorView: View {
     @State private var cercando = false
     @State private var statoBIOS: [String: Bool] = [:]     // file -> impronta giusta
     @State private var controllando = false
+    @State private var estraendo: String?
+    @Environment(\.scenePhase) private var fase
     @State private var versioneDati = FMLABDati.versione
     @AppStorage(FMLABDati.chiaveNuovi) private var nuovi = ""
     @ObservedObject private var stato = FMLABStatoDati.shared
@@ -411,6 +432,8 @@ struct GameEmulatorView: View {
     @AppStorage("FMLAB.comandi.opacita") private var opacita = 0.9
     @AppStorage("FMLAB.comandi.vibra") private var vibra = true
     @AppStorage("FMLAB.riprendi") private var riprendi = true
+    @AppStorage("FMLAB.veloce.velocita") private var velocita = 3.0
+    @AppStorage(FMLABCopertine.chiaveAttive) private var copertine = true
 
     private var perConsole: [(String, [FMLABGioco])] {
         let ordine = FMLABEmulatore.core().map(\.console)
@@ -426,11 +449,12 @@ struct GameEmulatorView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 10) {
                         Label("No games yet", systemImage: "gamecontroller").font(.headline)
-                        Text("Choose the folder where you keep your games (On My iPhone, iCloud Drive, a USB drive…): FMLAB reads them from there and sorts them by console. Or import single files, or put them in Files › FMLAB Linux › Giochi.").font(.callout).foregroundColor(.secondary)
+                        Text("Choose the folder where you keep your games (On My iPhone, iCloud Drive, a USB drive…): FMLAB reads them from there and sorts them by console. Or import single files, or put them in Files › FMLAB Linux › Giochi. Zipped games (.zip, .7z, .rar) work as they are.").font(.callout).foregroundColor(.secondary)
                         Text("No games are included or downloaded by FMLAB: only use files you own or free homebrew.").font(.footnote).foregroundColor(.secondary)
                     }.padding(.vertical, 6)
                 }
             }
+            if let n = estraendo { Section { HStack(spacing: 12) { ProgressView(); Text(String(format: LF("Opening the archive of %@…"), n)) } } }
             if stato.fase != nil { Section { FMLABBarraDati() } }
             if !nuovi.isEmpty {
                 Section {
@@ -470,6 +494,8 @@ struct GameEmulatorView: View {
                 Picker("Controls Size", selection: $scala) { Text("Small").tag(0.85); Text("Normal").tag(1.0); Text("Large").tag(1.2) }
                 VStack(alignment: .leading) { Text("Controls Opacity"); Slider(value: $opacita, in: 0.3...1) }
                 Toggle("Vibration", isOn: $vibra)
+                Picker("Fast Forward Speed", selection: $velocita) { Text("2×").tag(2.0); Text("3×").tag(3.0); Text("4×").tag(4.0) }
+                Toggle(isOn: $copertine) { VStack(alignment: .leading, spacing: 3) { Text("Automatic Covers"); Text("Box art from the public libretro-thumbnails collection, found by file name (standard names like \"Super Mario World (USA)\").").font(.caption).foregroundColor(.secondary) } }
                 Toggle(isOn: $riprendi) { VStack(alignment: .leading, spacing: 3) { Text("Resume Where I Left Off"); Text("When you quit a game it is saved; next time you can continue from there.").font(.caption).foregroundColor(.secondary) } }
             } header: { Text("Controls and Saves") }
             if !FMLABDati.bios.isEmpty {
@@ -542,6 +568,7 @@ struct GameEmulatorView: View {
             Button { FMLABSceltaFile.apri(cartella: false) { importaFile($0) } } label: { Label("Import Games…", systemImage: "square.and.arrow.down") }
         } label: { Image(systemName: "plus") }.accessibilityLabel(LF("Add Games")) } }
         .onAppear { aggiorna(); controllaBIOS(); FMLABDati.aggiorna { versioneDati = FMLABDati.versione; aggiorna() } }
+        .onChange(of: fase) { f in if f == .active { FMLABDati.aggiorna { versioneDati = FMLABDati.versione } } }
         .refreshable { FMLABDati.aggiorna(forza: true) { versioneDati = FMLABDati.versione; aggiorna() }; aggiorna(); controllaBIOS() }
         .fullScreenCover(item: $inGioco) { gioco in FMLABGiocoSchermo(gioco: gioco).ignoresSafeArea() }
         .alert(String(format: LF("Delete %@?"), daTogliere?.nome ?? ""), isPresented: Binding(get: { daTogliere != nil }, set: { if !$0 { daTogliere = nil } })) {
@@ -579,6 +606,22 @@ struct GameEmulatorView: View {
     }
 
     private func apri(_ gioco: FMLABGioco) {
+        if !gioco.inDownload && gioco.archivio {
+            FMLABRecenti.aggiungi(gioco); estraendo = gioco.nome
+            DispatchQueue.global(qos: .userInitiated).async {
+                let accesso = gioco.cartella?.startAccessingSecurityScopedResource() ?? false
+                defer { if accesso { gioco.cartella?.stopAccessingSecurityScopedResource() } }
+                let esito = Result { try FMLABEmulatore.prepara(archivio: gioco.url.path) }
+                DispatchQueue.main.async {
+                    estraendo = nil
+                    switch esito {
+                    case .success(let p): var g = gioco; g = FMLABGioco(url: URL(fileURLWithPath: p), core: FMLABEmulatore.core(per: p) ?? gioco.core, cartella: nil, nomeCartella: gioco.nomeCartella, inDownload: false, icona: gioco.icona); inGioco = g
+                    case .failure(let e): errore = e.localizedDescription
+                    }
+                }
+            }
+            return
+        }
         guard gioco.inDownload else { FMLABRecenti.aggiungi(gioco); inGioco = gioco; return }
         let accesso = gioco.cartella?.startAccessingSecurityScopedResource() ?? false
         defer { if accesso { gioco.cartella?.stopAccessingSecurityScopedResource() } }
@@ -602,7 +645,7 @@ struct GameEmulatorView: View {
         DispatchQueue.global(qos: .userInitiated).async {
             var scartati: [String] = []
             for u in urls {
-                guard FMLABEmulatore.core(per: u.lastPathComponent) != nil else { scartati.append(u.lastPathComponent); continue }
+                guard FMLABEmulatore.core(per: u.lastPathComponent) != nil || FMLABEmulatore.core(dentroArchivio: u.path) != nil else { scartati.append(u.lastPathComponent); continue }
                 let dest = base.appendingPathComponent(u.lastPathComponent)
                 try? FileManager.default.removeItem(at: dest)
                 // asCopy: iOS ci ha già dato una copia nostra, basta spostarla
@@ -611,7 +654,7 @@ struct GameEmulatorView: View {
                 }
             }
             DispatchQueue.main.async {
-                if !scartati.isEmpty { errore = String(format: LF("Not a supported game file (unzip it first): %@"), scartati.joined(separator: ", ")) }
+                if !scartati.isEmpty { errore = String(format: LF("Not a supported game file: %@"), scartati.joined(separator: ", ")) }
                 aggiorna()
             }
         }
@@ -630,7 +673,7 @@ struct GameEmulatorView: View {
             }
             var visti = Set<String>()
             tutti = tutti.filter { visti.insert($0.url.standardizedFileURL.path).inserted }
-            DispatchQueue.main.async { giochi = tutti; cercando = false }
+            DispatchQueue.main.async { giochi = tutti; cercando = false; FMLABCopertine.cerca(tutti) { aggiorna() } }
         }
     }
 }
@@ -673,6 +716,8 @@ final class FMLABGiocoController: UIViewController {
     private let avviso = UILabel()
     private var osservatori: [NSObjectProtocol] = []
     private var accessoCartella = false
+    private var scambiati = false            // DS: schermo di sotto sopra (o a sinistra)
+    private var tenuto: FMLABTasto?          // "tieni premuto": un tasto sempre giù (es. correre)
     deinit { osservatori.forEach { NotificationCenter.default.removeObserver($0) } }
 
     init(gioco: FMLABGioco, chiudi: @escaping () -> Void) { self.gioco = gioco; self.chiudi = chiudi; super.init(nibName: nil, bundle: nil); modalPresentationStyle = .fullScreen }
@@ -692,7 +737,10 @@ final class FMLABGiocoController: UIViewController {
             emulatore = e
             view.addSubview(e.vista)
             pad.disposizione = e.disposizione
-            pad.tasto = { [weak e] t, giu in e?.tasto(t, premuto: giu) }
+            pad.tasto = { [weak e, weak self] t, giu in
+                if !giu, t == self?.tenuto { return }   // il tasto "tenuto" resta giù anche se lo tocchi
+                e?.tasto(t, premuto: giu)
+            }
         } catch {
             avviso.text = error.localizedDescription
         }
@@ -717,6 +765,7 @@ final class FMLABGiocoController: UIViewController {
         guard let e = emulatore else { apriMenu(); return }
         let riprendi = UserDefaults.standard.object(forKey: "FMLAB.riprendi") as? Bool ?? true
         e.salvaUscita = riprendi
+        e.velocita = UserDefaults.standard.object(forKey: "FMLAB.veloce.velocita") as? Double ?? 3
         guard riprendi, e.statoAutomaticoEsiste else { e.avvia(); return }
         let m = UIAlertController(title: gioco.nome, message: LF("Continue where you left off?"), preferredStyle: .alert)
         m.addAction(UIAlertAction(title: LF("Continue"), style: .default) { _ in e.avvia(); e.caricaAutomatico { _ in } })
@@ -734,7 +783,10 @@ final class FMLABGiocoController: UIViewController {
         let r = max(0.3, emulatore?.rapporto ?? 4.0 / 3.0)
         avviso.frame = s.insetBy(dx: 24, dy: 80)
         // Nintendo DS: in verticale gli schermi uno sopra l'altro, in orizzontale affiancati (molto più grandi)
-        if emulatore?.tocco == true { emulatore?.opzione("desmume_screens_layout", valore: b.height >= b.width ? "top/bottom" : "left/right") }
+        if emulatore?.tocco == true {
+            let v = b.height >= b.width
+            emulatore?.opzione("desmume_screens_layout", valore: v ? (scambiati ? "bottom/top" : "top/bottom") : (scambiati ? "right/left" : "left/right"))
+        }
         if b.height >= b.width {
             // verticale: gioco in alto, comandi sotto (come una console portatile)
             var w = s.width, h = w / r
@@ -766,16 +818,17 @@ final class FMLABGiocoController: UIViewController {
         let m = UIAlertController(title: gioco.nome, message: e == nil ? avviso.text : nil, preferredStyle: .actionSheet)
         if let e {
             m.addAction(UIAlertAction(title: LF("Resume"), style: .default) { _ in e.inPausa = false })
-            m.addAction(UIAlertAction(title: LF("Save State"), style: .default) { [weak self] _ in
-                e.inPausa = false
-                e.salvaStato { err in self?.mostra(err?.localizedDescription ?? LF("State saved")) }
-            })
-            let carica = UIAlertAction(title: LF("Load State"), style: .default) { [weak self] _ in
-                e.inPausa = false
-                e.caricaStato { err in self?.mostra(err?.localizedDescription ?? LF("State loaded")) }
-            }
-            carica.isEnabled = e.statoEsiste
+            m.addAction(UIAlertAction(title: LF("Save State…"), style: .default) { [weak self] _ in self?.scegliPosto(salva: true) })
+            let carica = UIAlertAction(title: LF("Load State…"), style: .default) { [weak self] _ in self?.scegliPosto(salva: false) }
+            carica.isEnabled = (1...3).contains { e.dataStato($0) != nil }
             m.addAction(carica)
+            m.addAction(UIAlertAction(title: LF("Take Screenshot"), style: .default) { [weak self] _ in e.inPausa = false; self?.fotografa() })
+            m.addAction(UIAlertAction(title: tenuto == nil ? LF("Hold a Button…") : String(format: LF("Release %@"), nomeTasto(tenuto!)), style: .default) { [weak self] _ in self?.scegliTenuto() })
+            if e.tocco {
+                m.addAction(UIAlertAction(title: LF("Swap Screens"), style: .default) { [weak self] _ in
+                    guard let self else { return }; e.inPausa = false; self.scambiati.toggle(); self.view.setNeedsLayout()
+                })
+            }
         }
         if e == nil {
             m.addAction(UIAlertAction(title: LF("Copy Report"), style: .default) { [weak self] _ in
@@ -791,6 +844,57 @@ final class FMLABGiocoController: UIViewController {
         m.popoverPresentationController?.sourceRect = CGRect(x: pad.bounds.midX, y: pad.bounds.midY, width: 1, height: 1)
         present(m, animated: true)
     }
+    private func nomeTasto(_ t: FMLABTasto) -> String {
+        switch t { case .a: return "A"; case .b: return "B"; case .x: return "X"; case .y: return "Y"; case .l: return "L"; case .r: return "R"; default: return "?" }
+    }
+    private func scegliPosto(salva: Bool) {
+        guard let e = emulatore else { return }
+        let f = DateFormatter(); f.dateStyle = .short; f.timeStyle = .short
+        let m = UIAlertController(title: LF(salva ? "Save State" : "Load State"), message: nil, preferredStyle: .actionSheet)
+        for posto in 1...3 {
+            let quando = e.dataStato(posto).map { f.string(from: $0) }
+            let titolo = String(format: LF("Slot %ld"), posto) + " · " + (quando ?? LF("empty"))
+            let a = UIAlertAction(title: titolo, style: .default) { [weak self] _ in
+                e.inPausa = false
+                if salva { e.salvaStato(posto: posto) { err in self?.mostra(err?.localizedDescription ?? String(format: LF("Saved in slot %ld"), posto)) } }
+                else { e.caricaStato(posto: posto) { err in self?.mostra(err?.localizedDescription ?? LF("State loaded")) } }
+            }
+            if let foto = e.fotoStato(posto) { a.setValue(foto.preparingThumbnail(of: CGSize(width: 64, height: 48))?.withRenderingMode(.alwaysOriginal), forKey: "image") }
+            a.isEnabled = salva || quando != nil
+            m.addAction(a)
+        }
+        m.addAction(UIAlertAction(title: LF("Cancel"), style: .cancel) { _ in e.inPausa = false })
+        m.popoverPresentationController?.sourceView = pad
+        m.popoverPresentationController?.sourceRect = CGRect(x: pad.bounds.midX, y: pad.bounds.midY, width: 1, height: 1)
+        present(m, animated: true)
+    }
+    private func fotografa() {
+        guard let foto = emulatore?.fotografia(), let png = foto.pngData() else { return }
+        let cartella = FMLABEmulatore.cartellaGiochi().appendingPathComponent("Foto", isDirectory: true)
+        try? FileManager.default.createDirectory(at: cartella, withIntermediateDirectories: true)
+        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd HH.mm.ss"
+        let file = cartella.appendingPathComponent("\(gioco.nome) \(f.string(from: Date())).png")
+        do { try png.write(to: file); mostra(LF("Screenshot saved in Giochi › Foto")) } catch { mostra(error.localizedDescription) }
+    }
+    private func scegliTenuto() {
+        guard let e = emulatore else { return }
+        if let t = tenuto { e.tasto(t, premuto: false); tenuto = nil; e.inPausa = false; mostra(LF("Button released")); return }
+        let m = UIAlertController(title: LF("Hold a Button"), message: LF("The button stays pressed until you release it from the menu (e.g. run in platform games)."), preferredStyle: .actionSheet)
+        var tasti: [FMLABTasto] = [.a, .b]
+        if e.disposizione >= 2 { tasti += [.x, .y] }
+        if e.disposizione >= 1 { tasti += [.l, .r] }
+        for t in tasti {
+            m.addAction(UIAlertAction(title: nomeTasto(t), style: .default) { [weak self] _ in
+                self?.tenuto = t; e.tasto(t, premuto: true); e.inPausa = false
+                self?.mostra(String(format: LF("%@ held down"), self?.nomeTasto(t) ?? ""))
+            })
+        }
+        m.addAction(UIAlertAction(title: LF("Cancel"), style: .cancel) { _ in e.inPausa = false })
+        m.popoverPresentationController?.sourceView = pad
+        m.popoverPresentationController?.sourceRect = CGRect(x: pad.bounds.midX, y: pad.bounds.midY, width: 1, height: 1)
+        present(m, animated: true)
+    }
+
     /// Quello che serve per capire perché un gioco non parte (niente percorsi personali, solo nome ed estensione).
     private func rapporto() -> String {
         let info = Bundle.main.infoDictionary

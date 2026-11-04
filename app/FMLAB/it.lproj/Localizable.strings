@@ -34,6 +34,7 @@
 "%@ deleted from LinuxRunner's files. Freed %lf." = "%@ eliminata dai file di LinuxRunner. Liberati %lf.";
 "%@ deleted from LinuxRunner's files. Freed %lld." = "%@ eliminata dai file di LinuxRunner. Liberati %lld.";
 "%@ deleted. Space is freed; it disappears from the list for good after reopening the app." = "%@ eliminata. Lo spazio è libero; sparisce del tutto dall'elenco dopo aver riaperto l'app.";
+"%@ held down" = "%@ tenuto premuto";
 "%@ installed" = "%@ installato";
 "%@ is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%@ è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%@ is now in FMLAB Linux. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%@ è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
@@ -83,6 +84,7 @@
 "%lf deleted from LinuxRunner's files. Freed %lf." = "%lf eliminata dai file di LinuxRunner. Liberati %lf.";
 "%lf deleted from LinuxRunner's files. Freed %lld." = "%lf eliminata dai file di LinuxRunner. Liberati %lld.";
 "%lf deleted. Space is freed; it disappears from the list for good after reopening the app." = "%lf eliminata. Lo spazio è libero; sparisce del tutto dall'elenco dopo aver riaperto l'app.";
+"%lf held down" = "%lf tenuto premuto";
 "%lf installed" = "%lf installato";
 "%lf is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lf è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%lf is now in FMLAB Linux. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lf è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
@@ -131,6 +133,7 @@
 "%lld deleted from LinuxRunner's files. Freed %lf." = "%lld eliminata dai file di LinuxRunner. Liberati %lf.";
 "%lld deleted from LinuxRunner's files. Freed %lld." = "%lld eliminata dai file di LinuxRunner. Liberati %lld.";
 "%lld deleted. Space is freed; it disappears from the list for good after reopening the app." = "%lld eliminata. Lo spazio è libero; sparisce del tutto dall'elenco dopo aver riaperto l'app.";
+"%lld held down" = "%lld tenuto premuto";
 "%lld installed" = "%lld installato";
 "%lld is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lld è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%lld is now in FMLAB Linux. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lld è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
@@ -244,6 +247,7 @@
 "Attach with StikDebug" = "Aggancia con StikDebug";
 "Audio" = "Audio";
 "Automatic" = "Automatica";
+"Automatic Covers" = "Copertine automatiche";
 "Automatic uses software rendering until Metal is validated on iPhone" = "Automatico usa il disegno software finché Metal non è provato sull'iPhone";
 "Automatic uses the mouse pointer behaviour when a mouse, trackpad or AssistiveTouch is active: a click presses the Linux button at the pointer, holding and dragging works, double-click works. Touch Gestures keeps tap = click, long press = right click." = "Automatica usa il puntatore quando c'è un mouse, un trackpad o AssistiveTouch: il clic preme il tasto in Linux dove sta il puntatore, si può tenere premuto e trascinare, il doppio clic funziona. Gesti touch tiene tocco = clic, pressione lunga = tasto destro.";
 "Available" = "Libero";
@@ -260,6 +264,8 @@
 "Boot result: %@" = "Esito dell'avvio: %@";
 "Boot result: %lf" = "Esito dell'avvio: %lf";
 "Boot result: %lld" = "Esito dell'avvio: %lld";
+"Box art from the public libretro-thumbnails collection, found by file name (standard names like \"Super Mario World (USA)\")." = "Copertine dalla raccolta pubblica libretro-thumbnails, cercate col nome del file (nomi standard come \"Super Mario World (USA)\").";
+"Button released" = "Tasto lasciato";
 "CPU" = "CPU";
 "CPU (100% = 1 core)" = "CPU (100% = 1 core)";
 "CPU now" = "CPU adesso";
@@ -299,7 +305,7 @@
 "Choose Games Folder…" = "Scegli la cartella dei giochi…";
 "Choose a single folder name." = "Scegli un solo nome di cartella.";
 "Choose an application first." = "Prima scegli un'applicazione.";
-"Choose the folder where you keep your games (On My iPhone, iCloud Drive, a USB drive…): FMLAB reads them from there and sorts them by console. Or import single files, or put them in Files › FMLAB Linux › Giochi." = "Scegli la cartella dove tieni i tuoi giochi (Sul mio iPhone, iCloud Drive, una chiavetta…): FMLAB li legge da lì e li divide per console. Oppure importa singoli file, o mettili in File › FMLAB Linux › Giochi.";
+"Choose the folder where you keep your games (On My iPhone, iCloud Drive, a USB drive…): FMLAB reads them from there and sorts them by console. Or import single files, or put them in Files › FMLAB Linux › Giochi. Zipped games (.zip, .7z, .rar) work as they are." = "Scegli la cartella dove tieni i tuoi giochi (Sul mio iPhone, iCloud Drive, una chiavetta…): FMLAB li legge da lì e li divide per console. Oppure importa singoli file, o mettili in File › FMLAB Linux › Giochi. I giochi zippati (.zip, .7z, .rar) vanno bene così.";
 "Classic" = "Classico";
 "Clean Temporary Files" = "Pulisci file temporanei";
 "Clean Up" = "Pulisci";
@@ -557,6 +563,7 @@
 "Failed: %lld. Close LinuxRunner and try again." = "Non riuscito: %lld. Chiudi LinuxRunner e riprova.";
 "Fair" = "Tiepido";
 "Fast Forward" = "Avanti veloce";
+"Fast Forward Speed" = "Velocità dell'avanti veloce";
 "File Sharing" = "Condivisione file";
 "Files" = "File";
 "Files & Devices" = "File e dispositivi";
@@ -606,6 +613,7 @@
 "Game Emulator" = "Game Emulator";
 "Game Emulator · FMLAB" = "Game Emulator · FMLAB";
 "Game Folders" = "Cartelle dei giochi";
+"Games" = "Giochi";
 "Games Only" = "Solo giochi";
 "General" = "Generali";
 "Graphics" = "Grafica";
@@ -615,6 +623,8 @@
 "Guest: ARM64 · " = "Linux: ARM64 · ";
 "Hide Details" = "Nascondi dettagli";
 "Hide Extra Keys with Hardware Keyboard" = "Nascondi i tasti extra con la tastiera fisica";
+"Hold a Button" = "Tieni premuto un tasto";
+"Hold a Button…" = "Tieni premuto un tasto…";
 "Home" = "Home";
 "Home: %@" = "Home: %@";
 "Home: %lf" = "Home: %lf";
@@ -818,6 +828,7 @@
 "Live input sources of the open desktop. Open the desktop, use the mouse, return here (or export the Open Desktop report) to see which events iOS delivered." = "Comandi in arrivo al desktop aperto. Apri il desktop, usa il mouse e torna qui (o esporta il rapporto di apertura del desktop) per vedere quali eventi ha passato iOS.";
 "Live logs" = "Registro dal vivo";
 "Load State" = "Carica stato";
+"Load State…" = "Carica stato…";
 "Local Linux ARM64 userspace for iPhone." = "Linux ARM64 locale per iPhone.";
 "Log test keystrokes (includes typed text)" = "Registra i tasti di prova (anche il testo scritto)";
 "Logging" = "Registro";
@@ -905,6 +916,9 @@
 "Not a supported game file (unzip it first): %@" = "File di gioco non supportato (prima decomprimilo): %@";
 "Not a supported game file (unzip it first): %lf" = "File di gioco non supportato (prima decomprimilo): %lf";
 "Not a supported game file (unzip it first): %lld" = "File di gioco non supportato (prima decomprimilo): %lld";
+"Not a supported game file: %@" = "File di gioco non supportato: %@";
+"Not a supported game file: %lf" = "File di gioco non supportato: %lf";
+"Not a supported game file: %lld" = "File di gioco non supportato: %lld";
 "Not available" = "Non disponibile";
 "Not available on Debian" = "Non disponibile su Debian";
 "Not available yet: Linux programs cannot record from the iPhone microphone in this version." = "Non ancora disponibile: in questa versione i programmi Linux non possono registrare dal microfono dell'iPhone.";
@@ -937,6 +951,9 @@
 "Open in" = "Apri in";
 "OpenGL Processes" = "Processi OpenGL";
 "Openbox window manager, panel and file manager: the lightest and most tested desktop." = "Gestore finestre Openbox, pannello e gestore file: il desktop più leggero e più provato.";
+"Opening the archive of %@…" = "Apro l'archivio di %@…";
+"Opening the archive of %lf…" = "Apro l'archivio di %lf…";
+"Opening the archive of %lld…" = "Apro l'archivio di %lld…";
 "Operation running or interrupted; inspect terminal / Diagnose Package State." = "Operazione in corso o interrotta; guarda il terminale / Diagnosi stato pacchetti.";
 "Operations use this running environment's real package manager." = "Le operazioni usano il vero gestore pacchetti di questo ambiente in funzione.";
 "Option Sends Escape" = "Option manda Esc";
@@ -1019,6 +1036,9 @@
 "Refresh Distributions" = "Aggiorna distribuzioni";
 "Refresh Repository Indexes" = "Aggiorna gli indici dei pacchetti";
 "Refresh the account list first." = "Prima aggiorna l'elenco degli account.";
+"Release %@" = "Lascia %@";
+"Release %lf" = "Lascia %lf";
+"Release %lld" = "Lascia %lld";
 "Remove" = "Togli";
 "Remove %@ and keep its home?" = "Rimuovere %@ e tenere la sua cartella Home?";
 "Remove %lf and keep its home?" = "Rimuovere %lf e tenere la sua cartella Home?";
@@ -1086,10 +1106,13 @@
 "Save" = "Salva";
 "Save Launcher" = "Salva avviatore";
 "Save State" = "Salva stato";
+"Save State…" = "Salva stato…";
 "Save documents first. This closes applications in this desktop. Linux files and other terminal sessions are retained." = "Salva prima i documenti. Si chiudono le applicazioni di questo desktop. I file di Linux e le altre sessioni del terminale restano.";
 "Save documents first. This closes applications owned by the desktop; persistent files and the terminal environment remain." = "Salva prima i documenti. Si chiudono le applicazioni del desktop; i file salvati e l'ambiente del terminale restano.";
 "Save to Files…" = "Salva in File…";
 "Saved Linux applications" = "Applicazioni Linux salvate";
+"Saved in slot %ld" = "Salvato nel posto %ld";
+"Screenshot saved in Giochi › Foto" = "Foto salvata in Giochi › Foto";
 "Scrolling sensitivity" = "Sensibilità dello scorrimento";
 "Scrolling sensitivity: %.2g×" = "Sensibilità dello scorrimento: %.2g×";
 "Search" = "Cerca";
@@ -1132,6 +1155,7 @@
 "Show Details" = "Mostra dettagli";
 "Shows the Linux desktop in a separate connected-display window. Keyboard, mouse and touch input stay on this device. Closing the viewer keeps output running while LinuxRunner stays in the foreground. Disconnecting returns control to this device; it does not stop Linux." = "Mostra il desktop Linux su uno schermo collegato. Tastiera, mouse e tocco restano su questo telefono. Chiudendo il visore l'uscita continua finché FMLAB Linux resta davanti. Scollegando, i comandi tornano al telefono; Linux non si ferma.";
 "Slide to move, tap to click, hold and slide to drag; two fingers scroll or tap for right click in touchpad mode. Clipboard text is sent only when requested." = "Scorri per muovere, tocca per cliccare, tieni premuto e scorri per trascinare; con due dita scorri o tocchi per il tasto destro in modalità touchpad. Il testo copiato si manda solo quando lo chiedi.";
+"Slot %ld" = "Posto %ld";
 "Small" = "Piccoli";
 "Software" = "Software";
 "Software (Mesa)" = "Software (Mesa)";
@@ -1186,6 +1210,7 @@
 "Storage Management" = "Gestione spazio";
 "Support installation failed or was interrupted. Open GUI Logs for the exact package/compiler failure, then retry installation." = "Installazione non riuscita o interrotta. Apri Registri grafica per l'errore preciso, poi riprova.";
 "Support installation verified. You can launch the Linux applications." = "Installazione verificata. Puoi avviare le applicazioni Linux.";
+"Swap Screens" = "Scambia schermi";
 "Syscall number (optional)" = "Numero della syscall (facoltativo)";
 "System" = "Sistema";
 "System accounts and the default login cannot be removed. Select a different default login first." = "Gli account di sistema e l'accesso predefinito non si possono togliere. Prima scegli un altro accesso predefinito.";
@@ -1195,6 +1220,7 @@
 "Take %@ from LinuxRunner?" = "Prendere %@ da LinuxRunner?";
 "Take %lf from LinuxRunner?" = "Prendere %lf da LinuxRunner?";
 "Take %lld from LinuxRunner?" = "Prendere %lld da LinuxRunner?";
+"Take Screenshot" = "Fai una foto";
 "Take Settings from LinuxRunner" = "Prendi le impostazioni di LinuxRunner";
 "Takes effect after LinuxRunner restarts." = "Vale dopo aver riaperto FMLAB Linux.";
 "Tap Retry; Details shows the installer log." = "Tocca Riprova; Dettagli mostra il registro dell'installazione.";
@@ -1217,6 +1243,9 @@
 "The account tools were reported installed but are missing. Export the Open Desktop Report and try again." = "Gli strumenti per gli account risultano installati ma mancano. Esporta il rapporto di apertura del desktop e riprova.";
 "The account was created but its password could not be set. Set it in Linux Users." = "L'account è stato creato ma la password no. Impostala in Utenti Linux.";
 "The app shared folder will be created on first access." = "La cartella condivisa dell'app viene creata al primo accesso.";
+"The archive could not be extracted (damaged or protected by a password)." = "Non è stato possibile estrarre l'archivio (rovinato o protetto da password).";
+"The archive could not be opened." = "Non è stato possibile aprire l'archivio.";
+"The button stays pressed until you release it from the menu (e.g. run in platform games)." = "Il tasto resta premuto finché non lo lasci dal menu (es. per correre nei giochi di piattaforme).";
 "The check inside Linux did not finish. Tap Retry; if it repeats, Details shows the startup log." = "Il controllo dentro Linux non è finito. Tocca Riprova; se si ripete, Dettagli mostra il registro d'avvio.";
 "The clipboard contains no text." = "Negli appunti non c'è testo.";
 "The command and arguments exceed the 4 KiB launch limit." = "Comando e argomenti superano il limite di 4 KiB.";
@@ -1267,6 +1296,7 @@
 "The source changed during copying. Close its editor and retry." = "L'originale è cambiato durante la copia. Chiudi il programma che lo modifica e riprova.";
 "The terminal's key bar provides Esc, Tab, Ctrl, Alt and arrow keys on screen. Changes apply to open terminals." = "La barra dei tasti del terminale ha Esc, Tab, Ctrl, Alt e le frecce sullo schermo. Le modifiche valgono anche per i terminali aperti.";
 "The verified rootfs could not be imported." = "Non è stato possibile importare i file di sistema verificati.";
+"There is no game this emulator can open inside the archive." = "Nell'archivio non c'è un gioco che questo emulatore può aprire.";
 "There is not enough free storage on this iPhone. Free some space and try again." = "Non c'è abbastanza spazio libero sull'iPhone. Libera un po' di spazio e riprova.";
 "These Arch repositories do not provide the Plasma X11 session required by LinuxRunner. Choose LinuxRunner Desktop. Wayland is not supported." = "Questi repository di Arch non hanno la sessione Plasma X11 che serve a FMLAB Linux. Scegli il Desktop LinuxRunner. Wayland non è supportato.";
 "These are real host addresses, shared with iOS and other apps; LinuxRunner has no separate network namespace. Review addresses before sharing a screenshot. No network requests are sent by this screen." = "Sono gli indirizzi veri del telefono, condivisi con iOS e le altre app; FMLAB Linux non ha una rete separata. Controllali prima di condividere uno screenshot. Questa schermata non manda richieste in rete.";
@@ -1407,6 +1437,7 @@
 "You already have these distributions in LinuxRunner. Take them here without reinstalling anything (close LinuxRunner first)." = "Hai già queste distribuzioni in LinuxRunner. Prendile qui senza reinstallare niente (chiudi prima LinuxRunner).";
 "You stay on this distribution: the change you chose is cancelled." = "Resti su questa distribuzione: il cambio che avevi scelto viene annullato.";
 "Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched). DS games show their own icon; for the others put a picture with the same name next to the game (e.g. Zelda.png beside Zelda.sfc) or in Giochi/Copertine." = "Le tue cartelle restano dove sono: FMLAB le legge e basta. Scorri a sinistra per togliere una cartella dall'elenco (i file non vengono toccati). I giochi DS mostrano la loro icona; per gli altri metti un'immagine con lo stesso nome accanto al gioco (es. Zelda.png vicino a Zelda.sfc) o in Giochi/Copertine.";
+"empty" = "vuoto";
 "iOS 26 and later: StikDebug attaches with its universal script; return here and LinuxRunner prepares its code region while it is attached. Support on iOS 26 has not been verified on a device yet." = "iOS 26 e successivi: StikDebug si collega con il suo script universale; torna qui e FMLAB Linux prepara la sua zona di codice mentre è collegato. Su iOS 26 non è ancora stato provato su un dispositivo.";
 "iOS Files: On My iPhone/iPad → LinuxRunner → Shared → " = "App File: Sul mio iPhone/iPad → FMLAB Linux → Shared → ";
 "iOS Network Path" = "Rete di iOS";

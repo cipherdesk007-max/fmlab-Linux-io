@@ -14,6 +14,9 @@
 #include <stdatomic.h>
 #include <os/lock.h>
 #include "libretro.h"
+#include <archive.h>
+#include <archive_entry.h>
+#include <CommonCrypto/CommonDigest.h>
 
 #pragma mark - Core disponibili
 
@@ -66,6 +69,8 @@ static _Atomic int G_px, G_py, G_ptocco;
 static struct retro_system_av_info G_av;
 static BOOL G_avCambiato;
 static _Atomic bool G_varNuove;   // un'opzione è cambiata mentre il gioco gira
+static retro_audio_buffer_status_t G_statoAudio;   // il core vuole sapere quanto suono c'è in coda (salto fotogrammi automatico)
+static _Atomic uint32_t G_vibra;                    // ultima forza di vibrazione chiesta dal core (0-65535)
 
 // immagine: l'ultima schermata in BGRX 32 bit, presa dalla vista a ogni giro dello schermo
 static os_unfair_lock G_lockImmagine = OS_UNFAIR_LOCK_INIT;
@@ -75,6 +80,11 @@ static uint32_t *G_pixel; static unsigned G_w, G_h; static size_t G_cap; static 
 #define FMLAB_ANELLO (1 << 15)
 static int16_t G_anello[FMLAB_ANELLO * 2];
 static _Atomic uint32_t G_scrivi, G_leggi;
+
+static bool fmlabVibra(unsigned port, enum retro_rumble_effect effetto, uint16_t forza) {
+    if (port == 0) atomic_store(&G_vibra, forza);
+    return true;
+}
 
 static void fmlabLog(enum retro_log_level level, const char *fmt, ...) {
     if (level < RETRO_LOG_WARN) return;
@@ -127,6 +137,11 @@ static bool fmlabAmbiente(unsigned cmd, void *data) {
         case RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME & ~RETRO_ENVIRONMENT_EXPERIMENTAL:
         case RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE & ~RETRO_ENVIRONMENT_EXPERIMENTAL:
             return true;
+        case RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK & ~RETRO_ENVIRONMENT_EXPERIMENTAL: {
+            const struct retro_audio_buffer_status_callback *c = data; G_statoAudio = c ? c->callback : NULL; return true;
+        }
+        case RETRO_ENVIRONMENT_GET_RUMBLE_INTERFACE & ~RETRO_ENVIRONMENT_EXPERIMENTAL:
+            ((struct retro_rumble_interface *)data)->set_rumble_state = fmlabVibra; return true;
         case RETRO_ENVIRONMENT_SET_MESSAGE & ~RETRO_ENVIRONMENT_EXPERIMENTAL: {
             const struct retro_message *m = data; if (m && m->msg) NSLog(@"[FMLAB Emulatore] %s", m->msg); return true;
         }
@@ -293,6 +308,68 @@ static __weak FMLABEmulatore *G_attivo;
     @synchronized (self) { G_estensioni = est; G_opzioniCore = opz; G_tuttiCore = nil; }
 }
 
+static NSError *fmlabErrore(NSString *messaggio);
+static BOOL fmlabArchivio(struct archive *a) {
+    archive_read_support_filter_all(a);
+    archive_read_support_format_zip(a); archive_read_support_format_7zip(a);
+    archive_read_support_format_rar(a); archive_read_support_format_rar5(a);
+    return YES;
+}
++ (FMLABCore *)coreDentroArchivio:(NSString *)archivio {
+    struct archive *a = archive_read_new(); fmlabArchivio(a);
+    FMLABCore *trovato = nil;
+    if (archive_read_open_filename(a, archivio.fileSystemRepresentation, 1 << 16) == ARCHIVE_OK) {
+        struct archive_entry *e; int giri = 0;
+        while (!trovato && giri++ < 64 && archive_read_next_header(a, &e) == ARCHIVE_OK) {
+            const char *n = archive_entry_pathname(e); if (!n || archive_entry_filetype(e) != AE_IFREG) continue;
+            NSString *nome = @(n).lastPathComponent; if ([nome hasPrefix:@"."]) continue;
+            trovato = [self corePer:nome];
+            if ([nome.pathExtension.lowercaseString isEqual:@"bin"]) trovato = nil;   // da solo non basta: serve il .cue
+        }
+    }
+    archive_read_free(a);
+    return trovato;
+}
++ (NSString *)preparaArchivio:(NSString *)archivio error:(NSError **)error {
+    NSDictionary *at = [NSFileManager.defaultManager attributesOfItemAtPath:archivio error:nil];
+    // cartella nella cache: nome + dimensione + data (se il file cambia si estrae di nuovo)
+    NSString *chiave = [NSString stringWithFormat:@"%@|%@|%@", archivio.lastPathComponent, at[NSFileSize], at[NSFileModificationDate]];
+    unsigned char h[CC_SHA256_DIGEST_LENGTH]; NSData *d = [chiave dataUsingEncoding:NSUTF8StringEncoding]; CC_SHA256(d.bytes, (CC_LONG)d.length, h);
+    NSMutableString *sigla = [NSMutableString string]; for (int i = 0; i < 8; i++) [sigla appendFormat:@"%02x", h[i]];
+    NSURL *cache = [[NSFileManager.defaultManager URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask].firstObject URLByAppendingPathComponent:@"FMLAB-Giochi" isDirectory:YES];
+    NSURL *dest = [cache URLByAppendingPathComponent:sigla isDirectory:YES];
+    NSURL *fatto = [dest URLByAppendingPathComponent:@".pronto"];
+    if (![NSFileManager.defaultManager fileExistsAtPath:fatto.path]) {
+        [NSFileManager.defaultManager removeItemAtURL:cache error:nil];   // si tiene solo l'ultimo gioco estratto: niente spazio sprecato
+        [NSFileManager.defaultManager createDirectoryAtURL:dest withIntermediateDirectories:YES attributes:nil error:nil];
+        struct archive *a = archive_read_new(); fmlabArchivio(a);
+        if (archive_read_open_filename(a, archivio.fileSystemRepresentation, 1 << 16) != ARCHIVE_OK) {
+            archive_read_free(a); if (error) *error = fmlabErrore(@"The archive could not be opened."); return nil;
+        }
+        struct archive_entry *e; int r = ARCHIVE_OK; char buf[1 << 16];
+        while ((r = archive_read_next_header(a, &e)) == ARCHIVE_OK) {
+            const char *n = archive_entry_pathname(e);
+            if (!n || archive_entry_filetype(e) != AE_IFREG) continue;
+            NSString *nome = @(n).lastPathComponent;   // solo il nome: niente cartelle, niente "../"
+            if (nome.length == 0 || [nome hasPrefix:@"."]) continue;
+            FILE *f = fopen([dest URLByAppendingPathComponent:nome].fileSystemRepresentation, "wb"); if (!f) { r = ARCHIVE_FATAL; break; }
+            la_ssize_t k; while ((k = archive_read_data(a, buf, sizeof buf)) > 0) fwrite(buf, 1, (size_t)k, f);
+            fclose(f); if (k < 0) { r = ARCHIVE_FATAL; break; }
+        }
+        archive_read_free(a);
+        if (r != ARCHIVE_EOF) { [NSFileManager.defaultManager removeItemAtURL:dest error:nil]; if (error) *error = fmlabErrore(@"The archive could not be extracted (damaged or protected by a password)."); return nil; }
+        [@"" writeToURL:fatto atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    }
+    // il file da aprire: prima .cue/.m3u (dischi), poi il primo che un emulatore riconosce
+    NSArray *files = [[NSFileManager.defaultManager contentsOfDirectoryAtPath:dest.path error:nil] sortedArrayUsingSelector:@selector(compare:)];
+    for (NSArray *preferite in @[@[@"m3u", @"cue"], @[]]) for (NSString *n in files) {
+        NSString *e = n.pathExtension.lowercaseString; if ([n hasPrefix:@"."]) continue;
+        if (preferite.count ? [preferite containsObject:e] : ([self corePer:n] && ![e isEqual:@"bin"])) return [dest URLByAppendingPathComponent:n].path;
+    }
+    if (error) *error = fmlabErrore(@"There is no game this emulator can open inside the archive.");
+    return nil;
+}
+
 + (NSArray<FMLABCore *> *)core {
     @synchronized (self) {
     if (G_tuttiCore) return G_tuttiCore;
@@ -350,7 +427,7 @@ static NSError *fmlabErrore(NSString *messaggio) {
     strlcpy(G_salvataggi, FMLABEmulatore.cartellaSalvataggi.fileSystemRepresentation, sizeof G_salvataggi);
     G_opzioni = [FMLABOpzioniFisse(core.nome) mutableCopy];
     _salvaUscita = YES;
-    G_formato = RETRO_PIXEL_FORMAT_0RGB1555;
+    G_formato = RETRO_PIXEL_FORMAT_0RGB1555; G_statoAudio = NULL; atomic_store(&G_vibra, 0);
     atomic_store(&G_tasti, 0); atomic_store(&G_tastiController, 0); atomic_store(&G_ptocco, 0);
     atomic_store(&G_scrivi, 0); atomic_store(&G_leggi, 0);
     os_unfair_lock_lock(&G_lockImmagine); G_nuova = NO; G_w = G_h = 0; os_unfair_lock_unlock(&G_lockImmagine);
@@ -505,12 +582,28 @@ static uint32_t fmlabTastiera(void) {
         for (GCController *c in GCController.controllers) pad |= fmlabPad(c.extendedGamepad);
         pad |= fmlabTastiera();
         atomic_store(&G_tastiController, pad);
+        uint32_t inCoda = atomic_load(&G_scrivi) - atomic_load(&G_leggi);
+        double hz = G_av.timing.sample_rate > 1000 ? G_av.timing.sample_rate : 44100;
+        if (G_statoAudio) {   // 100% = 0,1 s di suono pronto; sotto il 25% il core può saltare un fotogramma
+            unsigned occ = (unsigned)MIN(100.0, inCoda / (hz * 0.1) * 100.0);
+            G_statoAudio(true, occ, occ < 25);
+        }
         @autoreleasepool { F.run(); }
+        uint32_t forza = atomic_exchange(&G_vibra, 0);
+        NSUserDefaults *preferenze = NSUserDefaults.standardUserDefaults;
+        if (forza > 8000 && ([preferenze objectForKey:@"FMLAB.comandi.vibra"] ? [preferenze boolForKey:@"FMLAB.comandi.vibra"] : YES)) {
+            static uint64_t ultima; uint64_t ora = mach_absolute_time();
+            if ((ora - ultima) * secondi > 0.12) { ultima = ora;
+                CGFloat i = MIN(1.0, forza / 65535.0);
+                dispatch_async(dispatch_get_main_queue(), ^{ UIImpactFeedbackGenerator *g = [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleHeavy]; [g impactOccurredWithIntensity:i]; });
+            }
+        }
         if (G_avCambiato) { G_avCambiato = NO; periodo = 1.0 / self.fps; }
         // se il suono è molto avanti, si aspetta un po' di più (resta in pari con l'audio)
+        // ritmo legato al suono: troppo avanti si aspetta un po' di più, quasi vuoto si va un filo più svelti
         uint32_t coda = atomic_load(&G_scrivi) - atomic_load(&G_leggi);
-        double extra = coda > (uint32_t)(G_av.timing.sample_rate * 0.15) ? periodo * 0.5 : 0;
-        if (self.veloce) extra = -periodo * 2.0 / 3.0;   // avanti veloce: circa 3 volte (il suono in più si scarta)
+        double extra = coda > (uint32_t)(hz * 0.15) ? periodo * 0.5 : coda < (uint32_t)(hz * 0.03) ? -periodo * 0.05 : 0;
+        if (self.veloce) { double v = self.velocita >= 1.5 ? MIN(self.velocita, 8) : 3; extra = -periodo * (1 - 1 / v); }   // avanti veloce (il suono in più si scarta)
         prossimo += (uint64_t)((periodo + extra) / secondi);
         uint64_t ora = mach_absolute_time();
         if (ora < prossimo) mach_wait_until(prossimo);
@@ -550,6 +643,52 @@ static uint32_t fmlabTastiera(void) {
     atomic_store(&G_ptocco, premuto ? 1 : 0);
 }
 
+- (UIImage *)fotografia {
+    os_unfair_lock_lock(&G_lockImmagine);
+    if (!G_pixel || !G_w || !G_h) { os_unfair_lock_unlock(&G_lockImmagine); return nil; }
+    unsigned w = G_w, h = G_h; NSData *copia = [NSData dataWithBytes:G_pixel length:(size_t)w * h * 4];
+    os_unfair_lock_unlock(&G_lockImmagine);
+    CGDataProviderRef dati = CGDataProviderCreateWithCFData((__bridge CFDataRef)copia);
+    CGColorSpaceRef spazio = CGColorSpaceCreateDeviceRGB();
+    CGImageRef img = CGImageCreate(w, h, 8, 32, w * 4, spazio, kCGBitmapByteOrder32Little | kCGImageAlphaNoneSkipFirst, dati, NULL, false, kCGRenderingIntentDefault);
+    // più grande e a pixel netti, come si vede sul telefono (con le proporzioni giuste del gioco)
+    CGFloat r = self.rapporto > 0.1 ? self.rapporto : (CGFloat)w / h, scala = MAX(1, floor(720.0 / h));
+    CGSize misura = CGSizeMake(round(h * scala * r), h * scala);
+    UIGraphicsImageRendererFormat *f = [UIGraphicsImageRendererFormat preferredFormat]; f.scale = 1;
+    UIImage *foto = [[[UIGraphicsImageRenderer alloc] initWithSize:misura format:f] imageWithActions:^(UIGraphicsImageRendererContext *c) {
+        CGContextSetInterpolationQuality(c.CGContext, kCGInterpolationNone);
+        CGContextTranslateCTM(c.CGContext, 0, misura.height); CGContextScaleCTM(c.CGContext, 1, -1);
+        CGContextDrawImage(c.CGContext, CGRectMake(0, 0, misura.width, misura.height), img);
+    }];
+    CGImageRelease(img); CGColorSpaceRelease(spazio); CGDataProviderRelease(dati);
+    return foto;
+}
+- (NSString *)nomePosto:(NSInteger)posto { return posto <= 1 ? @"state" : [NSString stringWithFormat:@"state%ld", (long)posto]; }
+- (void)salvaStato:(NSInteger)posto fatto:(void (^)(NSError *))fatto {
+    UIImage *foto = [self fotografia];
+    [self lavoro:^{
+        size_t n = F.serSize(); NSMutableData *d = [NSMutableData dataWithLength:n];
+        NSError *e = nil;
+        if (!n || !F.ser(d.mutableBytes, n)) e = fmlabErrore(@"This game cannot be saved right now.");
+        else [d writeToURL:[self fileSalvataggio:[self nomePosto:posto]] options:NSDataWritingAtomic error:&e];
+        if (!e && foto) [UIImagePNGRepresentation(foto) writeToURL:[self fileSalvataggio:[[self nomePosto:posto] stringByAppendingString:@".png"]] atomically:YES];
+        [self scriviMemoria];
+        dispatch_async(dispatch_get_main_queue(), ^{ fatto(e); });
+    }];
+}
+- (void)caricaStato:(NSInteger)posto fatto:(void (^)(NSError *))fatto {
+    [self lavoro:^{
+        NSData *d = [NSData dataWithContentsOfURL:[self fileSalvataggio:[self nomePosto:posto]]];
+        NSError *e = (!d || !F.unser(d.bytes, d.length)) ? fmlabErrore(@"The saved state could not be loaded.") : nil;
+        dispatch_async(dispatch_get_main_queue(), ^{ fatto(e); });
+    }];
+}
+- (NSDate *)dataStato:(NSInteger)posto {
+    return [NSFileManager.defaultManager attributesOfItemAtPath:[self fileSalvataggio:[self nomePosto:posto]].path error:nil][NSFileModificationDate];
+}
+- (UIImage *)fotoStato:(NSInteger)posto {
+    return [UIImage imageWithContentsOfFile:[self fileSalvataggio:[[self nomePosto:posto] stringByAppendingString:@".png"]].path];
+}
 - (BOOL)statoAutomaticoEsiste { return [NSFileManager.defaultManager fileExistsAtPath:[self fileSalvataggio:@"auto.state"].path]; }
 - (void)caricaAutomatico:(void (^)(NSError *))fatto {
     [self lavoro:^{

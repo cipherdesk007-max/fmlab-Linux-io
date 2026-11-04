@@ -2,6 +2,23 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.10.0
+- **Scheda Giochi** nella barra in basso (Home · Distribuzioni · Giochi · Sessioni · Impostazioni): il Game Emulator
+  non sta più dentro Distribuzioni. I dati del motore (barra, avviso, controllo) si vedono solo lì dentro; si
+  controllano quando apri la scheda o torni nell'app con la scheda aperta (al massimo ogni 2 minuti).
+- **Giochi zippati** (.zip, .7z, .rar) direttamente: la console si riconosce dai file dentro, si estrae al momento
+  di giocare nella cache dell'app (l'archivio resta com'è; si tiene solo l'ultimo estratto).
+- **Motore**: il suono resta in pari col gioco anche quando è indietro (meno scricchiolii); i core sanno quanto suono
+  è pronto, così PlayStation e GBA possono saltare un fotogramma da soli se il telefono non ce la fa; **vibrazione**
+  nei giochi che la usano (Game Boy con rumble, controller PlayStation).
+- Idee prese da Delta, Manic EMU, Provenance e RetroArch:
+  - **3 posti per gli stati salvati**, ognuno con data e foto della schermata
+  - **Tieni premuto un tasto** (es. correre) finché non lo lasci dal menu
+  - **velocità dell'avanti veloce** 2×, 3× o 4×
+  - **foto della partita** in Giochi › Foto
+  - **copertine automatiche** dalla raccolta pubblica libretro-thumbnails (nomi di file standard), disattivabili
+  - **Scambia schermi** sul DS
+
 ## 0.9.9
 - **Codice FMLAB separato anche nella parte Objective-C**: misura "Telefono", rotazione del desktop, lato della
   fotocamera e margini per RunnerKit in `app/FMLAB/GUIViewController+FMLAB.inc.m`; eliminazione sicura dei file
