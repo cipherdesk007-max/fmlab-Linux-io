@@ -2,6 +2,12 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.8.3
+- **Schermo intero davvero, senza bande nere ai lati**: la schermata che contiene il desktop (SwiftUI) rimetteva la
+  zona sicura dell'iPhone (59 punti a destra e a sinistra), quindi il desktop 1398×644 restava rimpicciolito con
+  bande nere ai lati, sopra e sotto. Ora la zona sicura la decide solo il desktop: in orizzontale a schermo intero
+  riempie tutto l'iPhone, e TouchPad riceve i margini veri di Dynamic Island e angoli.
+
 ## 0.8.2
 - **Corretto (grave)**: nella 0.8.0–0.8.1 il desktop non partiva ("Il desktop non è partito",
   `FMLAB_ROTAZIONE: misura non valida`). Lo script della rotazione, caricato all'avvio della sessione, leggeva i

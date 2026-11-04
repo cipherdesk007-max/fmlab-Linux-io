@@ -4,7 +4,7 @@ Linux vero sull'iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), versione FMLA
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. Niente jailbreak, niente macchina virtuale:
 i programmi Linux ARM64 girano dentro l'app grazie a un interprete e a uno strato che traduce le chiamate di sistema.
 
-> **Stato: 0.8.2.** È LinuxRunner 1.1.0 (build 900) con nome, logo e colori FMLAB (rosso e nero), identificativo
+> **Stato: 0.8.3.** È LinuxRunner 1.1.0 (build 900) con nome, logo e colori FMLAB (rosso e nero), identificativo
 > proprio (`dev.fmlab.linux`, si installa **accanto** a LinuxRunner senza toccarne i dati), aggiornamenti dall'app
 > come FMLAB Cleaner e avviso quando esce un LinuxRunner originale più nuovo. Le altre migliorie arrivano una alla
 > volta, ognuna misurata contro l'originale.
@@ -14,6 +14,10 @@ i programmi Linux ARM64 girano dentro l'app grazie a un interprete e a uno strat
 Foto vere dal telefono (iPhone 15 Pro Max). Le schermate dell'app nel simulatore iPhone, in italiano, si
 aggiornano da sole a ogni versione in [docs/screenshots/ultima-versione](docs/screenshots/ultima-versione).
 
+<p align="center">
+  <img src="docs/images/0.8.2/desktop-verticale-ruotato.png" width="24%" alt="Desktop girato in verticale, pallini in basso">
+  <img src="docs/images/0.8.2/desktop-orizzontale.png" width="72%" alt="Desktop in orizzontale">
+</p>
 <p align="center">
   <img src="docs/images/0.7.2/home.png" width="24%" alt="Home">
   <img src="docs/images/0.7.2/distribuzioni.png" width="24%" alt="Distribuzioni">

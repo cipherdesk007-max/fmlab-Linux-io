@@ -397,7 +397,7 @@ struct ManagerView: View {
             Button("Cancel", role: .cancel) { }
             Button("Stop", role: .destructive) { LRRuntimeBridge.stopDesktopSession(); desktopSummary = LRRuntimeBridge.desktopSessionSummary() }
         } message: { Text("Save documents first. This closes applications owned by the desktop; persistent files and the terminal environment remain.") }
-        .fullScreenCover(item: $graphical) { request in NativeController(controller: presentedController(request)) }
+        .fullScreenCover(item: $graphical) { request in NativeController(controller: presentedController(request)).ignoresSafeArea() }   // FMLAB: il desktop decide da sé la zona sicura (schermo intero vero, niente bande ai lati)
         .sheet(isPresented: $diagnostics) { DeveloperDiagnosticsView() }
         .sheet(isPresented: $desktopSettings) {
             if let navigation = LRRuntimeBridge.desktopController() as? UINavigationController,
