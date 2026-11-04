@@ -2,6 +2,11 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.9.1
+- Game Emulator: console e giochi in ordine di uscita (NES, Game Boy, SNES, PlayStation, GBA, DS).
+- Tolta la vecchia parte Debian di FMLAB Retro (chiave e archivio apt): i giochi si fanno solo col Game Emulator nativo.
+  Il progetto fmlab-retro ora compila solo gli emulatori.
+
 ## 0.9.0
 - **Game Emulator (FMLAB)**: emulatori **nativi dentro l'app**, senza Linux e senza JIT, nella sezione *Game Emulator ·
   FMLAB* sotto le distribuzioni. Console: NES, Game Boy / Color, Game Boy Advance, Super Nintendo, PlayStation,

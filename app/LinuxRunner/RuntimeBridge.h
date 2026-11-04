@@ -129,9 +129,6 @@ void LRSetDatalessMaterialization(void);
 + (void)installEnlightenment:(void (^)(NSString *stage))progress completion:(void (^)(NSError * _Nullable error))completion;
 + (BOOL)enlightenmentInstalled;
 + (void)installWayfire:(void (^)(NSString *stage))progress completion:(void (^)(NSError * _Nullable error))completion;
-/// FMLAB Retro: aggiunge l'archivio apt FMLAB firmato e installa il pacchetto fmlab-retro (solo Debian).
-+ (void)installFMLABRetro:(void (^)(NSString *stage))progress completion:(void (^)(NSError * _Nullable error))completion;
-+ (BOOL)fmlabRetroInstalled;
 + (BOOL)wayfireInstalled;
 + (void)installHyprland:(void (^)(NSString *stage))progress completion:(void (^)(NSError * _Nullable error))completion;
 + (BOOL)hyprlandInstalled;

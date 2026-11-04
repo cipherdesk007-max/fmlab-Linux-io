@@ -41,7 +41,8 @@ struct GameEmulatorView: View {
     @State private var errore: String?
 
     private var perConsole: [(String, [FMLABGioco])] {
-        Dictionary(grouping: giochi, by: { $0.core.console }).sorted { $0.key < $1.key }.map { ($0.key, $0.value.sorted { $0.nome.localizedStandardCompare($1.nome) == .orderedAscending }) }
+        let ordine = FMLABEmulatore.core().map(\.console)
+        return Dictionary(grouping: giochi, by: { $0.core.console }).sorted { (ordine.firstIndex(of: $0.key) ?? 99) < (ordine.firstIndex(of: $1.key) ?? 99) }.map { ($0.key, $0.value.sorted { $0.nome.localizedStandardCompare($1.nome) == .orderedAscending }) }
     }
 
     var body: some View {

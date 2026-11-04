@@ -271,6 +271,12 @@ static __weak FMLABEmulatore *G_attivo;
             if (!nome || !est || !b.executablePath) continue;
             [a addObject:[[FMLABCore alloc] initNome:nome console:console ?: nome percorso:b.executablePath estensioni:est]];
         }
+        // in ordine di uscita delle console
+        NSArray *ordine = @[@"fceumm", @"gambatte", @"bsnes", @"pcsx_rearmed", @"mgba", @"desmume"];
+        [a sortUsingComparator:^NSComparisonResult(FMLABCore *x, FMLABCore *y) {
+            NSUInteger i = [ordine indexOfObject:x.nome], j = [ordine indexOfObject:y.nome];
+            return i < j ? NSOrderedAscending : i > j ? NSOrderedDescending : NSOrderedSame;
+        }];
         tutti = a;
     });
     return tutti;

@@ -338,20 +338,5 @@ case "$mode" in
                 swaybg papirus-icon-theme inter-font ttf-jetbrains-mono || echo 'PROFILE: hyprland appearance packages unavailable; plain background'
         fi
         echo 'PROFILE: hyprland=PASS';;
-    fmlab-retro)
-        # FMLAB Retro: Debian + l'archivio apt FMLAB (firmato, chiave nel bundle
-        # dell'app con la stessa impronta del repository fmlab-retro) + il
-        # pacchetto fmlab-retro. Da qui in poi si aggiorna con apt come il resto.
-        case "$distro" in debian) ;; *) support_fail PROFILE fmlab-retro-needs-debian;; esac
-        stage "Adding the FMLAB Retro repository"
-        install -d -m 755 /usr/share/keyrings /etc/apt/sources.list.d
-        install -m 644 fmlab-retro.gpg /usr/share/keyrings/fmlab-retro.gpg
-        install -m 644 fmlab-retro.sources /etc/apt/sources.list.d/fmlab-retro.sources
-        # fmlab-retro is not in the reused package lists yet: install_packages
-        # sees that and downloads them again, the new repository included.
-        install_packages "FMLAB Retro" fmlab-retro libretro-desmume libretro-bsnes-mercury-performance || support_fail PROFILE fmlab-retro-packages
-        stage "Verifying installation"
-        have fmlab-retro && have retroarch && have rk-giochi || support_fail PROFILE fmlab-retro-missing
-        echo 'PROFILE: fmlab-retro=PASS';;
     *) exit 2;;
 esac

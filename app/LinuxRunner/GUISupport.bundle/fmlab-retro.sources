@@ -1,7 +1,0 @@
-# FMLAB Retro: pacchetti FMLAB (emulatori regolati, rk-giochi, tema). Firmati con la chiave FMLAB Retro.
-# Impronta: 179D FBA1 AE36 3242 B1E6  49D1 66B1 B041 7BE8 A5E2
-Types: deb
-URIs: https://raw.githubusercontent.com/cipherdesk007-max/fmlab-retro/apt/
-Suites: trixie
-Components: main
-Signed-By: /usr/share/keyrings/fmlab-retro.gpg
