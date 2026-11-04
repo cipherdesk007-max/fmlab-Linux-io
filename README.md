@@ -4,7 +4,7 @@ Linux vero sull'iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), versione FMLA
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. Niente jailbreak, niente macchina virtuale:
 i programmi Linux ARM64 girano dentro l'app grazie a un interprete e a uno strato che traduce le chiamate di sistema.
 
-> **Stato: 0.2.0.** È LinuxRunner 1.1.0 (build 900) con nome, logo e colori FMLAB (rosso e nero), identificativo
+> **Stato: 0.3.0.** È LinuxRunner 1.1.0 (build 900) con nome, logo e colori FMLAB (rosso e nero), identificativo
 > proprio (`dev.fmlab.linux`, si installa **accanto** a LinuxRunner senza toccarne i dati), aggiornamenti dall'app
 > come FMLAB Cleaner e avviso quando esce un LinuxRunner originale più nuovo. Le altre migliorie arrivano una alla
 > volta, ognuna misurata contro l'originale.
@@ -19,11 +19,12 @@ LiveContainer → **+** → **Installa dall'URL** e incolla:
 | Miglioria | Perché |
 |---|---|
 | **Distribuzioni a scelta e cancellabili** | In LinuxRunner Alpine è dentro l'app e non si può togliere. Qui ogni distribuzione (Debian, Arch, Alpine) si scarica solo se la vuoi, mostra quanto pesa e si elimina con un tocco, anche quella di base |
-| **RunnerKit già dentro** | TouchPad, pannello Sistema e consigli di prestazioni di [FMlab - RunnerKit](https://github.com/cipherdesk007-max/FMlab---RunnerKit) senza installare niente a parte |
+| **RunnerKit già dentro** ✅ | Si installa da solo la prima volta che Debian è pronto: TouchPad, pannello Sistema e consigli di prestazioni di [FMlab - RunnerKit](https://github.com/cipherdesk007-max/FMlab---RunnerKit) senza installare niente a parte |
 | **Italiano e grafica FMLAB** (logo e colori ✅, italiano in corso) | Stessi colori e stile di [FMLAB Cleaner](https://github.com/cipherdesk007-max/FMLAB-cleaner) |
 | **Aggiornamenti dall'app** ✅ | Come FMLAB Cleaner: l'app avvisa e si reinstalla sopra senza perdere i dati |
 | **Al passo con l'originale** ✅ | Quando esce un LinuxRunner più nuovo, l'app lo dice e il repository apre da solo una segnalazione ([workflow "originale"](.github/workflows/originale.yml)) |
-| **Backup e trasferimento del Debian** | Esporta/importa l'ambiente, anche per portarci quello che hai già in LinuxRunner |
+| **Prendi il Debian da LinuxRunner** ✅ | Se LinuxRunner è nello stesso LiveContainer, la Home mostra le sue distribuzioni: **Sposta** (istantaneo) o **Copia** |
+| **Backup del Debian** | Esporta/importa l'ambiente con un tocco |
 
 **Come si verifica che è davvero meglio**: gli stessi comandi cronometrati sulle due app, sullo stesso telefono
 (avvio, `apt install`, uno script Python, apertura del desktop, RAM usata), più lo spazio occupato visto dalla

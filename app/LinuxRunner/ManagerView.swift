@@ -336,6 +336,7 @@ struct ManagerView: View {
     @AppStorage("LinuxRunner.experimentalMemoryPCFusion") private var memoryPCFusion = true
     @AppStorage("LinuxRunner.appearance") private var appearance = "dark"
     @StateObject private var fmlabAggiornamenti = FMLABAggiornamenti()
+    @StateObject private var fmlabImporta = FMLABImporta()
     private let sessionTimer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
     /// What the full-screen graphical cover shows. The request is the cover's
     /// item, so its content receives the request itself: separate @State
@@ -371,7 +372,7 @@ struct ManagerView: View {
         .overlay(alignment: .bottom) { InstallProgressCard() }
         .accentColor(Color(red: 0xBF / 255, green: 0x6D / 255, blue: 0x6F / 255))
         .preferredColorScheme(appearance == "system" ? nil : appearance == "light" ? .light : .dark)
-        .task { await fmlabAggiornamenti.controlla(); await fmlabAggiornamenti.controllaOriginale() }
+        .task { fmlabImporta.cerca(); await fmlabAggiornamenti.controlla(); await fmlabAggiornamenti.controllaOriginale() }
         .onAppear {
             desktopSummary = LRRuntimeBridge.desktopSessionSummary()
             // First launch without Linux, or setup waiting for its relaunch/account step.
@@ -498,6 +499,21 @@ struct ManagerView: View {
             if fmlabAggiornamenti.nuova != nil {
                 Section { FMLABAvvisoAggiornamento(agg: fmlabAggiornamenti) }
             }
+            if !fmlabImporta.trovati.isEmpty || fmlabImporta.messaggio != nil {
+                Section { FMLABImportaView(imp: fmlabImporta, manager: manager) } header: { Text("Da LinuxRunner") }
+            }
+            if LRRuntimeBridge.isRunning(), LRRuntimeBridge.activeEnvironmentIsDebian() {
+                Section {
+                    if FMLABRunnerKit.installato() {
+                        Label("RunnerKit installato: TouchPad, Centro, Pulizia e il comando rk", systemImage: "checkmark.seal.fill")
+                    } else {
+                        Text("RunnerKit (TouchPad, Centro, Pulizia, RunnerBoost, comando rk) si installa da solo la prima volta: serve un minuto e la connessione.")
+                            .font(.footnote).foregroundColor(.secondary)
+                        Button { installaRunnerKit() } label: { Label("Installa RunnerKit ora", systemImage: "square.and.arrow.down") }
+                    }
+                } header: { Text("FMlab - RunnerKit") }
+                .onAppear { if FMLABRunnerKit.daInstallareDaSolo() { installaRunnerKit() } }
+            }
             if LRRuntimeBridge.isRunning() {
                 Section("Status") {
                     statusRow("Runtime", systemImage: "cpu", value: activeEnvironment?.name ?? "Running", color: .green)
@@ -610,6 +626,11 @@ struct ManagerView: View {
             }
             Section("About") { NavigationLink(destination: LinuxRunnerAboutView()) { Label("About LinuxRunner", systemImage: "info.circle") } }
         }.listStyle(.insetGrouped).navigationTitle("Settings")
+    }
+    private func installaRunnerKit() {
+        FMLABRunnerKit.segnaTentativo()
+        let controller = LRRuntimeBridge.terminal(forCommand: ["/bin/sh", "-c", FMLABRunnerKit.comando], directory: "/")
+        session = TerminalPresentation(controller: controller)
     }
     private func openTerminal(_ environment: LinuxEnvironment) {
         guard manager.active(environment) else { return }
@@ -2857,5 +2878,168 @@ struct FMLABInformazioni: View {
         } header: { Text("FMLAB") } footer: {
             Text("FMLAB Linux è basata su LinuxRunner di Leminos, che deriva da iSH e ios-linuxkit. Licenza GPL-3.0.")
         }
+    }
+}
+
+
+// MARK: - FMLAB: RunnerKit già installato
+// La prima volta che Debian è pronto, FMLAB Linux apre un terminale che installa FMlab - RunnerKit dal ramo
+// "stabile" (lo stesso comando del README di RunnerKit). Un solo tentativo automatico per ambiente; poi c'è il pulsante.
+enum FMLABRunnerKit {
+    static let comando = "echo '== FMLAB Linux: installo FMlab - RunnerKit =='; " +
+        "S=''; [ \"$(id -u)\" -ne 0 ] && S=sudo; " +
+        "command -v curl >/dev/null 2>&1 || $S apt-get install -y curl || { $S apt-get update && $S apt-get install -y curl; }; " +
+        "curl -fsSL https://raw.githubusercontent.com/cipherdesk007-max/FMlab---RunnerKit/stabile/install.sh | sh; " +
+        "echo; echo 'Fatto. Puoi chiudere questa finestra.'; exec sh"
+
+    private static func radice() -> URL { LRRuntimeBridge.rootURL(LRRuntimeBridge.activeRootName()) }
+    static func installato() -> Bool {
+        FileManager.default.fileExists(atPath: radice().appendingPathComponent("data/usr/local/bin/touchpad").path)
+    }
+    private static var chiave: String { "FMLAB.RunnerKit.tentato." + LRRuntimeBridge.activeRootName() }
+    /// Debian configurato (prima configurazione finita), RunnerKit assente e mai provato in automatico
+    static func daInstallareDaSolo() -> Bool {
+        let pronto = FileManager.default.fileExists(atPath: radice().appendingPathComponent("data/var/lib/linuxrunner/initialized").path)
+        return pronto && !installato() && !UserDefaults.standard.bool(forKey: chiave)
+    }
+    static func segnaTentativo() { UserDefaults.standard.set(true, forKey: chiave) }
+}
+
+// MARK: - FMLAB: prendere le distribuzioni già installate in LinuxRunner
+// Dentro LiveContainer le app ospitate stanno nella stessa cartella di LiveContainer: FMLAB Linux trova i dati di
+// LinuxRunner (contenitore dell'app o gruppo condiviso) e sposta o copia le sue distribuzioni nelle proprie.
+// "Sposta" è istantaneo e non occupa spazio in più (stesso disco), ma LinuxRunner non le avrà più; "Copia" le lascia
+// anche a LinuxRunner e occupa il doppio. Poi va chiusa e riaperta FMLAB Linux, che le legge all'avvio.
+struct FMLABDistribuzioneTrovata: Identifiable {
+    let id = UUID()
+    let sorgente: URL        // cartella "LinuxRunner" (con roots/, exchanges/, environments.json)
+    let nomeRadice: String   // nome della cartella in roots/
+    let nome: String
+    let ambiente: LinuxEnvironment?
+    var byte: Int64
+}
+
+@MainActor
+final class FMLABImporta: ObservableObject {
+    @Published var trovati: [FMLABDistribuzioneTrovata] = []
+    @Published var lavoro = false
+    @Published var messaggio: String?
+
+    nonisolated private static func contenitoriLinuxRunner() -> [URL] {
+        guard let h = getenv("LC_HOME_PATH") else { return [] }
+        let fm = FileManager.default
+        let docs = URL(fileURLWithPath: String(cString: h)).appendingPathComponent("Documents")
+        var basi: [URL] = []
+        // dati delle app ospitate: Library/Application Support/LinuxRunner (quando il gruppo non c'è)
+        for d in (try? fm.contentsOfDirectory(at: docs.appendingPathComponent("Data/Application"), includingPropertiesForKeys: nil)) ?? [] {
+            basi.append(d.appendingPathComponent("Library/Application Support/LinuxRunner"))
+        }
+        // gruppi condivisi emulati da LiveContainer
+        var gruppi = [docs.appendingPathComponent("Data/AppGroup")]
+        let sel = NSSelectorFromString("lcAppGroupPath")
+        if (UserDefaults.self as AnyObject).responds(to: sel),
+           let p = (UserDefaults.self as AnyObject).perform(sel)?.takeUnretainedValue() as? String {
+            gruppi.append(URL(fileURLWithPath: p).appendingPathComponent("LiveContainer/Data/AppGroup"))
+        }
+        for g in gruppi {
+            for d in (try? fm.contentsOfDirectory(at: g, includingPropertiesForKeys: nil)) ?? []
+            where d.lastPathComponent.lowercased().contains("linuxrunner") && !d.lastPathComponent.contains("fmlab") {
+                basi.append(d)
+            }
+        }
+        let mio = LRRuntimeBridge.catalogURL().deletingLastPathComponent().resolvingSymlinksInPath().path
+        return basi.filter { fm.fileExists(atPath: $0.appendingPathComponent("roots").path) && $0.resolvingSymlinksInPath().path != mio }
+    }
+
+    func cerca() {
+        let miei = Set(LRRuntimeBridge.rootNames())
+        Task.detached(priority: .utility) {
+            var out: [FMLABDistribuzioneTrovata] = []
+            for base in Self.contenitoriLinuxRunner() {
+                let catalogo = try? EnvironmentCatalog.read(base.appendingPathComponent("environments.json"))
+                for r in (try? FileManager.default.contentsOfDirectory(atPath: base.appendingPathComponent("roots").path)) ?? []
+                where !r.hasPrefix(".") && !miei.contains(r) {
+                    let amb = catalogo?.environments.first { $0.rootfsName == r }
+                    out.append(FMLABDistribuzioneTrovata(sorgente: base, nomeRadice: r, nome: amb?.name ?? amb?.distribution ?? r,
+                                                         ambiente: amb, byte: Self.peso(base.appendingPathComponent("roots").appendingPathComponent(r))))
+                }
+            }
+            await MainActor.run { self.trovati = out }
+        }
+    }
+
+    nonisolated static func peso(_ u: URL) -> Int64 {
+        var tot: Int64 = 0
+        let k: [URLResourceKey] = [.totalFileAllocatedSizeKey, .isRegularFileKey]
+        if let e = FileManager.default.enumerator(at: u, includingPropertiesForKeys: k, options: [], errorHandler: { _, _ in true }) {
+            for case let f as URL in e {
+                if let v = try? f.resourceValues(forKeys: Set(k)), v.isRegularFile == true { tot += Int64(v.totalFileAllocatedSize ?? 0) }
+            }
+        }
+        return tot
+    }
+
+    func prendi(_ t: FMLABDistribuzioneTrovata, sposta: Bool, manager: EnvironmentManager) {
+        guard !lavoro else { return }
+        lavoro = true; messaggio = sposta ? "Sposto \(t.nome)…" : "Copio \(t.nome)… (può volerci qualche minuto)"
+        let mieRadici = LRRuntimeBridge.catalogURL().deletingLastPathComponent().appendingPathComponent("roots")
+        let mieiScambi = LRRuntimeBridge.catalogURL().deletingLastPathComponent().appendingPathComponent("exchanges")
+        Task.detached(priority: .userInitiated) {
+            let fm = FileManager.default
+            var errore: String?
+            do {
+                try fm.createDirectory(at: mieRadici, withIntermediateDirectories: true)
+                let da = t.sorgente.appendingPathComponent("roots").appendingPathComponent(t.nomeRadice)
+                let a = mieRadici.appendingPathComponent(t.nomeRadice)
+                if sposta { try fm.moveItem(at: da, to: a) } else { try fm.copyItem(at: da, to: a) }
+                let sda = t.sorgente.appendingPathComponent("exchanges").appendingPathComponent(t.nomeRadice)
+                if fm.fileExists(atPath: sda.path) {
+                    try? fm.createDirectory(at: mieiScambi, withIntermediateDirectories: true)
+                    let sa = mieiScambi.appendingPathComponent(t.nomeRadice)
+                    if sposta { try? fm.moveItem(at: sda, to: sa) } else { try? fm.copyItem(at: sda, to: sa) }
+                }
+                if sposta, var cat = try? EnvironmentCatalog.read(t.sorgente.appendingPathComponent("environments.json")) {
+                    cat.environments.removeAll { $0.rootfsName == t.nomeRadice }
+                    try? cat.write(t.sorgente.appendingPathComponent("environments.json"))
+                }
+            } catch { errore = error.localizedDescription }
+            await MainActor.run {
+                self.lavoro = false
+                if let errore { self.messaggio = "Non riuscito: \(errore). Chiudi LinuxRunner e riprova."; return }
+                if let amb = t.ambiente, !manager.environments.contains(where: { $0.id == amb.id || $0.rootfsName == amb.rootfsName }) {
+                    manager.environments.append(amb); try? manager.persist()
+                }
+                self.trovati.removeAll { $0.id == t.id }
+                self.messaggio = "\(t.nome) è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila: poi la scegli in Distributions."
+            }
+        }
+    }
+}
+
+struct FMLABImportaView: View {
+    @ObservedObject var imp: FMLABImporta
+    @ObservedObject var manager: EnvironmentManager
+    @State private var scelta: FMLABDistribuzioneTrovata?
+
+    var body: some View {
+        if imp.lavoro { HStack { ProgressView(); Text(imp.messaggio ?? "") } }
+        else if let m = imp.messaggio { Text(m).font(.footnote) }
+        if !imp.trovati.isEmpty && !imp.lavoro {
+            Text("Hai già queste distribuzioni in LinuxRunner. Prendile qui senza reinstallare niente (chiudi prima LinuxRunner).")
+                .font(.footnote).foregroundColor(.secondary)
+        }
+        ForEach(imp.trovati) { t in
+            Button { scelta = t } label: {
+                HStack {
+                    Image(systemName: "shippingbox.fill")
+                    VStack(alignment: .leading) { Text(t.nome); Text(ByteCountFormatter.string(fromByteCount: t.byte, countStyle: .file)).font(.caption).foregroundColor(.secondary) }
+                    Spacer(); Image(systemName: "arrow.down.circle")
+                }
+            }.disabled(imp.lavoro)
+        }
+        .confirmationDialog("Prendere \(scelta?.nome ?? "") da LinuxRunner?", isPresented: Binding(get: { scelta != nil }, set: { if !$0 { scelta = nil } }), titleVisibility: .visible) {
+            Button("Sposta (istantaneo, nessuno spazio in più)") { if let t = scelta { imp.prendi(t, sposta: true, manager: manager) } }
+            Button("Copia (resta anche in LinuxRunner)") { if let t = scelta { imp.prendi(t, sposta: false, manager: manager) } }
+        } message: { Text("Sposta: la distribuzione passa a FMLAB Linux e LinuxRunner non la avrà più. Copia: occupa il doppio dello spazio.") }
     }
 }
