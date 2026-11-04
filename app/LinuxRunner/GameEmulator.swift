@@ -1,5 +1,7 @@
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
+import GameController
 
 // MARK: - FMLAB Game Emulator
 // Non fa parte di LinuxRunner e non usa Linux: i core libretro (dal progetto fmlab-retro) sono
@@ -137,6 +139,8 @@ final class FMLABGiocoController: UIViewController {
     private var emulatore: FMLABEmulatore?
     private let pad = FMLABPad()
     private let avviso = UILabel()
+    private var osservatori: [NSObjectProtocol] = []
+    deinit { osservatori.forEach { NotificationCenter.default.removeObserver($0) } }
 
     init(gioco: FMLABGioco, chiudi: @escaping () -> Void) { self.gioco = gioco; self.chiudi = chiudi; super.init(nibName: nil, bundle: nil); modalPresentationStyle = .fullScreen }
     required init?(coder: NSCoder) { fatalError() }
@@ -159,6 +163,11 @@ final class FMLABGiocoController: UIViewController {
             avviso.text = error.localizedDescription
         }
         pad.menu = { [weak self] in self?.apriMenu() }
+        pad.veloce = { [weak self] attivo in self?.emulatore?.veloce = attivo }
+        let controller = { [weak self] (_: Notification) in self?.pad.soloMenu = !GCController.controllers().compactMap(\.extendedGamepad).isEmpty }
+        osservatori = [NotificationCenter.default.addObserver(forName: .GCControllerDidConnect, object: nil, queue: .main, using: controller),
+                       NotificationCenter.default.addObserver(forName: .GCControllerDidDisconnect, object: nil, queue: .main, using: controller)]
+        controller(Notification(name: .GCControllerDidConnect))
         view.addSubview(pad)
         avviso.textColor = .white; avviso.numberOfLines = 0; avviso.textAlignment = .center; avviso.font = .preferredFont(forTextStyle: .body)
         view.addSubview(avviso)
@@ -239,12 +248,16 @@ final class FMLABPad: UIView {
     var spazioLato: CGFloat = 0
     var tasto: ((FMLABTasto, Bool) -> Void)?
     var menu: (() -> Void)?
+    var veloce: ((Bool) -> Void)?
+    /// Con un controller collegato restano solo menu e avanti veloce.
+    var soloMenu = false { didSet { setNeedsLayout() } }
 
     private struct Pulsante { let tasto: FMLABTasto?; let vista: UILabel }
     private var pulsanti: [Pulsante] = []
     private let croce = UIView()
     private let frecce = (0..<4).map { _ in UIImageView() }
     private let bottoneMenu = UIButton(type: .system)
+    private let bottoneVeloce = UIButton(type: .system)
     private var premuti = Set<Int>()        // FMLABTasto.rawValue
     private let vibra = UIImpactFeedbackGenerator(style: .light)
     private let rosso = UIColor(red: 0.85, green: 0.27, blue: 0.27, alpha: 1)
@@ -266,6 +279,17 @@ final class FMLABPad: UIView {
         bottoneMenu.accessibilityLabel = LF("Menu")
         bottoneMenu.addAction(UIAction { [weak self] _ in self?.menu?() }, for: .touchUpInside)
         addSubview(bottoneMenu)
+        bottoneVeloce.setImage(UIImage(systemName: "forward.fill"), for: .normal)
+        bottoneVeloce.tintColor = .white
+        bottoneVeloce.backgroundColor = UIColor(white: 0.2, alpha: 0.8)
+        bottoneVeloce.accessibilityLabel = LF("Fast Forward")
+        bottoneVeloce.addAction(UIAction { [weak self] _ in
+            guard let self else { return }
+            self.bottoneVeloce.isSelected.toggle()
+            self.bottoneVeloce.tintColor = self.bottoneVeloce.isSelected ? self.rosso : .white
+            self.veloce?(self.bottoneVeloce.isSelected)
+        }, for: .touchUpInside)
+        addSubview(bottoneVeloce)
         costruisci()
     }
     required init?(coder: NSCoder) { fatalError() }
@@ -316,6 +340,10 @@ final class FMLABPad: UIView {
             if disposizione >= 1 { bottoneMenu.frame.origin.x = destra - 88 - 54 }
         }
         bottoneMenu.layer.cornerRadius = 10; bottoneMenu.alpha = alfa < 0.5 ? 0.6 : 1
+        bottoneVeloce.frame = bottoneMenu.frame.offsetBy(dx: modo == .verticale ? 54 : -54, dy: 0)
+        bottoneVeloce.layer.cornerRadius = 10; bottoneVeloce.alpha = bottoneMenu.alpha
+        croce.isHidden = soloMenu
+        pulsanti.forEach { $0.vista.isHidden = soloMenu }
         // croce
         croce.frame = CGRect(x: centroCroce.x - lato / 2, y: centroCroce.y - lato / 2, width: lato, height: lato)
         croce.backgroundColor = fondo
@@ -350,6 +378,7 @@ final class FMLABPad: UIView {
 
     // Quali tasti tiene premuti un dito in quel punto (la croce dà fino a due direzioni: diagonali)
     private func tasti(in p: CGPoint) -> Set<Int> {
+        if soloMenu { return [] }
         let c = croce.frame
         if c.insetBy(dx: -c.width * 0.25, dy: -c.height * 0.25).contains(p) {
             let dx = p.x - c.midX, dy = p.y - c.midY
@@ -382,7 +411,8 @@ final class FMLABPad: UIView {
     }
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
         // in orizzontale il pad è grande quanto lo schermo: i tocchi fuori dai comandi vanno al gioco (DS)
-        if bottoneMenu.frame.contains(point) { return true }
+        if bottoneMenu.frame.contains(point) || bottoneVeloce.frame.contains(point) { return true }
+        if soloMenu { return false }
         return !tasti(in: point).isEmpty || croce.frame.insetBy(dx: -30, dy: -30).contains(point)
     }
     override func touchesBegan(_ t: Set<UITouch>, with e: UIEvent?) { for x in t { tocchi[ObjectIdentifier(x)] = tasti(in: x.location(in: self)) }; aggiornaTocchi(e) }

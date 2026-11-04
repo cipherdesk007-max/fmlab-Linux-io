@@ -517,6 +517,7 @@
 "Failed: %lf. Close LinuxRunner and try again." = "Non riuscito: %lf. Chiudi LinuxRunner e riprova.";
 "Failed: %lld. Close LinuxRunner and try again." = "Non riuscito: %lld. Chiudi LinuxRunner e riprova.";
 "Fair" = "Tiepido";
+"Fast Forward" = "Avanti veloce";
 "File Sharing" = "Condivisione file";
 "Files" = "File";
 "Files & Devices" = "File e dispositivi";

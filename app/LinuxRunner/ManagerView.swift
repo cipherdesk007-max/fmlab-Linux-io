@@ -150,7 +150,8 @@ import Darwin
         environment.rootfsName == LRRuntimeBridge.activeRootName() && LRRuntimeBridge.isRunning()
     }
     func size(_ environment: LinuxEnvironment) -> String {
-        storage[environment.id].map { ByteCountFormatter.string(fromByteCount: $0, countStyle: .file) } ?? LF("Calculating…")
+        // FMLAB: mentre si rimisura si vede l'ultima misura salvata, non "Calcolo…"
+        (storage[environment.id] ?? environment.storageBytes).map { ByteCountFormatter.string(fromByteCount: $0, countStyle: .file) } ?? LF("Calculating…")
     }
 }
 

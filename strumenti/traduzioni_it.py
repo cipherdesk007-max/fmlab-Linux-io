@@ -731,6 +731,7 @@ TR.update({
 "The emulator could not open this game. Check that the file is complete and not zipped; some consoles need their BIOS in Giochi/BIOS.": "L'emulatore non riesce ad aprire questo gioco. Controlla che il file sia completo e non zippato; alcune console vogliono il BIOS in Giochi/BIOS.",
 "This game cannot be saved right now.": "Questo gioco ora non si può salvare.",
 "The saved state could not be loaded.": "Non è stato possibile caricare lo stato salvato.",
+"Fast Forward": "Avanti veloce",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

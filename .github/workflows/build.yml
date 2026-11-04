@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      mac:
+        description: "Mac di GitHub (macos-latest = arm64; macos-15-intel se gli arm64 sono pieni)"
+        default: macos-latest
 
 permissions:
   contents: write
@@ -15,7 +19,7 @@ concurrency:
 
 jobs:
   ipa:
-    runs-on: macos-latest
+    runs-on: ${{ inputs.mac || 'macos-latest' }}
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4

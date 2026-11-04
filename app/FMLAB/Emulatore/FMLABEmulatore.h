@@ -40,6 +40,8 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 @property (readonly) BOOL tocco;
 @property (readonly) double fps;
 @property (nonatomic) BOOL inPausa;
+/// Avanti veloce (circa 3 volte) finché è attivo.
+@property (nonatomic) BOOL veloce;
 
 - (void)avvia;
 - (void)ferma;  // salva la memoria del gioco e chiude il core

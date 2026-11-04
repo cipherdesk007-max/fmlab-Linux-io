@@ -247,7 +247,7 @@ static __weak FMLABEmulatore *G_attivo;
     os_unfair_lock _lockLavori;
     AVAudioEngine *_motore;
     FMLABVistaGioco *_vista;
-    BOOL _caricato;
+    BOOL _caricato, _fermoDaSfondo;
 }
 
 + (NSURL *)cartellaGiochi {
@@ -396,8 +396,11 @@ static NSError *fmlabErrore(NSString *messaggio) {
     _filo.name = @"FMLAB Emulatore";
     [_filo start];
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(sfondo) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(primoPiano) name:UIApplicationDidBecomeActiveNotification object:nil];
 }
-- (void)sfondo { self.inPausa = YES; [self lavoro:^{ [self scriviMemoria]; }]; }
+// in sfondo si ferma e salva la memoria del gioco; tornando, riparte da solo se l'aveva fermato l'app
+- (void)sfondo { if (!self.inPausa) { _fermoDaSfondo = YES; self.inPausa = YES; } [self lavoro:^{ [self scriviMemoria]; }]; }
+- (void)primoPiano { if (_fermoDaSfondo) { _fermoDaSfondo = NO; self.inPausa = NO; } }
 
 static uint32_t fmlabPad(GCExtendedGamepad *g) {
     if (!g) return 0;
@@ -435,6 +438,7 @@ static uint32_t fmlabPad(GCExtendedGamepad *g) {
         // se il suono è molto avanti, si aspetta un po' di più (resta in pari con l'audio)
         uint32_t coda = atomic_load(&G_scrivi) - atomic_load(&G_leggi);
         double extra = coda > (uint32_t)(G_av.timing.sample_rate * 0.15) ? periodo * 0.5 : 0;
+        if (self.veloce) extra = -periodo * 2.0 / 3.0;   // avanti veloce: circa 3 volte (il suono in più si scarta)
         prossimo += (uint64_t)((periodo + extra) / secondi);
         uint64_t ora = mach_absolute_time();
         if (ora < prossimo) mach_wait_until(prossimo);
