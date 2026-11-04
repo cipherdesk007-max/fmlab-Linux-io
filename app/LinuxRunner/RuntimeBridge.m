@@ -1651,6 +1651,26 @@ static int LRSharedDirectory(NSString *root,NSString *relative){
     closedir(directory);if(failure){if(error)*error=lrError(failure,@"Folder could not be listed completely (maximum 4096 entries).");return nil;}
     [items sortUsingComparator:^NSComparisonResult(NSDictionary *a,NSDictionary *b){if([a[@"directory"] boolValue]!=[b[@"directory"] boolValue])return [a[@"directory"] boolValue]?NSOrderedAscending:NSOrderedDescending;return [a[@"name"] localizedStandardCompare:b[@"name"]];}];return items;
 }
+// FMLAB: eliminazione sicura relativa a una cartella aperta: niente percorsi assoluti, i collegamenti simbolici
+// vengono tolti come collegamenti (mai seguiti), profondità limitata.
+static int FMLABRemoveAt(int dirfd,const char *name,int depth){
+    struct stat st;if(fstatat(dirfd,name,&st,AT_SYMLINK_NOFOLLOW)<0)return errno;
+    if(!S_ISDIR(st.st_mode))return unlinkat(dirfd,name,0)<0?errno:0;
+    if(depth>64)return ELOOP;
+    int fd=openat(dirfd,name,O_RDONLY|O_DIRECTORY|O_NOFOLLOW|O_CLOEXEC);if(fd<0)return errno;
+    DIR *d=fdopendir(fd);if(!d){int e=errno;close(fd);return e;}
+    struct dirent *entry;int failure=0;
+    while((entry=readdir(d))){if(!strcmp(entry->d_name,".")||!strcmp(entry->d_name,".."))continue;
+        int e=FMLABRemoveAt(dirfd(d),entry->d_name,depth+1);if(e){failure=e;break;}}
+    closedir(d);if(failure)return failure;
+    return unlinkat(dirfd,name,AT_REMOVEDIR)<0?errno:0;
+}
++ (BOOL)deleteSharedItem:(NSString *)leaf relative:(NSString *)relative root:(NSString *)root error:(NSError **)error {
+    if(!LRTransferString(leaf)||!lr_valid_leaf(leaf.UTF8String)){if(error)*error=lrError(EINVAL,@"Invalid filename.");return NO;}
+    int fd=LRSharedDirectory(root,relative);if(fd<0){if(error)*error=lrError(errno,@"Cannot open the shared folder. Symbolic links are not followed.");return NO;}
+    int result=FMLABRemoveAt(fd,leaf.UTF8String,0);close(fd);
+    if(result&&error)*error=lrError(result,@"The item could not be deleted.");return result==0;
+}
 + (BOOL)createSharedDirectory:(NSString *)leaf relative:(NSString *)relative root:(NSString *)root error:(NSError **)error {
     if(!LRTransferString(leaf)||!lr_valid_leaf(leaf.UTF8String)){if(error)*error=lrError(EINVAL,@"Choose a single folder name.");return NO;}
     int fd=LRSharedDirectory(root,relative);int result=fd<0?-1:mkdirat(fd,leaf.UTF8String,0700);int saved=errno;if(fd>=0)close(fd);

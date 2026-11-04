@@ -2,6 +2,12 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.8.1
+- **File condivisi: elimina da qui**. Tocca un file → menu **sul file** con *Salva in File…* ed *Elimina*; scorri a
+  sinistra su un file o una cartella per eliminarlo (le cartelle con quello che contengono). Chiede sempre conferma.
+  Eliminazione sicura dentro la cartella condivisa: i collegamenti non vengono mai seguiti.
+- Il menu del file si apre sulla riga toccata, non più in cima allo schermo.
+
 ## 0.8.0
 - **Il desktop si gira col telefono**: con la risoluzione **Telefono** lo schermo di Linux passa da solo da
   orizzontale (1398×644) a verticale (644×1398) quando giri l'iPhone, **senza riavviare il desktop** né chiudere i

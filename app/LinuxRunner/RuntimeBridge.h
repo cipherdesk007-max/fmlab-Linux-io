@@ -164,6 +164,8 @@ void LRSetDatalessMaterialization(void);
 + (NSURL *)sharedExchangeURL:(NSString *)root;
 + (NSArray<NSDictionary *> * _Nullable)sharedEntries:(NSString *)relative root:(NSString *)root error:(NSError **)error;
 + (BOOL)createSharedDirectory:(NSString *)leaf relative:(NSString *)relative root:(NSString *)root error:(NSError **)error;
+/// FMLAB: elimina un file o una cartella (con quello che contiene) dalla cartella condivisa. Non segue i collegamenti.
++ (BOOL)deleteSharedItem:(NSString *)leaf relative:(NSString *)relative root:(NSString *)root error:(NSError **)error;
 + (BOOL)importSharedFile:(NSURL *)source relative:(NSString *)relative root:(NSString *)root control:(LRTransferControl *)control error:(NSError **)error;
 + (NSURL * _Nullable)exportSharedItem:(NSString *)leaf relative:(NSString *)relative root:(NSString *)root control:(LRTransferControl *)control error:(NSError **)error;
 + (void)deleteExport:(NSURL *)url;

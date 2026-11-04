@@ -1017,4 +1017,11 @@ TR_OBJC = {
 "These distributions are in LinuxRunner's files (they stay even after removing LinuxRunner). Tap one to take it here without reinstalling, or to delete it and free the space.": "Queste distribuzioni sono nei file di LinuxRunner (restano anche dopo averlo tolto). Toccane una per prenderla qui senza reinstallare, oppure per eliminarla e liberare lo spazio.",
 "Delete It (frees %@)": "Eliminala (libera %@)",
 "Move: the distribution goes to FMLAB Linux and LinuxRunner no longer has it. Copy: uses twice the space. Delete: removes it from LinuxRunner's files for good.": "Sposta: la distribuzione passa a FMLAB Linux e LinuxRunner non l'ha più. Copia: occupa il doppio. Elimina: la toglie per sempre dai file di LinuxRunner.",
+"Delete": "Elimina",
+"Delete File?": "Eliminare il file?",
+"Delete Folder?": "Eliminare la cartella?",
+"%@ will be deleted from Linux and from the iPhone.": "%@ verrà eliminato da Linux e dall'iPhone.",
+"%@ and everything inside it will be deleted from Linux and from the iPhone.": "%@ e tutto quello che contiene verranno eliminati da Linux e dall'iPhone.",
+"Tap a file to save it to Files or delete it. Swipe left to delete files and folders.": "Tocca un file per salvarlo in File o eliminarlo. Scorri verso sinistra per eliminare file e cartelle.",
+"The item could not be deleted.": "Non è stato possibile eliminarlo.",
 }

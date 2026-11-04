@@ -1123,7 +1123,13 @@ struct ExchangeFilesView: View {
     @State private var save: ExportItem?
     @State private var snapshot: URL?
     @State private var selected: SharedFileEntry?
+    @State private var daEliminare: SharedFileEntry?   // FMLAB: conferma prima di eliminare
     private let tick = Timer.publish(every: 0.3, on: .main, in: .common).autoconnect()
+    private func elimina(_ entry: SharedFileEntry) {
+        do { try LRRuntimeBridge.deleteSharedItem(entry.name, relative: relative, root: environment.rootfsName); failure = nil }
+        catch { failure = error.localizedDescription }
+        refresh()
+    }
     init(environment: LinuxEnvironment, manager: EnvironmentManager, share: Binding<ExportItem?>, relative: String = "") {
         self.environment = environment; self.manager = manager; _share = share; self.relative = relative
     }
@@ -1180,11 +1186,18 @@ struct ExchangeFilesView: View {
                     if entry.directory {
                         NavigationLink(destination: ExchangeFilesView(environment: environment, manager: manager, share: $share, relative: relative.isEmpty ? entry.name : relative + "/" + entry.name)) {
                             Label(entry.name, systemImage: "folder")
-                        }.contextMenu { Button("Export Folder as ZIP") { export(entry) } }
+                        }.contextMenu { Button("Export Folder as ZIP") { export(entry) }; Button("Delete", role: .destructive) { daEliminare = entry } }
+                        .swipeActions { Button("Delete", role: .destructive) { daEliminare = entry } }
                     } else {
-                        Button { selected = entry } label: {
+                        // FMLAB: il menu si apre sul file toccato (prima era un riquadro staccato in cima allo schermo)
+                        Menu {
+                            Button { export(entry) } label: { Label("Save to Files…", systemImage: "square.and.arrow.down") }
+                            Button(role: .destructive) { daEliminare = entry } label: { Label("Delete", systemImage: "trash") }
+                        } label: {
                             HStack { Label(entry.name, systemImage: "doc"); Spacer(); Text(ByteCountFormatter.string(fromByteCount: entry.bytes, countStyle: .file)).font(.caption).foregroundColor(.secondary) }
+                                .contentShape(Rectangle())
                         }.disabled(manager.busy)
+                        .swipeActions { Button("Delete", role: .destructive) { daEliminare = entry } }
                     }
                 }
                 if entries.isEmpty { Text("No visible files in this folder.").foregroundColor(.secondary) }
@@ -1193,16 +1206,17 @@ struct ExchangeFilesView: View {
             if relative.isEmpty {
                 Section("Existing Files") { NavigationLink("Previous Downloads Exchange", destination: LegacyExchangeFilesView(environment: environment, manager: manager, share: $share)) }
             }
+            if !entries.isEmpty { Section { Text("Tap a file to save it to Files or delete it. Swipe left to delete files and folders.").font(.caption).foregroundColor(.secondary) } }
             Section { Text("Transfers stream data up to 512 MiB. Existing names are preserved. Exporting a directory creates a ZIP; links and special files are refused. Save changes before exporting a file that another app is editing.").font(.caption).foregroundColor(.secondary) }
         }.navigationTitle(relative.isEmpty ? "Shared Files" : (relative as NSString).lastPathComponent)
             .onAppear(perform: refresh).toolbar { Button("Refresh", action: refresh) }
             .onReceive(tick) { _ in if let operation { progress = operation.snapshot() as? [String: NSNumber] ?? [:] } }
             .fileImporter(isPresented: $importer, allowedContentTypes: [.data], onCompletion: imported)
             .sheet(item: $save, onDismiss: { if let snapshot { LRRuntimeBridge.deleteExport(snapshot) }; snapshot = nil }) { item in SaveToFilesPicker(url: item.url) { save = nil } }
-            .confirmationDialog("Export File", isPresented: Binding(get: { selected != nil }, set: { if !$0 { selected = nil } })) {
-                if let selected { Button("Save to Files…") { export(selected); self.selected = nil } }
-                Button("Cancel", role: .cancel) { selected = nil }
-            }
+            .alert(daEliminare?.directory == true ? "Delete Folder?" : "Delete File?", isPresented: Binding(get: { daEliminare != nil }, set: { if !$0 { daEliminare = nil } })) {
+                Button("Cancel", role: .cancel) { daEliminare = nil }
+                Button("Delete", role: .destructive) { if let e = daEliminare { elimina(e) }; daEliminare = nil }
+            } message: { Text(String(format: LF(daEliminare?.directory == true ? "%@ and everything inside it will be deleted from Linux and from the iPhone." : "%@ will be deleted from Linux and from the iPhone."), daEliminare?.name ?? "")) }
             .alert("New Folder", isPresented: $creatingFolder) {
                 TextField("Folder name", text: $folderName).autocorrectionDisabled().textInputAutocapitalization(.never)
                 Button("Cancel", role: .cancel) { }

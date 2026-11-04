@@ -29,6 +29,7 @@
 "%@ %@ · ARM64" = "%@ %@ · ARM64";
 "%@ %lf · ARM64" = "%@ %lf · ARM64";
 "%@ %lld · ARM64" = "%@ %lld · ARM64";
+"%@ and everything inside it will be deleted from Linux and from the iPhone." = "%@ e tutto quello che contiene verranno eliminati da Linux e dall'iPhone.";
 "%@ deleted from LinuxRunner's files. Freed %@." = "%@ eliminata dai file di LinuxRunner. Liberati %@.";
 "%@ deleted from LinuxRunner's files. Freed %lf." = "%@ eliminata dai file di LinuxRunner. Liberati %lf.";
 "%@ deleted from LinuxRunner's files. Freed %lld." = "%@ eliminata dai file di LinuxRunner. Liberati %lld.";
@@ -37,6 +38,7 @@
 "%@ is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%@ è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%@ is now in FMLAB Linux. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%@ è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%@ pt" = "%@ pt";
+"%@ will be deleted from Linux and from the iPhone." = "%@ verrà eliminato da Linux e dall'iPhone.";
 "%@ · %.0fs · %.1f display updates/s" = "%@ · %.0f s · %.1f aggiornamenti/s";
 "%@ · %@ · PID %@" = "%@ · %@ · PID %@";
 "%@ · %@ · PID %lf" = "%@ · %@ · PID %lf";
@@ -74,6 +76,7 @@
 "%lf %@ · ARM64" = "%lf %@ · ARM64";
 "%lf %lf · ARM64" = "%lf %lf · ARM64";
 "%lf %lld · ARM64" = "%lf %lld · ARM64";
+"%lf and everything inside it will be deleted from Linux and from the iPhone." = "%lf e tutto quello che contiene verranno eliminati da Linux e dall'iPhone.";
 "%lf deleted from LinuxRunner's files. Freed %@." = "%lf eliminata dai file di LinuxRunner. Liberati %@.";
 "%lf deleted from LinuxRunner's files. Freed %lf." = "%lf eliminata dai file di LinuxRunner. Liberati %lf.";
 "%lf deleted from LinuxRunner's files. Freed %lld." = "%lf eliminata dai file di LinuxRunner. Liberati %lld.";
@@ -82,6 +85,7 @@
 "%lf is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lf è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%lf is now in FMLAB Linux. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lf è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%lf pt" = "%lf pt";
+"%lf will be deleted from Linux and from the iPhone." = "%lf verrà eliminato da Linux e dall'iPhone.";
 "%lf · %.0fs · %.1f display updates/s" = "%lf · %.0f s · %.1f aggiornamenti/s";
 "%lf · %@ · PID %@" = "%lf · %@ · PID %@";
 "%lf · %@ · PID %lf" = "%lf · %@ · PID %lf";
@@ -119,6 +123,7 @@
 "%lld %@ · ARM64" = "%lld %@ · ARM64";
 "%lld %lf · ARM64" = "%lld %lf · ARM64";
 "%lld %lld · ARM64" = "%lld %lld · ARM64";
+"%lld and everything inside it will be deleted from Linux and from the iPhone." = "%lld e tutto quello che contiene verranno eliminati da Linux e dall'iPhone.";
 "%lld deleted from LinuxRunner's files. Freed %@." = "%lld eliminata dai file di LinuxRunner. Liberati %@.";
 "%lld deleted from LinuxRunner's files. Freed %lf." = "%lld eliminata dai file di LinuxRunner. Liberati %lf.";
 "%lld deleted from LinuxRunner's files. Freed %lld." = "%lld eliminata dai file di LinuxRunner. Liberati %lld.";
@@ -127,6 +132,7 @@
 "%lld is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lld è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%lld is now in FMLAB Linux. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lld è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%lld pt" = "%lld pt";
+"%lld will be deleted from Linux and from the iPhone." = "%lld verrà eliminato da Linux e dall'iPhone.";
 "%lld · %.0fs · %.1f display updates/s" = "%lld · %.0f s · %.1f aggiornamenti/s";
 "%lld · %@ · PID %@" = "%lld · %@ · PID %@";
 "%lld · %@ · PID %lf" = "%lld · %@ · PID %lf";
@@ -355,9 +361,12 @@
 "Debugger attachment not detected · attach with StikDebug (its universal script) and return here" = "Debugger non collegato · collegalo con StikDebug (il suo script universale) e torna qui";
 "Decrease Font Size" = "Testo più piccolo";
 "Default Linux Session User" = "Utente predefinito delle sessioni Linux";
+"Delete" = "Elimina";
 "Delete %@?" = "Eliminare %@?";
 "Delete %lf?" = "Eliminare %lf?";
 "Delete %lld?" = "Eliminare %lld?";
+"Delete File?" = "Eliminare il file?";
+"Delete Folder?" = "Eliminare la cartella?";
 "Delete It (frees %@)" = "Eliminala (libera %@)";
 "Delete It (frees %lf)" = "Eliminala (libera %lf)";
 "Delete It (frees %lld)" = "Eliminala (libera %lld)";
@@ -1095,6 +1104,7 @@
 "Takes effect after LinuxRunner restarts." = "Vale dopo aver riaperto FMLAB Linux.";
 "Tap Retry; Details shows the installer log." = "Tocca Riprova; Dettagli mostra il registro dell'installazione.";
 "Tap Retry; if it repeats, the Debian servers may be updating." = "Tocca Riprova; se si ripete, forse i server Debian si stanno aggiornando.";
+"Tap a file to save it to Files or delete it. Swipe left to delete files and folders." = "Tocca un file per salvarlo in File o eliminarlo. Scorri verso sinistra per eliminare file e cartelle.";
 "Task Manager" = "Gestione attività";
 "Terminal" = "Terminale";
 "Terminal & Keyboard" = "Terminale e tastiera";
@@ -1135,6 +1145,7 @@
 "The installer could not be started. Restart LinuxRunner and try again." = "L'installazione non è partita. Riavvia FMLAB Linux e riprova.";
 "The installer stopped before finishing. Try again; if it repeats, export the Open Desktop Report." = "L'installazione si è fermata prima di finire. Riprova; se si ripete, esporta il rapporto di apertura del desktop.";
 "The installer stopped early" = "L'installazione si è fermata prima";
+"The item could not be deleted." = "Non è stato possibile eliminarlo.";
 "The package lists could not be verified or downloaded. Try again later." = "Non è stato possibile scaricare o verificare gli elenchi dei pacchetti. Riprova più tardi.";
 "The package servers did not offer a required package. Try again later." = "I server non hanno dato un pacchetto necessario. Riprova più tardi.";
 "The packages have conflicting dependencies. Export the Open Desktop Report and send it." = "I pacchetti hanno dipendenze in conflitto. Esporta il rapporto di apertura del desktop e mandalo.";
