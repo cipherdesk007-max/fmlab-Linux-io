@@ -48,6 +48,8 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 /// Avanti veloce (circa 3 volte) finché è attivo.
 @property (nonatomic) BOOL veloce;
 
+/// Cambia un'opzione del core mentre gira (es. disposizione degli schermi del DS quando giri il telefono).
+- (void)opzione:(NSString *)chiave valore:(NSString *)valore NS_SWIFT_NAME(opzione(_:valore:));
 - (void)avvia;
 - (void)ferma;  // salva la memoria del gioco e chiude il core
 - (void)tasto:(FMLABTasto)tasto premuto:(BOOL)premuto;

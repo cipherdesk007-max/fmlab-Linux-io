@@ -650,7 +650,9 @@ final class FMLABGiocoController: UIViewController {
         let controller: @Sendable (Notification) -> Void = { [weak self] _ in
             DispatchQueue.main.async { self?.pad.soloMenu = !GCController.controllers().compactMap(\.extendedGamepad).isEmpty }
         }
-        osservatori = [NotificationCenter.default.addObserver(forName: .GCControllerDidConnect, object: nil, queue: .main, using: controller),
+        osservatori = [NotificationCenter.default.addObserver(forName: Notification.Name("FMLABMisuraGioco"), object: nil, queue: .main) { [weak self] _ in
+                           self?.view.setNeedsLayout(); UIView.animate(withDuration: 0.2) { self?.view.layoutIfNeeded() } },
+                       NotificationCenter.default.addObserver(forName: .GCControllerDidConnect, object: nil, queue: .main, using: controller),
                        NotificationCenter.default.addObserver(forName: .GCControllerDidDisconnect, object: nil, queue: .main, using: controller)]
         controller(Notification(name: .GCControllerDidConnect))
         view.addSubview(pad)
@@ -680,10 +682,12 @@ final class FMLABGiocoController: UIViewController {
         let b = view.bounds, s = view.safeAreaLayoutGuide.layoutFrame
         let r = max(0.3, emulatore?.rapporto ?? 4.0 / 3.0)
         avviso.frame = s.insetBy(dx: 24, dy: 80)
+        // Nintendo DS: in verticale gli schermi uno sopra l'altro, in orizzontale affiancati (molto più grandi)
+        if emulatore?.tocco == true { emulatore?.opzione("desmume_screens_layout", valore: b.height >= b.width ? "top/bottom" : "left/right") }
         if b.height >= b.width {
             // verticale: gioco in alto, comandi sotto (come una console portatile)
             var w = s.width, h = w / r
-            let massimo = s.height * (r < 1 ? 0.62 : 0.5)
+            let massimo = s.height * (r < 1 ? 0.7 : 0.5)
             if h > massimo { h = massimo; w = h * r }
             let gioco = CGRect(x: s.midX - w / 2, y: s.minY + 8, width: w, height: h).integral
             emulatore?.vista.frame = gioco
@@ -693,7 +697,9 @@ final class FMLABGiocoController: UIViewController {
         } else {
             // orizzontale: gioco al centro a tutta altezza, comandi ai lati (sopra il gioco se lo spazio è poco)
             var h = s.height, w = h * r
-            if w > s.width { w = s.width; h = w / r }
+            // DS affiancati: ai lati resta lo spazio giusto per croce e tasti, così non coprono gli schermi
+            let laterale: CGFloat = emulatore?.tocco == true ? 128 : 0
+            if w > s.width - 2 * laterale { w = s.width - 2 * laterale; h = w / r }
             emulatore?.vista.frame = CGRect(x: s.midX - w / 2, y: s.midY - h / 2, width: w, height: h).integral
             pad.modo = .orizzontale
             pad.frame = b

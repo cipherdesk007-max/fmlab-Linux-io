@@ -65,6 +65,7 @@ static _Atomic uint32_t G_tasti, G_tastiController;
 static _Atomic int G_px, G_py, G_ptocco;
 static struct retro_system_av_info G_av;
 static BOOL G_avCambiato;
+static _Atomic bool G_varNuove;   // un'opzione è cambiata mentre il gioco gira
 
 // immagine: l'ultima schermata in BGRX 32 bit, presa dalla vista a ogni giro dello schermo
 static os_unfair_lock G_lockImmagine = OS_UNFAIR_LOCK_INIT;
@@ -113,7 +114,7 @@ static bool fmlabAmbiente(unsigned cmd, void *data) {
             static char tenuti[64][128]; static int giro;   // le stringhe restano valide per il core
             char *s = tenuti[giro++ % 64]; strlcpy(s, val.UTF8String, 128); v->value = s; return true;
         }
-        case RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE & ~RETRO_ENVIRONMENT_EXPERIMENTAL: *(bool *)data = false; return true;
+        case RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE & ~RETRO_ENVIRONMENT_EXPERIMENTAL: *(bool *)data = atomic_exchange(&G_varNuove, false); return true;
         case RETRO_ENVIRONMENT_SET_GEOMETRY & ~RETRO_ENVIRONMENT_EXPERIMENTAL: G_av.geometry = *(const struct retro_game_geometry *)data; G_avCambiato = YES; return true;
         case RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO & ~RETRO_ENVIRONMENT_EXPERIMENTAL: G_av = *(const struct retro_system_av_info *)data; G_avCambiato = YES; return true;
         case RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS & ~RETRO_ENVIRONMENT_EXPERIMENTAL:
@@ -216,6 +217,8 @@ static int16_t fmlabStato(unsigned port, unsigned device, unsigned index, unsign
     os_unfair_lock_lock(&G_lockImmagine);
     if (!G_nuova || !G_pixel) { os_unfair_lock_unlock(&G_lockImmagine); return; }
     unsigned w = G_w, h = G_h;
+    static unsigned vecchiaW, vecchiaH;
+    if (w != vecchiaW || h != vecchiaH) { vecchiaW = w; vecchiaH = h; dispatch_async(dispatch_get_main_queue(), ^{ [NSNotificationCenter.defaultCenter postNotificationName:@"FMLABMisuraGioco" object:nil]; }); }
     NSData *copia = [NSData dataWithBytes:G_pixel length:(size_t)w * h * 4];
     G_nuova = NO;
     os_unfair_lock_unlock(&G_lockImmagine);
@@ -376,6 +379,12 @@ static NSError *fmlabErrore(NSString *messaggio) {
 }
 
 - (BOOL)tocco { return [_core.nome isEqual:@"desmume"]; }
+- (void)opzione:(NSString *)chiave valore:(NSString *)valore {
+    [self lavoro:^{
+        if ([G_opzioni[chiave] isEqual:valore]) return;
+        G_opzioni[chiave] = valore; atomic_store(&G_varNuove, true);
+    }];
+}
 - (FMLABCore *)coreUsato { return _core; }
 - (NSInteger)disposizione {
     if ([@[@"fceumm", @"gambatte"] containsObject:_core.nome]) return 0;
@@ -384,6 +393,7 @@ static NSError *fmlabErrore(NSString *messaggio) {
 }
 - (double)fps { return G_av.timing.fps > 1 ? G_av.timing.fps : 60; }
 - (CGFloat)rapporto {
+    if (self.tocco) { os_unfair_lock_lock(&G_lockImmagine); unsigned w = G_w, h = G_h; os_unfair_lock_unlock(&G_lockImmagine); if (w && h) return (CGFloat)w / h; }
     struct retro_game_geometry g = G_av.geometry;
     if (g.aspect_ratio > 0.1) return g.aspect_ratio;
     return g.base_height ? (CGFloat)g.base_width / g.base_height : 4.0 / 3.0;

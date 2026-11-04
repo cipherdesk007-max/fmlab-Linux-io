@@ -2,6 +2,15 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.9.8
+- **Nintendo DS più grande**: in verticale gli schermi usano fino al 70% dell'altezza (quasi tutta la larghezza);
+  in orizzontale si mettono **affiancati** (circa un quarto più grandi), con lo spazio giusto ai lati per croce e
+  tasti, così non coprono gli schermi. Il cambio lo fa l'emulatore mentre giri il telefono e il pennino resta
+  giusto. Più in generale l'immagine si risistema da sola quando un gioco cambia misura.
+- **Codice FMLAB separato da LinuxRunner**: le funzioni FMLAB (aggiornamenti, informazioni, RunnerKit,
+  importazione delle distribuzioni, pulizia) sono uscite da `ManagerView.swift` in `app/FMLAB/FMLABFunzioni.swift`;
+  il Game Emulator sta in `app/FMLAB/Emulatore/`. Aggiornare la base LinuxRunner tocca meno codice nostro.
+
 ## 0.9.7
 - **Dati del motore controllati all'apertura**: ogni volta che apri o riapri FMLAB Linux (e il Game Emulator), al
   massimo ogni 10 minuti, invece che ogni 6 ore. Il file è di pochi KB.

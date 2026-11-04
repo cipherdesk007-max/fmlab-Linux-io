@@ -14,7 +14,7 @@ import glob, itertools, os, re, sys
 sys.path.insert(0, os.path.dirname(__file__))
 from traduzioni_it import TR, TR_OBJC
 
-SWIFT = "app/LinuxRunner/*.swift"
+SWIFT = ["app/LinuxRunner/*.swift", "app/FMLAB/*.swift", "app/FMLAB/Emulatore/*.swift"]
 OBJC = ["app/LinuxRunner/GUIViewController.m", "app/LinuxRunner/RuntimeBridge.m", "app/TerminalViewController.m",
         "app/AppDelegate.m", "app/SceneDelegate.m"]
 
@@ -71,7 +71,7 @@ def testi_primo_argomento(s, i):
 
 def chiavi_swift():
     chiavi = set()
-    for f in sorted(glob.glob(SWIFT)):
+    for f in sorted(f for g in SWIFT for f in glob.glob(g)):
         s = open(f, encoding="utf-8").read()
         for m in CHIAMATE.finditer(s):
             for k in testi_primo_argomento(s, m.end()):
