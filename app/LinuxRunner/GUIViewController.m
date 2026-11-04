@@ -1457,14 +1457,35 @@ static NSString *DesktopDegradedNotice(NSString *state){
 // split view and external displays included), scaled up to at least 540 pixels
 // on the short side for usable Linux UIs and capped at 1600x1200 to bound the
 // software-rendering and x11vnc cost. Multiples of 8; session.sh validates it.
-// FMLAB: "Phone" = 540 pixel high like 960×540, but as wide as the iPhone screen's proportions in landscape
-// (iPhone 15 Pro Max: 1168×540), so Immersive Landscape fills the whole screen without black bars.
+// FMLAB 0.7.0: "Phone" reads the screen and picks the sharpest size by itself.
+// It divides the screen's real pixels by a whole number (2, 3…) so that every Linux pixel becomes an exact
+// square of iPhone pixels (sharp, no uneven rows), choosing the division that gives 540–720 rows.
+// iPhone 15 Pro Max: 2796×1290 pixels ÷ 2 = 1398×644 (before: 1168×540 stretched 2.39×, slightly blocky).
+// If the phone is hot (thermal state Serious/Critical) or in Low Power Mode it uses the lighter 540-row size,
+// so the desktop never pushes a hot phone harder. An external monitor keeps the previous rule.
 - (NSString *)fmlabPhoneGeometry{
     UIWindow *target=([self externalOutputActive]?LRCurrentExternalDisplay.view.window:nil)?:self.view.window;
     CGSize s=target?target.bounds.size:UIScreen.mainScreen.bounds.size;
     CGFloat lungo=MAX(s.width,s.height),corto=MAX(1,MIN(s.width,s.height));
-    unsigned W=(unsigned)(540.0*lungo/corto);W=MIN(1600u,MAX(960u,W/8*8));
-    return [NSString stringWithFormat:@"%ux540",W];
+    unsigned W540=(unsigned)(540.0*lungo/corto);W540=MIN(1600u,MAX(960u,W540/8*8));
+    NSString *leggera=[NSString stringWithFormat:@"%ux540",W540];
+    if([self externalOutputActive])return leggera;
+    NSProcessInfoThermalState caldo=NSProcessInfo.processInfo.thermalState;
+    if(caldo>=NSProcessInfoThermalStateSerious||NSProcessInfo.processInfo.lowPowerModeEnabled){
+        [LRRuntimeBridge logCategory:@"FMLAB_DISPLAY" event:[NSString stringWithFormat:@"phone geometry=%@ reason=%@",leggera,caldo>=NSProcessInfoThermalStateSerious?@"thermal":@"low-power"]];
+        return leggera;
+    }
+    CGSize nativo=UIScreen.mainScreen.nativeBounds.size;   // real pixels, portrait (15 Pro Max: 1290×2796)
+    unsigned pl=(unsigned)MAX(nativo.width,nativo.height),pc=(unsigned)MIN(nativo.width,nativo.height);
+    for(unsigned k=2;k<=4&&pc>0;k++){
+        unsigned H=pc/k/2*2,W=pl/k/2*2;   // session.sh wants even sizes up to 2560×1600
+        if(H>=540&&H<=720&&W<=2560){
+            NSString *g=[NSString stringWithFormat:@"%ux%u",W,H];
+            [LRRuntimeBridge logCategory:@"FMLAB_DISPLAY" event:[NSString stringWithFormat:@"phone geometry=%@ native=%ux%u divisor=%u",g,pl,pc,k]];
+            return g;
+        }
+    }
+    return leggera;
 }
 - (NSString *)fitScreenGeometry{
     UIWindow *target=([self externalOutputActive]?LRCurrentExternalDisplay.view.window:nil)?:self.view.window;   // a connected monitor wins

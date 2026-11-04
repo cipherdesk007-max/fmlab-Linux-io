@@ -870,6 +870,7 @@
 "Performance" = "Prestazioni";
 "Persistent storage" = "Spazio permanente";
 "Phone" = "Telefono";
+"Phone reads the screen and picks the sharpest size: each Linux pixel becomes an exact square of iPhone pixels (iPhone 15 Pro Max: 1398 × 644, exactly 2×). If the phone is hot or in Low Power Mode it uses the lighter 540-row size." = "Telefono legge lo schermo e sceglie da solo la misura più nitida: ogni pixel di Linux diventa un quadrato preciso di pixel dell'iPhone (iPhone 15 Pro Max: 1398 × 644, esattamente 2×). Se il telefono è caldo o in Risparmio energetico usa la misura più leggera da 540 righe.";
 "Phone · Full Screen" = "Telefono · tutto schermo";
 "Played" = "Riprodotto";
 "Plays sound from Linux programs (browsers, media players, games) through the iPhone, mixed with other apps. Applies to the next desktop or app session. Sound stops while LinuxRunner is in the background." = "Fa sentire l'audio dei programmi Linux (browser, lettori, giochi) dall'iPhone, insieme alle altre app. Vale dalla prossima sessione del desktop o dell'app. L'audio si ferma quando FMLAB Linux è in sottofondo.";

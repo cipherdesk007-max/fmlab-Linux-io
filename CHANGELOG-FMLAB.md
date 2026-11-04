@@ -2,6 +2,15 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.7.0
+- **Desktop nitido, scelto da solo**: la risoluzione **Telefono** ora legge lo schermo e sceglie la misura più
+  nitida: divide i pixel veri dello schermo per un numero intero, così ogni pixel di Linux diventa un quadrato
+  preciso di pixel dell'iPhone. Su **iPhone 15 Pro Max** (2796×1290): **1398×644, esattamente 2×** (prima 1168×540
+  ingrandito 2,39 volte, un po' squadrato). Costa circa il 40% di calcolo in più del 540.
+- **Non scalda il telefono**: se all'avvio del desktop il telefono è caldo (stato termico Serio/Critico) o in
+  Risparmio energetico, usa da solo la misura leggera da 540 righe. La scelta finisce nei registri (`FMLAB_DISPLAY`).
+- Vale al prossimo avvio del desktop (Impostazioni del desktop → Riavvia desktop).
+
 ## 0.6.0
 - **Tutto in italiano, davvero**: prima restavano in inglese lo schermo del desktop (menu "Start / Reconnect Desktop",
   "Use iPhone as Trackpad", stato "Desktop ready · … display updates/s"), le righe di Impostazioni del desktop

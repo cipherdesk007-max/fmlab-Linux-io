@@ -1770,6 +1770,7 @@ private struct DesktopPreferencesView: View {
     var body: some View { Form {
         Section("Next Desktop Start") {
             Picker("Resolution", selection: $resolution) { Text("640 × 480").tag(0); Text("800 × 600").tag(1); Text("1024 × 768").tag(2); Text("960 × 540 · Wide").tag(3); Text("Fit Screen").tag(4); Text("Phone · Full Screen").tag(5) }
+            Text("Phone reads the screen and picks the sharpest size: each Linux pixel becomes an exact square of iPhone pixels (iPhone 15 Pro Max: 1398 × 644, exactly 2×). If the phone is hot or in Low Power Mode it uses the lighter 540-row size.").font(.caption).foregroundColor(.secondary)
             Toggle("Immersive Landscape", isOn: $autoFullscreen)
             Text("Applies after saving documents and stopping the current desktop. The existing session is not resized or interrupted.").font(.caption)
         }

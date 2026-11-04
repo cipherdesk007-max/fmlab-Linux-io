@@ -1011,4 +1011,5 @@ TR_OBJC = {
 "Waiting for system path": "In attesa del percorso di sistema",
 "Waiting for the package manager": "In attesa del gestore pacchetti",
 "“%@” is already running. Wait for it to finish, then try again.": "“%@” è già in corso. Aspetta che finisca, poi riprova.",
+"Phone reads the screen and picks the sharpest size: each Linux pixel becomes an exact square of iPhone pixels (iPhone 15 Pro Max: 1398 × 644, exactly 2×). If the phone is hot or in Low Power Mode it uses the lighter 540-row size.": "Telefono legge lo schermo e sceglie da solo la misura più nitida: ogni pixel di Linux diventa un quadrato preciso di pixel dell'iPhone (iPhone 15 Pro Max: 1398 × 644, esattamente 2×). Se il telefono è caldo o in Risparmio energetico usa la misura più leggera da 540 righe.",
 }
