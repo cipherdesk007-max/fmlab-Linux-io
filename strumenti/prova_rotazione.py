@@ -13,7 +13,7 @@ env = dict(os.environ, DISPLAY=D)
 
 def run(*a):
     r = subprocess.run(a, env=env, capture_output=True, text=True)
-    print("$", " ".join(a), "->", r.returncode, (r.stdout + r.stderr).strip()[-300:])
+    print("$", " ".join(a), "->", r.returncode, (r.stdout + r.stderr).strip()[-1500:])
     return r
 
 
@@ -62,6 +62,13 @@ def aspetta_misura(s, w0, h0, voluta, secondi=20):
 def main():
     xv = subprocess.Popen(["Xvfb", D, "-screen", "0", "1398x1398x24", "-nolisten", "tcp"])
     time.sleep(2)
+    run("xrandr", "-q")
+    # diagnostica passo per passo (se lo script fallisce si vede dove)
+    run("xrandr", "--newmode", "prova", "60", "1398", "1406", "1414", "1422", "644", "647", "650", "653")
+    run("xrandr", "-q", "--verbose")
+    run("xrandr", "--addmode", "screen", "prova")
+    run("xrandr", "--output", "screen", "--mode", "prova", "--fb", "1398x644")
+    run("xrandr", "-s", "1398x1398")
     run("xrandr", "-q")
     assert run("sh", RUOTA, "1398", "644").returncode == 0, "rotazione iniziale non riuscita"
     assert misura() == "1398x644", misura()
