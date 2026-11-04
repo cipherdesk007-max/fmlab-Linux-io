@@ -1653,17 +1653,17 @@ static int LRSharedDirectory(NSString *root,NSString *relative){
 }
 // FMLAB: eliminazione sicura relativa a una cartella aperta: niente percorsi assoluti, i collegamenti simbolici
 // vengono tolti come collegamenti (mai seguiti), profondità limitata.
-static int FMLABRemoveAt(int dirfd,const char *name,int depth){
-    struct stat st;if(fstatat(dirfd,name,&st,AT_SYMLINK_NOFOLLOW)<0)return errno;
-    if(!S_ISDIR(st.st_mode))return unlinkat(dirfd,name,0)<0?errno:0;
+static int FMLABRemoveAt(int base,const char *name,int depth){
+    struct stat st;if(fstatat(base,name,&st,AT_SYMLINK_NOFOLLOW)<0)return errno;
+    if(!S_ISDIR(st.st_mode))return unlinkat(base,name,0)<0?errno:0;
     if(depth>64)return ELOOP;
-    int fd=openat(dirfd,name,O_RDONLY|O_DIRECTORY|O_NOFOLLOW|O_CLOEXEC);if(fd<0)return errno;
+    int fd=openat(base,name,O_RDONLY|O_DIRECTORY|O_NOFOLLOW|O_CLOEXEC);if(fd<0)return errno;
     DIR *d=fdopendir(fd);if(!d){int e=errno;close(fd);return e;}
     struct dirent *entry;int failure=0;
     while((entry=readdir(d))){if(!strcmp(entry->d_name,".")||!strcmp(entry->d_name,".."))continue;
         int e=FMLABRemoveAt(dirfd(d),entry->d_name,depth+1);if(e){failure=e;break;}}
     closedir(d);if(failure)return failure;
-    return unlinkat(dirfd,name,AT_REMOVEDIR)<0?errno:0;
+    return unlinkat(base,name,AT_REMOVEDIR)<0?errno:0;
 }
 + (BOOL)deleteSharedItem:(NSString *)leaf relative:(NSString *)relative root:(NSString *)root error:(NSError **)error {
     if(!LRTransferString(leaf)||!lr_valid_leaf(leaf.UTF8String)){if(error)*error=lrError(EINVAL,@"Invalid filename.");return NO;}
