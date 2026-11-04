@@ -42,23 +42,67 @@ aggiornano da sole a ogni versione in [docs/screenshots/ultima-versione](docs/sc
 LiveContainer → **+** → **Installa dall'URL** e incolla:
 `https://github.com/cipherdesk007-max/fmlab-Linux-io/releases/download/ultima/FMLAB-Linux.ipa`
 
-## Cosa cambierà rispetto a LinuxRunner
+## Cosa c'è in più rispetto a LinuxRunner
 
-| Miglioria | Perché |
+Base: LinuxRunner 1.1.0 (build 900), con lo stesso motore (interprete ARM64, JIT, GPU Metal). Le versioni sono in
+[CHANGELOG-FMLAB.md](CHANGELOG-FMLAB.md).
+
+**App e installazione**
+
+| Miglioria | Com'è in LinuxRunner originale |
 |---|---|
-| **Distribuzioni cancellabili** ✅ | In LinuxRunner Alpine è dentro l'app e non si può togliere. Qui ogni distribuzione (Debian, Arch, Alpine) si scarica solo se la vuoi, mostra quanto pesa e si elimina con un tocco, anche quella di base |
-| **RunnerKit già dentro** ✅ | Si installa da solo la prima volta che Debian è pronto, e da Gestione app si aggiorna o si toglie: TouchPad, pannello Sistema e consigli di prestazioni di [FMlab - RunnerKit](https://github.com/cipherdesk007-max/FMlab---RunnerKit) senza installare niente a parte |
-| **Italiano e grafica FMLAB** ✅ (inglese di base, italiano da Impostazioni; dalla 0.6.0 anche desktop, menu e avvisi) | Stessi colori e stile di [FMLAB Cleaner](https://github.com/cipherdesk007-max/FMLAB-cleaner) |
-| **Aggiornamenti dall'app** ✅ | Come FMLAB Cleaner: l'app avvisa e si reinstalla sopra senza perdere i dati |
-| **Al passo con l'originale** ✅ | Quando esce un LinuxRunner più nuovo, l'app lo dice e il repository apre da solo una segnalazione ([workflow "originale"](.github/workflows/originale.yml)) |
-| **Prendi il Debian da LinuxRunner** ✅ | Se LinuxRunner è nello stesso LiveContainer, la Home mostra le sue distribuzioni: **Sposta** (istantaneo) o **Copia**, insieme alle tue impostazioni |
-| **Desktop a tutto schermo** ✅ | Risoluzione "Telefono": legge lo schermo e sceglie da sola la misura più nitida (iPhone 15 Pro Max: 1308×644 accanto alla fotocamera, esattamente 2×; 540 righe se il telefono è caldo); a schermo intero va da bordo a bordo, senza bande nere |
-| **Pulizia** ✅ | File temporanei e cache dell'app, e con RunnerKit anche dentro Linux |
-| **Backup del Debian** | Esporta/importa l'ambiente con un tocco |
+| **Si installa accanto all'originale** (`dev.fmlab.linux`): i suoi dati non vengono toccati | Un'app sola |
+| **Aggiornamenti dall'app**: avvisa della versione nuova e si reinstalla sopra da LiveContainer senza perdere niente | Si scarica e reinstalla a mano |
+| **Al passo con l'originale**: dice quando esce un LinuxRunner più nuovo e il repository apre da solo una segnalazione | — |
+| **Prendi tutto da LinuxRunner**: distribuzioni (Sposta istantaneo o Copia) e impostazioni (tema, terminale, mouse, grafica, desktop) | — |
+| **File rimasti di LinuxRunner**: anche dopo averlo tolto, le sue distribuzioni rimaste si prendono o si **eliminano** per liberare spazio (es. Alpine 730 MB) | Restano nascoste in LiveContainer |
+| **Logo, colori rosso e nero FMLAB**, stile di [FMLAB Cleaner](https://github.com/cipherdesk007-max/FMLAB-cleaner) | — |
+| **Italiano completo** (Impostazioni → FMLAB → Lingua): 984 testi, anche desktop, menu, avvisi, errori e stati del JIT; un controllo a ogni compilazione impedisce che un testo nuovo resti in inglese | Solo inglese |
 
-**Come si verifica che è davvero meglio**: gli stessi comandi cronometrati sulle due app, sullo stesso telefono
-(avvio, `apt install`, uno script Python, apertura del desktop, RAM usata), più lo spazio occupato visto dalla
-scheda App di FMLAB Cleaner. I numeri finiscono in questo README.
+**Distribuzioni e spazio**
+
+| Miglioria | Com'è in LinuxRunner originale |
+|---|---|
+| **Ogni distribuzione si elimina**, anche Alpine di base, e mostra quanto occupa | Alpine è dentro l'app e non si toglie |
+| **Pulizia** (Impostazioni → Pulizia): file temporanei di installazione, cartella temporanea e cache dell'app, con lo spazio liberato | — |
+| **File condivisi**: tocca un file → Salva in File / Elimina, scorri per eliminare file e cartelle (eliminazione sicura, i collegamenti non vengono seguiti) | Solo importa/esporta |
+
+**Desktop sul telefono**
+
+| Miglioria | Com'è in LinuxRunner originale |
+|---|---|
+| **Risoluzione "Telefono" automatica e nitida**: legge lo schermo e divide i pixel veri per un numero intero (15 Pro Max: **1308×644, 2× esatto**); con telefono caldo o Risparmio energetico usa la misura leggera da 540 righe | 960×540 ingrandito, un po' squadrato |
+| **Schermo intero vero**: niente margini e niente bande nere, solo una banda dal lato della fotocamera (Dynamic Island), riconosciuto da solo quando giri il telefono | Bande nere su tutti i lati |
+| **Si gira col telefono senza riavviare**: orizzontale ↔ verticale dal vivo (RandR), le finestre si rimpiccioliscono e restano dentro lo schermo nuovo; provato su Linux a ogni modifica | Misura fissa: per cambiarla si riavvia il desktop |
+| **Dice a RunnerKit cosa copre lo schermo** (Dynamic Island, indicatore Home) e che gira in FMLAB Linux (`/proc/ish/version`) | — |
+
+**Correzioni** (difetti dell'adattamento che non ci sono più): chiusura dell'app aprendo il menu Desktop in italiano
+(0.7.1), desktop che non partiva (0.8.2), menu del file che compariva in cima allo schermo (0.8.1).
+
+## Cosa fa RunnerKit al posto dell'app
+
+Niente di LinuxRunner originale è stato tolto. Alcune cose non sono nell'app perché le fa meglio, dentro Linux,
+**[FMlab - RunnerKit](https://github.com/cipherdesk007-max/FMlab---RunnerKit)**, che FMLAB Linux installa da sola
+la prima volta che Debian è pronto (Home → FMlab - RunnerKit; da Gestione app si aggiorna o si toglie):
+
+| Cosa | Dove |
+|---|---|
+| **TouchPad**: mouse e tastiera fluttuanti, pallini sul lato (in fila in basso col telefono in verticale), sempre fuori dalla Dynamic Island, tornano nel loro angolo quando giri il telefono | RunnerKit (la tastiera/trackpad dell'app restano come nell'originale) |
+| **Pulizia dentro Linux** (cache di apt, registri, file temporanei, sessioni vecchie del desktop) | RunnerKit; l'app la lancia da Impostazioni → Pulizia → *Pulisci anche dentro Linux* |
+| **Centro prestazioni e sistema** (RAM, CPU, disco, GPU, JIT, app), **RunnerBoost** | RunnerKit |
+| **Linux in italiano** (menu, programmi, Firefox, data) e tastiera secondo la lingua di Linux | RunnerKit (`rk italiano`) |
+| **Terminale** con barra di stato fissa e comandi `rk` | RunnerKit |
+| **Backup del Debian** | RunnerKit (`rk backup`) |
+| **Rotazione dello schermo** | L'app la comanda; dentro Linux usa Python + Xlib, che installa RunnerKit (senza, lo schermo resta fisso come nell'originale) |
+
+## Come si verifica
+
+- A ogni modifica GitHub compila l'app ([build](.github/workflows/build.yml)), controlla che ogni testo sia
+  tradotto, prova su Linux la rotazione e l'avvio della sessione ([prove-linux](.github/workflows/prove-linux.yml))
+  e fotografa l'app vera nel simulatore iPhone, in italiano ([screenshot](.github/workflows/screenshot.yml) →
+  [docs/screenshots/ultima-versione](docs/screenshots/ultima-versione)).
+- **Da fare**: misurare le due app sullo stesso telefono con gli stessi comandi (avvio, `apt install`, uno script
+  Python, apertura del desktop, RAM usata) e scrivere qui i numeri.
 
 ## Come è fatta
 
