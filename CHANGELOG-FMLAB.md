@@ -2,6 +2,12 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.8.4
+- **Anche le finestre si adattano quando giri il telefono**: dopo la rotazione ogni finestra resta dentro lo schermo
+  nuovo. Se non ci sta si rimpicciolisce, e si sposta in proporzione. Quelle a tutto schermo (massimizzate) le
+  rifà il gestore delle finestre. Provato con openbox vero (workflow `prove-linux`): una finestra larga 1200 diventa
+  642 in verticale e resta tutta visibile.
+
 ## 0.8.3
 - **Schermo intero davvero, senza bande nere ai lati**: la schermata che contiene il desktop (SwiftUI) rimetteva la
   zona sicura dell'iPhone (59 punti a destra e a sinistra), quindi il desktop 1398×644 restava rimpicciolito con
