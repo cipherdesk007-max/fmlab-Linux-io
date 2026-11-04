@@ -2,6 +2,11 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.9.4
+- Game Emulator: **icone dei giochi** nell'elenco. I giochi DS mostrano l'icona che hanno dentro (letta dal file);
+  per le altre console vale una copertina con lo stesso nome del gioco (.png/.jpg) accanto al file o in
+  *Giochi/Copertine*; se no un riquadro col colore e la sigla della console (NES, GB, GBC, GBA, SNES, PS1, DS).
+
 ## 0.9.3
 - Game Emulator, **cartelle dei giochi**: *Scegli la cartella dei giochi…* collega una tua cartella (Sul mio iPhone,
   iCloud Drive, chiavetta). FMLAB la legge da lì senza copiare nulla, anche nelle sottocartelle, e divide i giochi

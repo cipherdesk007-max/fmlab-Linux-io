@@ -17,6 +17,8 @@ struct FMLABGioco: Identifiable, Hashable {
     var nomeCartella: String? = nil
     /// Su iCloud e non ancora scaricato sull'iPhone.
     var inDownload = false
+    /// Icona del gioco (dentro i giochi DS) o copertina messa dall'utente accanto al gioco.
+    var icona: UIImage? = nil
     var nome: String { url.deletingPathExtension().lastPathComponent }
     static func == (a: Self, b: Self) -> Bool { a.url == b.url && a.inDownload == b.inDownload }
     func hash(into h: inout Hasher) { h.combine(url) }
@@ -43,7 +45,7 @@ enum FMLABArchivioGiochi {
     static func cerca(in base: URL, cartella: URL?, nomeCartella: String?) -> [FMLABGioco] {
         var trovati: [FMLABGioco] = []
         let interna = cartella == nil
-        let salta: Set<String> = ["BIOS", "Salvataggi", "Shared", ".linuxrunner"]
+        let salta: Set<String> = ["BIOS", "Salvataggi", "Copertine", "Shared", ".linuxrunner"]
         guard let e = FileManager.default.enumerator(at: base, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsPackageDescendants]) else { return [] }
         for case let u as URL in e {
             if e.level > 4 { e.skipDescendants(); continue }
@@ -62,9 +64,82 @@ enum FMLABArchivioGiochi {
             let est = vero.pathExtension.lowercased()
             // le tracce .bin di un disco con .cue accanto non sono giochi a sé
             if est == "bin", (try? FileManager.default.contentsOfDirectory(atPath: vero.deletingLastPathComponent().path))?.contains(where: { $0.lowercased().hasSuffix(".cue") }) == true { continue }
-            trovati.append(FMLABGioco(url: vero, core: c, cartella: cartella, nomeCartella: nomeCartella, inDownload: scaricare))
+            trovati.append(FMLABGioco(url: vero, core: c, cartella: cartella, nomeCartella: nomeCartella, inDownload: scaricare,
+                                      icona: scaricare ? nil : FMLABIcona.per(vero, core: c.nome)))
         }
         return trovati
+    }
+}
+
+/// Icone dei giochi: quella che i giochi DS hanno dentro (banner 32×32, 16 colori) oppure una copertina con lo
+/// stesso nome del gioco (.png/.jpg) accanto al file o in Giochi/Copertine.
+enum FMLABIcona {
+    static func per(_ url: URL, core: String) -> UIImage? {
+        let base = url.deletingPathExtension().lastPathComponent
+        let posti = [url.deletingLastPathComponent(), FMLABEmulatore.cartellaGiochi().appendingPathComponent("Copertine")]
+        for d in posti { for e in ["png", "jpg", "jpeg", "PNG", "JPG"] {
+            let f = d.appendingPathComponent(base).appendingPathExtension(e)
+            if let img = UIImage(contentsOfFile: f.path) { return img }
+        } }
+        return core == "desmume" ? ds(url) : nil
+    }
+    static func ds(_ url: URL) -> UIImage? {
+        guard let h = try? FileHandle(forReadingFrom: url) else { return nil }
+        defer { try? h.close() }
+        func leggi(_ da: UInt64, _ n: Int) -> Data? { try? h.seek(toOffset: da); let d = h.readData(ofLength: n); return d.count == n ? d : nil }
+        guard let testa = leggi(0x68, 4) else { return nil }
+        let banner = UInt64(testa.withUnsafeBytes { $0.loadUnaligned(as: UInt32.self) }.littleEndian)
+        guard banner > 0x200, let dati = leggi(banner, 0x240) else { return nil }
+        let bitmap = dati.subdata(in: 0x20..<0x220), tavolozza = dati.subdata(in: 0x220..<0x240)
+        var colori = [UInt32](repeating: 0, count: 16)
+        for i in 0..<16 {
+            let c = UInt16(tavolozza[i * 2]) | UInt16(tavolozza[i * 2 + 1]) << 8
+            let r = UInt32(c & 31) * 255 / 31, g = UInt32((c >> 5) & 31) * 255 / 31, b = UInt32((c >> 10) & 31) * 255 / 31
+            colori[i] = i == 0 ? 0 : (0xFF << 24) | (b << 16) | (g << 8) | r   // RGBA in memoria (little endian)
+        }
+        var px = [UInt32](repeating: 0, count: 32 * 32)
+        for ty in 0..<4 { for tx in 0..<4 { for y in 0..<8 { for x in stride(from: 0, to: 8, by: 2) {
+            let byte = bitmap[(ty * 4 + tx) * 32 + y * 4 + x / 2]
+            let riga = (ty * 8 + y) * 32 + tx * 8 + x
+            px[riga] = colori[Int(byte & 15)]; px[riga + 1] = colori[Int(byte >> 4)]
+        } } } }
+        guard px.contains(where: { $0 != 0 }) else { return nil }
+        let dataPx = px.withUnsafeBytes { Data($0) }
+        guard let prov = CGDataProvider(data: dataPx as CFData),
+              let img = CGImage(width: 32, height: 32, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: 128, space: CGColorSpaceCreateDeviceRGB(),
+                                bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue), provider: prov, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+        else { return nil }
+        return UIImage(cgImage: img)
+    }
+}
+
+/// Riquadro del gioco: l'icona vera se c'è, altrimenti il colore e la sigla della console.
+struct FMLABRiquadroGioco: View {
+    let gioco: FMLABGioco
+    private var sigla: (String, Color) {
+        switch gioco.core.nome {
+        case "fceumm": return ("NES", Color(red: 0.75, green: 0.15, blue: 0.15))
+        case "gambatte": return (gioco.url.pathExtension.lowercased() == "gbc" ? "GBC" : "GB", Color(red: 0.35, green: 0.45, blue: 0.25))
+        case "mgba": return ("GBA", Color(red: 0.35, green: 0.25, blue: 0.6))
+        case "bsnes": return ("SNES", Color(red: 0.45, green: 0.42, blue: 0.6))
+        case "pcsx_rearmed": return ("PS1", Color(red: 0.3, green: 0.3, blue: 0.35))
+        case "desmume": return ("DS", Color(red: 0.25, green: 0.4, blue: 0.6))
+        default: return ("?", .gray)
+        }
+    }
+    var body: some View {
+        ZStack {
+            if let img = gioco.icona {
+                Image(uiImage: img).resizable().interpolation(img.size.width <= 64 ? .none : .medium).aspectRatio(contentMode: img.size.width <= 64 ? .fit : .fill)
+            } else {
+                sigla.1
+                Text(sigla.0).font(.system(size: 13, weight: .heavy, design: .rounded)).foregroundColor(.white).minimumScaleFactor(0.6)
+            }
+            if gioco.inDownload { Color.black.opacity(0.45); Image(systemName: "icloud.and.arrow.down").foregroundColor(.white) }
+        }
+        .frame(width: 48, height: 48)
+        .background(Color(white: 0.15))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 
@@ -132,7 +207,7 @@ struct GameEmulatorView: View {
                     ForEach(lista) { gioco in
                         Button { apri(gioco) } label: {
                             HStack(spacing: 12) {
-                                Image(systemName: gioco.inDownload ? "icloud.and.arrow.down" : "play.circle.fill").foregroundColor(.accentColor).font(.title3)
+                                FMLABRiquadroGioco(gioco: gioco)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(gioco.nome).foregroundColor(.primary).lineLimit(2)
                                     Text(gioco.inDownload ? LF("In iCloud: tap to download") : (gioco.nomeCartella ?? "FMLAB Linux › Giochi")).font(.caption2).foregroundColor(.secondary).lineLimit(1)
@@ -153,7 +228,7 @@ struct GameEmulatorView: View {
                 Button { FMLABSceltaFile.apri(cartella: true) { aggiungiCartella($0.first) } } label: { Label("Choose Games Folder…", systemImage: "folder.badge.plus") }
                 Button { FMLABSceltaFile.apri(cartella: false) { importaFile($0) } } label: { Label("Import Games…", systemImage: "square.and.arrow.down") }
             } header: { Text("Game Folders") } footer: {
-                Text("Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched).")
+                Text("Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched). DS games show their own icon; for the others put a picture with the same name next to the game (e.g. Zelda.png beside Zelda.sfc) or in Giochi/Copertine.")
             }
             Section {
                 Toggle(isOn: $modoSoloGiochi) { VStack(alignment: .leading, spacing: 3) { Text("Games Only"); Text("FMLAB Linux opens straight into the Game Emulator. The Linux button brings back everything else.").font(.caption).foregroundColor(.secondary) } }

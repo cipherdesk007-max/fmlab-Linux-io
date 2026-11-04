@@ -260,15 +260,16 @@ static __weak FMLABEmulatore *G_attivo;
 
 + (void)preparaCartelle {
     (void)self.cartellaBIOS; (void)self.cartellaSalvataggi;
+    [NSFileManager.defaultManager createDirectoryAtURL:[self.cartellaGiochi URLByAppendingPathComponent:@"Copertine" isDirectory:YES] withIntermediateDirectories:YES attributes:nil error:nil];
     NSURL *leggimi = [self.cartellaGiochi URLByAppendingPathComponent:@"LEGGIMI - README.txt"];
     if (![NSFileManager.defaultManager fileExistsAtPath:leggimi.path]) {
         NSString *t = @"FMLAB Linux · Game Emulator\n\n"
             "IT  Metti qui i tuoi giochi (anche in sottocartelle): NES .nes, Game Boy .gb .gbc, GBA .gba, SNES .sfc .smc,\n"
             "    PlayStation .cue/.bin .chd .pbp, Nintendo DS .nds. Gli zip vanno decompressi. I BIOS (se servono) in BIOS,\n"
-            "    i salvataggi finiscono in Salvataggi. FMLAB non include né scarica giochi: usa solo file che possiedi.\n\n"
+            "    i salvataggi finiscono in Salvataggi, le copertine (stesso nome del gioco, .png/.jpg) in Copertine.\n    FMLAB non include né scarica giochi: usa solo file che possiedi.\n\n"
             "EN  Put your games here (subfolders are fine): NES .nes, Game Boy .gb .gbc, GBA .gba, SNES .sfc .smc,\n"
             "    PlayStation .cue/.bin .chd .pbp, Nintendo DS .nds. Unzip zipped games. BIOS files (if needed) go in BIOS,\n"
-            "    saves go to Salvataggi. FMLAB neither ships nor downloads games: only use files you own.\n";
+            "    saves go to Salvataggi, covers (same name as the game, .png/.jpg) go in Copertine.\n    FMLAB neither ships nor downloads games: only use files you own.\n";
         [t writeToURL:leggimi atomically:YES encoding:NSUTF8StringEncoding error:nil];
     }
 }

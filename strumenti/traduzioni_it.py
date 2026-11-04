@@ -745,7 +745,7 @@ TR.update({
 "Linux": "Linux",
 "Looking for games…": "Cerco i giochi…",
 "Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers and hardware keyboards work too.": "Emulatori nativi (core libretro), senza bisogno del JIT. I salvataggi vanno in Giochi/Salvataggi; i BIOS, se una console li vuole, in Giochi/BIOS. I comandi a schermo seguono la rotazione; funzionano anche controller e tastiere.",
-"Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched).": "Le tue cartelle restano dove sono: FMLAB le legge e basta. Scorri a sinistra per togliere una cartella dall'elenco (i file non vengono toccati).",
+"Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched). DS games show their own icon; for the others put a picture with the same name next to the game (e.g. Zelda.png beside Zelda.sfc) or in Giochi/Copertine.": "Le tue cartelle restano dove sono: FMLAB le legge e basta. Scorri a sinistra per togliere una cartella dall'elenco (i file non vengono toccati). I giochi DS mostrano la loro icona; per gli altri metti un'immagine con lo stesso nome accanto al gioco (es. Zelda.png vicino a Zelda.sfc) o in Giochi/Copertine.",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo
