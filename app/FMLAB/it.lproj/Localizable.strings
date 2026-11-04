@@ -38,6 +38,7 @@
 "%@ is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%@ è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%@ is now in FMLAB Linux. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%@ è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%@ pt" = "%@ pt";
+"%@ selected" = "%@ scelta";
 "%@ will be deleted from Linux and from the iPhone." = "%@ verrà eliminato da Linux e dall'iPhone.";
 "%@ · %.0fs · %.1f display updates/s" = "%@ · %.0f s · %.1f aggiornamenti/s";
 "%@ · %@ · PID %@" = "%@ · %@ · PID %@";
@@ -85,6 +86,7 @@
 "%lf is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lf è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%lf is now in FMLAB Linux. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lf è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%lf pt" = "%lf pt";
+"%lf selected" = "%lf scelta";
 "%lf will be deleted from Linux and from the iPhone." = "%lf verrà eliminato da Linux e dall'iPhone.";
 "%lf · %.0fs · %.1f display updates/s" = "%lf · %.0f s · %.1f aggiornamenti/s";
 "%lf · %@ · PID %@" = "%lf · %@ · PID %@";
@@ -132,6 +134,7 @@
 "%lld is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lld è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%lld is now in FMLAB Linux. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lld è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
 "%lld pt" = "%lld pt";
+"%lld selected" = "%lld scelta";
 "%lld will be deleted from Linux and from the iPhone." = "%lld verrà eliminato da Linux e dall'iPhone.";
 "%lld · %.0fs · %.1f display updates/s" = "%lld · %.0f s · %.1f aggiornamenti/s";
 "%lld · %@ · PID %@" = "%lld · %@ · PID %@";
@@ -808,6 +811,7 @@
 "New ordinary terminals log in as the selected user using the distribution's su. Existing terminals, managed desktops and administrative/package launches retain their identity." = "I nuovi terminali entrano con l'utente scelto tramite su della distribuzione. Terminali già aperti, desktop gestiti e avvii di amministrazione o pacchetti mantengono la loro identità.";
 "New password" = "Nuova password";
 "Next Desktop Start" = "Prossimo avvio del desktop";
+"Next launch" = "Al prossimo avvio";
 "No GUI session has started since LinuxRunner opened." = "Nessuna sessione grafica è partita da quando hai aperto FMLAB Linux.";
 "No applications match this filter." = "Nessuna applicazione con questo filtro.";
 "No connection to GitHub: try again later." = "Nessuna connessione con GitHub: riprova più tardi.";
@@ -837,6 +841,7 @@
 "Notices & Credits" = "Note e riconoscimenti";
 "Now %.0f MB" = "Ora %.0f MB";
 "Now %.0f%% · peak %.0f%% (100%% = one core)" = "Ora %.0f%% · picco %.0f%% (100%% = un core)";
+"Now close FMLAB Linux: swipe up from the bottom, hold, then swipe the app away. Open it again and it starts with the new distribution." = "Ora chiudi FMLAB Linux: scorri dal basso verso l'alto, tieni premuto, poi butta via l'app verso l'alto. Riaprila e parte con la nuova distribuzione.";
 "OK" = "OK";
 "Off in Settings" = "Spento nelle Impostazioni";
 "Official Debian packages, checked against Debian's signed index. The desktop, sound and account tools are added in the next steps." = "Pacchetti ufficiali Debian, controllati con l'indice firmato di Debian. Desktop, audio e strumenti per gli account si aggiungono nei passi successivi.";
@@ -844,6 +849,7 @@
 "On My iPhone / app folder" = "Sul mio iPhone / cartella dell'app";
 "On by default from build 884. Applies after fully closing and reopening LinuxRunner. Uses the same Asbestos engine with fewer dispatch steps per memory access (Mac: Python and Node startup 4-5% faster, ABI suites and browser tests pass). Turn off to restore the previous memory dispatch path if an app misbehaves." = "Attiva di base dalla build 884. Vale dopo aver chiuso del tutto e riaperto FMLAB Linux. Usa lo stesso motore Asbestos con meno passaggi per ogni accesso alla memoria (su Mac: avvio di Python e Node più veloce del 4-5%, test ABI e browser superati). Spegnila per tornare al metodo precedente se un'app si comporta male.";
 "One time, so Linux programs can play sound. The desktop starts afterwards even without network." = "Una volta sola, così i programmi Linux possono suonare. Dopo il desktop parte anche senza rete.";
+"Only one distribution runs at a time. After choosing, close FMLAB Linux from the app switcher and open it again. Files are preserved." = "Funziona una distribuzione alla volta. Dopo averla scelta, chiudi FMLAB Linux dal multitasking e riaprila. I file restano.";
 "Open" = "Apri";
 "Open Desktop" = "Apri desktop";
 "Open Desktop Starts" = "Apri desktop avvia";
@@ -985,6 +991,7 @@
 "RunnerKit (TouchPad, Center, Cleanup, RunnerBoost, rk command) installs itself the first time: it takes a minute and needs a connection." = "RunnerKit (TouchPad, Centro, Pulizia, RunnerBoost, comando rk) si installa da solo la prima volta: serve un minuto e la connessione.";
 "RunnerKit installed: TouchPad, Center, Cleanup and the rk command" = "RunnerKit installato: TouchPad, Centro, Pulizia e il comando rk";
 "Running" = "In funzione";
+"Running · until relaunch" = "In funzione · fino alla riapertura";
 "Runtime" = "Linux";
 "Runtime Auto Start (next launch)" = "Avvio automatico di Linux (dal prossimo avvio)";
 "Runtime Diagnostics" = "Diagnostica di Linux";
@@ -1104,7 +1111,9 @@
 "Takes effect after LinuxRunner restarts." = "Vale dopo aver riaperto FMLAB Linux.";
 "Tap Retry; Details shows the installer log." = "Tocca Riprova; Dettagli mostra il registro dell'installazione.";
 "Tap Retry; if it repeats, the Debian servers may be updating." = "Tocca Riprova; se si ripete, forse i server Debian si stanno aggiornando.";
+"Tap a distribution to use it: close the app from the app switcher and open it again. Files are preserved." = "Tocca una distribuzione per usarla: poi chiudi l'app dal multitasking e riaprila. I file restano.";
 "Tap a file to save it to Files or delete it. Swipe left to delete files and folders." = "Tocca un file per salvarlo in File o eliminarlo. Scorri verso sinistra per eliminare file e cartelle.";
+"Tap to use" = "Tocca per usarla";
 "Task Manager" = "Gestione attività";
 "Terminal" = "Terminale";
 "Terminal & Keyboard" = "Terminale e tastiera";
@@ -1242,6 +1251,9 @@
 "Unknown" = "Sconosciuto";
 "Unpacking Alpine Linux…" = "Estrazione di Alpine Linux…";
 "Update RunnerKit" = "Aggiorna RunnerKit";
+"Use %@?" = "Usare %@?";
+"Use %lf?" = "Usare %lf?";
+"Use %lld?" = "Usare %lld?";
 "Use 1–32 lowercase ASCII letters, digits, underscores or hyphens, starting with a letter or underscore." = "Usa da 1 a 32 lettere minuscole, cifre, trattini bassi o trattini, iniziando con una lettera o un trattino basso.";
 "Use 1–32 lowercase letters, digits, - or _, starting with a letter." = "Usa da 1 a 32 lettere minuscole, cifre, - o _, iniziando con una lettera.";
 "Use Full-Screen Desktop" = "Usa il desktop a tutto schermo";
@@ -1287,6 +1299,7 @@
 "You already have the latest version (%lf)." = "Hai già l'ultima versione (%lf).";
 "You already have the latest version (%lld)." = "Hai già l'ultima versione (%lld).";
 "You already have these distributions in LinuxRunner. Take them here without reinstalling anything (close LinuxRunner first)." = "Hai già queste distribuzioni in LinuxRunner. Prendile qui senza reinstallare niente (chiudi prima LinuxRunner).";
+"You stay on this distribution: the change you chose is cancelled." = "Resti su questa distribuzione: il cambio che avevi scelto viene annullato.";
 "iOS 26 and later: StikDebug attaches with its universal script; return here and LinuxRunner prepares its code region while it is attached. Support on iOS 26 has not been verified on a device yet." = "iOS 26 e successivi: StikDebug si collega con il suo script universale; torna qui e FMLAB Linux prepara la sua zona di codice mentre è collegato. Su iOS 26 non è ancora stato provato su un dispositivo.";
 "iOS Files: On My iPhone/iPad → LinuxRunner → Shared → " = "App File: Sul mio iPhone/iPad → FMLAB Linux → Shared → ";
 "iOS Network Path" = "Rete di iOS";

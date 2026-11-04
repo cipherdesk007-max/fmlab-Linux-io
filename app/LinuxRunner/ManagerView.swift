@@ -338,6 +338,8 @@ struct ManagerView: View {
     @StateObject private var fmlabAggiornamenti = FMLABAggiornamenti()
     @StateObject private var fmlabImporta = FMLABImporta()
     @State private var fmlabDaEliminare: LinuxEnvironment?
+    @State private var fmlabScelta: LinuxEnvironment?      // Home: distribuzione toccata, da confermare
+    @State private var fmlabSceltaFatta: String?           // Home: nome scelto, avviso "chiudi e riapri"
     private let sessionTimer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
     /// What the full-screen graphical cover shows. The request is the cover's
     /// item, so its content receives the request itself: separate @State
@@ -413,7 +415,7 @@ struct ManagerView: View {
             guard let root = importRoot else { return }
             transfer(result: result, root: root)
         }
-        .alert("LinuxRunner", isPresented: Binding(get: { manager.error != nil }, set: { if !$0 { DispatchQueue.main.async { manager.error = nil } } })) {
+        .alert("FMLAB Linux", isPresented: Binding(get: { manager.error != nil }, set: { if !$0 { DispatchQueue.main.async { manager.error = nil } } })) {
             Button("OK") { manager.error = nil }
         } message: { Text(manager.error ?? "") }
         .onChange(of: phase) { _ in manager.refresh() }
@@ -544,9 +546,35 @@ struct ManagerView: View {
                     HStack { if let image = manager.applicationIcons[app.launchKey] { Image(uiImage: image).resizable().scaledToFit().frame(width: 28, height: 28) } else { Image(systemName: "app").frame(width: 28) }; Text(app.name); Spacer(); Image(systemName: "arrow.up.right").font(.caption).foregroundColor(.secondary) }
                 } } }
             }
-            Section("Installed Distributions") { ForEach(manager.environments) { environment in
-                HStack { Image(systemName: "shippingbox").foregroundColor(.accentColor); VStack(alignment: .leading, spacing: 4) { Text(environment.name); Text(manager.size(environment)).font(.caption).foregroundColor(.secondary) }; Spacer(); Text(LF(manager.active(environment) ? "Running" : "Installed")).font(.caption).foregroundColor(.secondary) }
-            } }
+            Section { ForEach(manager.environments) { environment in
+                // FMLAB: un tocco sceglie la distribuzione per il prossimo avvio, senza passare da Distribuzioni
+                let attiva = manager.active(environment)
+                let prossima = LRRuntimeBridge.nextRootName() == environment.rootfsName
+                let cambio = manager.environments.contains { manager.active($0) && LRRuntimeBridge.nextRootName() != $0.rootfsName }
+                Button { if !prossima { fmlabScelta = environment } } label: {
+                    HStack { Image(systemName: "shippingbox").foregroundColor(.accentColor)
+                        VStack(alignment: .leading, spacing: 4) { Text(environment.name).foregroundColor(.primary); Text(manager.size(environment)).font(.caption).foregroundColor(.secondary) }
+                        Spacer()
+                        if attiva { Text(LF(cambio ? "Running · until relaunch" : "Running")).font(.caption).foregroundColor(.green) }
+                        else if prossima { Label(LF("Next launch"), systemImage: "checkmark.circle.fill").font(.caption).foregroundColor(.accentColor) }
+                        else { Text(LF("Tap to use")).font(.caption).foregroundColor(.secondary) }
+                    }
+                }.accessibilityIdentifier("home-distro-" + environment.rootfsName)
+            } } header: { Text("Installed Distributions") } footer: {
+                if manager.environments.count > 1 { Text("Tap a distribution to use it: close the app from the app switcher and open it again. Files are preserved.") }
+            }
+            .alert(String(format: LF("Use %@?"), fmlabScelta?.name ?? ""), isPresented: Binding(get: { fmlabScelta != nil }, set: { if !$0 { fmlabScelta = nil } })) {
+                Button("Use on Next Launch") {
+                    if let e = fmlabScelta { LRRuntimeBridge.setNextRootName(e.rootfsName); fmlabSceltaFatta = manager.active(e) ? nil : e.name; manager.refresh() }
+                    fmlabScelta = nil
+                }
+                Button("Cancel", role: .cancel) { fmlabScelta = nil }
+            } message: {
+                Text(fmlabScelta.map { manager.active($0) } == true ? LF("You stay on this distribution: the change you chose is cancelled.") : LF("Only one distribution runs at a time. After choosing, close FMLAB Linux from the app switcher and open it again. Files are preserved."))
+            }
+            .alert(String(format: LF("%@ selected"), fmlabSceltaFatta ?? ""), isPresented: Binding(get: { fmlabSceltaFatta != nil }, set: { if !$0 { fmlabSceltaFatta = nil } })) {
+                Button("OK") { fmlabSceltaFatta = nil }
+            } message: { Text("Now close FMLAB Linux: swipe up from the bottom, hold, then swipe the app away. Open it again and it starts with the new distribution.") }
             if !LRRuntimeBridge.isRunning() { Section { Text(LRRuntimeBridge.runtimeStatus()).foregroundColor(.orange) } }
         }.listStyle(.insetGrouped).navigationTitle("Home").navigationBarTitleDisplayMode(.inline)
             .toolbar { Button { manager.refresh() } label: { Image(systemName: "arrow.clockwise") }.accessibilityLabel("Refresh") }

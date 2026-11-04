@@ -685,6 +685,15 @@ TR.update({
 "running guest processes": "processi Linux in funzione",
 "%.1f s": "%.1f s",
 "%.1f%% of a core": "%.1f%% di un core",
+"Running · until relaunch": "In funzione · fino alla riapertura",
+"Next launch": "Al prossimo avvio",
+"Tap to use": "Tocca per usarla",
+"Tap a distribution to use it: close the app from the app switcher and open it again. Files are preserved.": "Tocca una distribuzione per usarla: poi chiudi l'app dal multitasking e riaprila. I file restano.",
+"Use %@?": "Usare %@?",
+"You stay on this distribution: the change you chose is cancelled.": "Resti su questa distribuzione: il cambio che avevi scelto viene annullato.",
+"Only one distribution runs at a time. After choosing, close FMLAB Linux from the app switcher and open it again. Files are preserved.": "Funziona una distribuzione alla volta. Dopo averla scelta, chiudi FMLAB Linux dal multitasking e riaprila. I file restano.",
+"%@ selected": "%@ scelta",
+"Now close FMLAB Linux: swipe up from the bottom, hold, then swipe the app away. Open it again and it starts with the new distribution.": "Ora chiudi FMLAB Linux: scorri dal basso verso l'alto, tieni premuto, poi butta via l'app verso l'alto. Riaprila e parte con la nuova distribuzione.",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

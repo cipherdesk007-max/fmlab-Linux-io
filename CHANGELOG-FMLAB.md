@@ -2,6 +2,13 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.8.7
+- **Cambio distribuzione con un tocco dalla Home**: in *Distribuzioni installate* tocchi quella che vuoi, confermi, e
+  l'app ti dice di chiuderla dal multitasking e riaprirla. Accanto a ognuna si vede se è *In funzione*, *Al prossimo
+  avvio* o *Tocca per usarla*. Toccando quella in funzione si annulla un cambio già scelto. Prima bisognava andare in
+  Distribuzioni → distribuzione → Usa al prossimo avvio.
+- Gli avvisi dell'app hanno il titolo FMLAB Linux (prima LinuxRunner).
+
 ## 0.8.6
 - **Terminale nitido**: a volte (anche in LinuxRunner originale) il terminale si apriva col testo sfocato. Su iOS
   recenti la schermata si apre con un'animazione che la ingrandisce da piccola, e il testo restava disegnato alla
