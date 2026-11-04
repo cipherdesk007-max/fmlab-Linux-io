@@ -4,9 +4,10 @@ Linux vero sull'iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), versione FMLA
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. Niente jailbreak, niente macchina virtuale:
 i programmi Linux ARM64 girano dentro l'app grazie a un interprete e a uno strato che traduce le chiamate di sistema.
 
-> **Stato: 0.1.0 — primo passo.** È LinuxRunner 1.1.0 (build 900) com'è, con nome e identificativo propri
-> (`dev.fmlab.linux`): si installa **accanto** a LinuxRunner senza toccarne i dati. Le migliorie arrivano dopo,
-> una alla volta, ognuna misurata contro l'originale.
+> **Stato: 0.2.0.** È LinuxRunner 1.1.0 (build 900) con nome, logo e colori FMLAB (rosso e nero), identificativo
+> proprio (`dev.fmlab.linux`, si installa **accanto** a LinuxRunner senza toccarne i dati), aggiornamenti dall'app
+> come FMLAB Cleaner e avviso quando esce un LinuxRunner originale più nuovo. Le altre migliorie arrivano una alla
+> volta, ognuna misurata contro l'originale.
 
 ## Installazione
 
@@ -19,8 +20,9 @@ LiveContainer → **+** → **Installa dall'URL** e incolla:
 |---|---|
 | **Distribuzioni a scelta e cancellabili** | In LinuxRunner Alpine è dentro l'app e non si può togliere. Qui ogni distribuzione (Debian, Arch, Alpine) si scarica solo se la vuoi, mostra quanto pesa e si elimina con un tocco, anche quella di base |
 | **RunnerKit già dentro** | TouchPad, pannello Sistema e consigli di prestazioni di [FMlab - RunnerKit](https://github.com/cipherdesk007-max/FMlab---RunnerKit) senza installare niente a parte |
-| **Italiano e grafica FMLAB** | Stessi colori e stile di [FMLAB Cleaner](https://github.com/cipherdesk007-max/FMLAB-cleaner) |
-| **Aggiornamenti dall'app** | Come FMLAB Cleaner: l'app avvisa e si reinstalla sopra senza perdere i dati |
+| **Italiano e grafica FMLAB** (logo e colori ✅, italiano in corso) | Stessi colori e stile di [FMLAB Cleaner](https://github.com/cipherdesk007-max/FMLAB-cleaner) |
+| **Aggiornamenti dall'app** ✅ | Come FMLAB Cleaner: l'app avvisa e si reinstalla sopra senza perdere i dati |
+| **Al passo con l'originale** ✅ | Quando esce un LinuxRunner più nuovo, l'app lo dice e il repository apre da solo una segnalazione ([workflow "originale"](.github/workflows/originale.yml)) |
 | **Backup e trasferimento del Debian** | Esporta/importa l'ambiente, anche per portarci quello che hai già in LinuxRunner |
 
 **Come si verifica che è davvero meglio**: gli stessi comandi cronometrati sulle due app, sullo stesso telefono
@@ -34,8 +36,9 @@ scheda App di FMLAB Cleaner. I numeri finiscono in questo README.
   Il README originale è in [README.LinuxRunner.md](README.LinuxRunner.md), le istruzioni di compilazione in
   [docs/BUILDING.md](docs/BUILDING.md).
 - Compilata **gratis da GitHub Actions su Mac** ([.github/workflows/build.yml](.github/workflows/build.yml)) con
-  `scripts/build-ipa.sh --unsigned`: variante interprete + grafica software (senza JIT e senza GPU Metal, che
-  richiedono dipendenze grafiche molto pesanti e arriveranno dopo).
+  `scripts/build-ipa.sh --unsigned`, con il JIT come l'originale. La GPU Metal richiede dipendenze grafiche pesanti
+  (virglrenderer, libepoxy, ANGLE): le compila una volta il [workflow "gpu"](.github/workflows/gpu.yml), restano in
+  cache e da lì entrano in ogni versione.
 - Le correzioni di LinuxRunner originale si riportano qui a ogni loro versione.
 - Storico delle versioni FMLAB: [CHANGELOG-FMLAB.md](CHANGELOG-FMLAB.md).
 

@@ -1600,7 +1600,7 @@ static NSString *DesktopDegradedNotice(NSString *state){
     // its own children. Never signal guest init, shell sessions or whole runtime.
     [LRRuntimeBridge logCategory:@"GUI" event:@"display disconnected; session cleanup requested"];
 }
-- (void)resetModifierButtons{for(UIButton *button in _modifierButtons){button.selected=NO;[button setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];}}
+- (void)resetModifierButtons{for(UIButton *button in _modifierButtons){button.selected=NO;[button setTitleColor:[UIColor colorWithRed:0xBF/255.0 green:0x6D/255.0 blue:0x6F/255.0 alpha:1] forState:UIControlStateNormal];}}
 - (void)background{if(_desktopMode)[LRRuntimeBridge desktopTrace:@"lifecycle" result:@"info" detail:[NSString stringWithFormat:@"app inactive start-state=%ld",(long)_startState]];[_surface releaseInput];[self resetModifierButtons];[_surface resignFirstResponder];[LRRuntimeBridge logCategory:@"GUI" event:@"scene inactive; input released; guest session retained"];
     // Avoid retaining a screen containing guest data in iOS's app switcher.
     _surface.hidden=YES;
@@ -1612,7 +1612,7 @@ static NSString *DesktopDegradedNotice(NSString *state){
     if([title isEqual:@"Close"]&&_desktopMode){[self done];return;}
     if([title isEqual:@"Close"]){[self stop];[self message:@"Display closed. CLI remains functional."];return;}
     NSDictionary *modifiers=@{@"Shift":@(UIKeyModifierShift),@"Ctrl":@(UIKeyModifierControl),@"Alt":@(UIKeyModifierAlternate),@"Super":@(UIKeyModifierCommand)};
-    if(modifiers[title]){[_surface toggleModifier:[modifiers[title] unsignedIntegerValue]];button.selected=!button.selected;[button setTitleColor:button.selected?UIColor.systemRedColor:UIColor.systemBlueColor forState:UIControlStateNormal];return;}
+    if(modifiers[title]){[_surface toggleModifier:[modifiers[title] unsignedIntegerValue]];button.selected=!button.selected;[button setTitleColor:button.selected?UIColor.whiteColor:[UIColor colorWithRed:0xBF/255.0 green:0x6D/255.0 blue:0x6F/255.0 alpha:1] forState:UIControlStateNormal];return;}
     NSDictionary *symbols=@{@"Esc":@0xff1b,@"Tab":@0xff09,@"←":@0xff51,@"↑":@0xff52,@"↓":@0xff54,@"→":@0xff53};if(symbols[title])[_surface stroke:[symbols[title] unsignedIntValue]];
 }
 - (void)detachViewer{

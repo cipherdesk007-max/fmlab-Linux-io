@@ -4,6 +4,10 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>FMLABVersion</key>
+	<string>$(FMLAB_VERSION)</string>
+	<key>FMLABBaseLinuxRunner</key>
+	<string>$(FMLAB_BASE_LINUXRUNNER)</string>
 	<key>CFBundleDisplayName</key>
 	<string>FMLAB Linux</string>
 	<key>CFBundleExecutable</key>

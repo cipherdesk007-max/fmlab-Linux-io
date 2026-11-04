@@ -1,0 +1,36 @@
+name: originale
+
+# Ogni giorno guarda se LinuxRunner originale (mxhm11cr/LinuxRunner) ha pubblicato una versione più nuova di
+# quella da cui parte FMLAB Linux (file BASE-LINUXRUNNER). Se sì, apre una segnalazione: arriva per email
+# e ricorda di riportare le loro novità qui.
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  controlla:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Versione più nuova di LinuxRunner?
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          base=$(tr -d '[:space:]' < BASE-LINUXRUNNER)
+          tag=$(gh api repos/mxhm11cr/LinuxRunner/releases/latest --jq .tag_name)
+          v=${tag#v}
+          echo "Base FMLAB: $base · LinuxRunner originale: $v"
+          piu_nuova=$(python3 -c "import sys; a=[int(x) for x in sys.argv[1].split('.')]; b=[int(x) for x in sys.argv[2].split('.')]; print('si' if a>b else 'no')" "$v" "$base")
+          [ "$piu_nuova" = si ] || exit 0
+          titolo="LinuxRunner originale $v è uscito (FMLAB Linux è su $base)"
+          if gh issue list --state open --search "$titolo in:title" --json number --jq 'length' | grep -q '^0$'; then
+            gh issue create --title "$titolo" --body "È uscita la versione **$v** di [LinuxRunner](https://github.com/mxhm11cr/LinuxRunner/releases/tag/$tag).
+
+          Da fare: riportare le loro novità in FMLAB Linux, aggiornare \`BASE-LINUXRUNNER\` a $v, provare e pubblicare.
+          Note della loro versione: https://github.com/mxhm11cr/LinuxRunner/releases/tag/$tag"
+          fi

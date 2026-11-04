@@ -335,6 +335,7 @@ struct ManagerView: View {
     @AppStorage("LinuxRunner.keepScreenAwake") private var keepScreenAwake = true
     @AppStorage("LinuxRunner.experimentalMemoryPCFusion") private var memoryPCFusion = true
     @AppStorage("LinuxRunner.appearance") private var appearance = "dark"
+    @StateObject private var fmlabAggiornamenti = FMLABAggiornamenti()
     private let sessionTimer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
     /// What the full-screen graphical cover shows. The request is the cover's
     /// item, so its content receives the request itself: separate @State
@@ -368,8 +369,9 @@ struct ManagerView: View {
                 .tabItem { Label("Settings", systemImage: "slider.horizontal.3") }.tag(3)
         }
         .overlay(alignment: .bottom) { InstallProgressCard() }
-        .accentColor(Color(red: 0.36, green: 0.68, blue: 0.98))
+        .accentColor(Color(red: 0xBF / 255, green: 0x6D / 255, blue: 0x6F / 255))
         .preferredColorScheme(appearance == "system" ? nil : appearance == "light" ? .light : .dark)
+        .task { await fmlabAggiornamenti.controlla(); await fmlabAggiornamenti.controllaOriginale() }
         .onAppear {
             desktopSummary = LRRuntimeBridge.desktopSessionSummary()
             // First launch without Linux, or setup waiting for its relaunch/account step.
@@ -469,8 +471,13 @@ struct ManagerView: View {
         List {
             Section {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("LinuxRunner").font(.system(size: 34, weight: .bold, design: .rounded)).tracking(-1)
-                    Text("Your Linux workspace, on iPhone.").font(.subheadline).foregroundColor(.secondary)
+                    HStack(spacing: 12) {
+                        Image("FMLABLogo").resizable().scaledToFit().frame(width: 54, height: 54).cornerRadius(12)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("FMLAB Linux").font(.system(size: 30, weight: .bold, design: .rounded)).tracking(-1)
+                            Text("Linux vero sul tuo iPhone.").font(.subheadline).foregroundColor(.secondary)
+                        }
+                    }
                     HStack(spacing: 7) {
                         Circle().fill(LRRuntimeBridge.isRunning() ? Color.green : Color.orange).frame(width: 6, height: 6)
                         Text(activeEnvironment?.name ?? LRRuntimeBridge.runtimeStatus()).font(.caption)
@@ -480,13 +487,16 @@ struct ManagerView: View {
                     if !LRRuntimeBridge.isRunning() {
                         Button(action: startRuntime) {
                             HStack { if startingRuntime { ProgressView().tint(.white) } else { Image(systemName: "power") }; Text(startingRuntime ? "Starting Runtime…" : "Start Linux Runtime").fontWeight(.semibold); Spacer(); Image(systemName: "arrow.right") }
-                                .padding(16).foregroundColor(.white).background(Color(red: 0.12, green: 0.30, blue: 0.52)).cornerRadius(12)
+                                .padding(16).foregroundColor(.white).background(Color(red: 0x7A / 255, green: 0x33 / 255, blue: 0x35 / 255)).cornerRadius(12)
                         }.buttonStyle(.plain).disabled(startingRuntime || !LRRuntimeBridge.canStartRuntime()).accessibilityIdentifier("Start Linux Runtime")
                     } else { Button(action: openDesktop) {
                         HStack { Image(systemName: "desktopcomputer"); Text(desktopAlive ? "Resume Desktop" : "Open Desktop").fontWeight(.semibold); Spacer(); Image(systemName: "arrow.up.right") }
-                            .padding(16).foregroundColor(.white).background(Color(red: 0.12, green: 0.30, blue: 0.52)).cornerRadius(12)
+                            .padding(16).foregroundColor(.white).background(Color(red: 0x7A / 255, green: 0x33 / 255, blue: 0x35 / 255)).cornerRadius(12)
                     }.buttonStyle(.plain).accessibilityIdentifier("Open Desktop") }
                 }.padding(.vertical, 12)
+            }
+            if fmlabAggiornamenti.nuova != nil {
+                Section { FMLABAvvisoAggiornamento(agg: fmlabAggiornamenti) }
             }
             if LRRuntimeBridge.isRunning() {
                 Section("Status") {
@@ -561,6 +571,7 @@ struct ManagerView: View {
     }
     private var preferences: some View {
         List {
+            FMLABInformazioni(agg: fmlabAggiornamenti)
             Section("Appearance") { Picker(selection: $appearance) { Text("Dark").tag("dark"); Text("Light").tag("light"); Text("System").tag("system") } label: { Label("Native Theme", systemImage: "circle.lefthalf.filled") } }
             Section {
                 Toggle(isOn: $keepScreenAwake) { Label("Keep Screen Awake During Operations", systemImage: "sun.max") }
@@ -2495,15 +2506,15 @@ struct InstallProgressCard: View {
 // are listed separately because every process mapping them would count them),
 // plus the whole app's footprint as iOS accounts it. No value is estimated.
 // The app's own dark style: black background, iOS dark grouped cards, white
-// text and the app accent blue.
+// text and the FMLAB accent red (#BF6D6F).
 private enum TaskStyle {
     static let base = Color.black
     static let panel = Color(red: 0x1c / 255, green: 0x1c / 255, blue: 0x1e / 255)
     static let line = Color(red: 0x2c / 255, green: 0x2c / 255, blue: 0x2e / 255)
     static let text = Color.white
     static let dim = Color(red: 0x8e / 255, green: 0x8e / 255, blue: 0x93 / 255)
-    static let frost = Color(red: 0.36, green: 0.68, blue: 0.98)
-    static let blue = Color(red: 0.12, green: 0.30, blue: 0.52)
+    static let frost = Color(red: 0xBF / 255, green: 0x6D / 255, blue: 0x6F / 255)
+    static let blue = Color(red: 0x7A / 255, green: 0x33 / 255, blue: 0x35 / 255)
     static let green = Color(red: 0x30 / 255, green: 0xd1 / 255, blue: 0x58 / 255)
     static let yellow = Color(red: 0xff / 255, green: 0xd6 / 255, blue: 0x0a / 255)
     static let red = Color(red: 0xff / 255, green: 0x45 / 255, blue: 0x3a / 255)
@@ -2730,6 +2741,121 @@ private struct ProcessDetailView: View {
                     sampler.sample()
                 }
             } message: { Text(confirm == true ? "The process stops immediately without saving." : "The process is asked to quit and may save its state.") }
+        }
+    }
+}
+
+
+// MARK: - FMLAB: aggiornamenti come in FMLAB Cleaner
+// Il numero di versione e il file .ipa escono insieme nella pubblicazione "ultima" del repository: l'avviso compare
+// solo quando il file nuovo è davvero pronto. Per installarlo non si scarica niente: si copia il link e
+// LiveContainer lo installa sopra questa versione con "+ → Installa dall'URL" (i dati restano).
+@MainActor
+final class FMLABAggiornamenti: ObservableObject {
+    static let repo = "https://github.com/cipherdesk007-max/new-app"
+    static let urlVersione = URL(string: repo + "/releases/download/ultima/VERSIONE.txt")!
+    static let urlIpa = URL(string: repo + "/releases/download/ultima/FMLAB-Linux.ipa")!
+
+    @Published var nuova: String?
+    @Published var controllo = false
+    @Published var esito: String?
+
+    var attuale: String { Bundle.main.object(forInfoDictionaryKey: "FMLABVersion") as? String ?? "0.0.0" }
+    /// Versione di LinuxRunner originale da cui parte questa FMLAB Linux
+    var base: String { Bundle.main.object(forInfoDictionaryKey: "FMLABBaseLinuxRunner") as? String ?? "0.0.0" }
+    /// Versione più nuova di LinuxRunner originale, se è uscita dopo la nostra base
+    @Published var originaleNuova: String?
+
+    func controllaOriginale() async {
+        var r = URLRequest(url: URL(string: "https://api.github.com/repos/mxhm11cr/LinuxRunner/releases/latest")!)
+        r.cachePolicy = .reloadIgnoringLocalCacheData
+        r.timeoutInterval = 15
+        r.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        guard let (dati, risposta) = try? await URLSession.shared.data(for: r),
+              (risposta as? HTTPURLResponse)?.statusCode == 200,
+              let j = try? JSONSerialization.jsonObject(with: dati) as? [String: Any],
+              let tag = j["tag_name"] as? String else { return }
+        let v = tag.trimmingCharacters(in: CharacterSet(charactersIn: "vV "))
+        originaleNuova = Self.piuNuova(v, di: base) ? v : nil
+    }
+
+    func controlla(manuale: Bool = false) async {
+        controllo = true
+        defer { controllo = false }
+        var r = URLRequest(url: URL(string: Self.urlVersione.absoluteString + "?t=\(Int(Date().timeIntervalSince1970))")!)
+        r.cachePolicy = .reloadIgnoringLocalCacheData
+        r.timeoutInterval = 15
+        guard let (dati, risposta) = try? await URLSession.shared.data(for: r),
+              (risposta as? HTTPURLResponse)?.statusCode == 200,
+              let v = String(data: dati, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+              v.range(of: #"^\d+\.\d+\.\d+$"#, options: .regularExpression) != nil else {
+            if manuale { esito = "Nessuna connessione con GitHub: riprova più tardi." }
+            return
+        }
+        if Self.piuNuova(v, di: attuale) { nuova = v; esito = nil }
+        else { nuova = nil; if manuale { esito = "Sei già all'ultima versione (\(attuale))." } }
+    }
+
+    static func piuNuova(_ a: String, di b: String) -> Bool {
+        let x = a.split(separator: ".").compactMap { Int($0) }, y = b.split(separator: ".").compactMap { Int($0) }
+        for i in 0..<max(x.count, y.count) {
+            let p = i < x.count ? x[i] : 0, q = i < y.count ? y[i] : 0
+            if p != q { return p > q }
+        }
+        return false
+    }
+}
+
+struct FMLABAvvisoAggiornamento: View {
+    @ObservedObject var agg: FMLABAggiornamenti
+    @Environment(\.openURL) private var apri
+    @State private var copiato = false
+
+    var body: some View {
+        if let v = agg.nuova {
+            VStack(alignment: .leading, spacing: 10) {
+                Label("FMLAB Linux \(v) disponibile", systemImage: "arrow.down.circle.fill").font(.headline)
+                Text(copiato
+                     ? "Link copiato. Ora: chiudi FMLAB Linux, in LiveContainer tocca + → Installa dall'URL → Incolla → OK. Si installa sopra questa, Linux e i dati restano."
+                     : "Senza scaricare file: copia il link e installalo da LiveContainer (+ → Installa dall'URL).")
+                    .font(copiato ? .callout : .footnote).foregroundColor(copiato ? .primary : .secondary)
+                Button {
+                    UIPasteboard.general.string = FMLABAggiornamenti.urlIpa.absoluteString
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    copiato = true
+                } label: {
+                    Label(copiato ? "Link copiato" : "Copia link di installazione", systemImage: copiato ? "checkmark" : "doc.on.doc")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                Button("Oppure scarica il file .ipa") { apri(FMLABAggiornamenti.urlIpa) }.font(.footnote)
+            }
+            .padding(.vertical, 4)
+        }
+    }
+}
+
+/// Riga per Impostazioni: versione FMLAB, controllo manuale e collegamenti al codice e alle segnalazioni.
+struct FMLABInformazioni: View {
+    @ObservedObject var agg: FMLABAggiornamenti
+    @Environment(\.openURL) private var apri
+
+    var body: some View {
+        Section {
+            HStack { Text("FMLAB Linux"); Spacer(); Text(agg.attuale).foregroundColor(.secondary) }
+            Button(agg.controllo ? "Controllo…" : "Controlla aggiornamenti") { Task { await agg.controlla(manuale: true) } }
+                .disabled(agg.controllo)
+            if let e = agg.esito { Text(e).font(.footnote).foregroundColor(.secondary) }
+            FMLABAvvisoAggiornamento(agg: agg)
+            HStack { Text("Basata su LinuxRunner"); Spacer(); Text(agg.base).foregroundColor(.secondary) }
+            if let o = agg.originaleNuova {
+                Label("LinuxRunner originale è passato alla \(o): FMLAB Linux la riprenderà. Quando è pronta arriva qui come aggiornamento.", systemImage: "sparkles")
+                    .font(.footnote).foregroundColor(.orange)
+            }
+            Button("Codice sorgente e segnalazioni (GitHub)") { apri(URL(string: FMLABAggiornamenti.repo)!) }
+            Button("LinuxRunner originale (Leminos)") { apri(URL(string: "https://github.com/mxhm11cr/LinuxRunner")!) }
+        } header: { Text("FMLAB") } footer: {
+            Text("FMLAB Linux è basata su LinuxRunner di Leminos, che deriva da iSH e ios-linuxkit. Licenza GPL-3.0.")
         }
     }
 }

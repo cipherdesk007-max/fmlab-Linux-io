@@ -40,7 +40,9 @@ args=("LINUXRUNNER_CMAKE=$cmake_path" -project iSH.xcodeproj -scheme LinuxRunner
       -derivedDataPath "$PWD/build/release-derived"
       "LINUXRUNNER_SOURCE_COMMIT=$(git rev-parse HEAD)"
       IPHONEOS_DEPLOYMENT_TARGET=15.0 "LINUXRUNNER_DIAGNOSTIC=$diagnostic"
-      "ROOT_BUNDLE_IDENTIFIER=${BUNDLE_ID:-dev.linuxrunner.app}")
+      "ROOT_BUNDLE_IDENTIFIER=${BUNDLE_ID:-dev.linuxrunner.app}"
+      "FMLAB_VERSION=$(tr -d '[:space:]' < VERSIONE-FMLAB)"
+      "FMLAB_BASE_LINUXRUNNER=$(tr -d '[:space:]' < BASE-LINUXRUNNER)")
 if [[ $diagnostic == YES ]]; then args+=(CODE_SIGN_ENTITLEMENTS=app/LinuxRunner/PrivateContainer.entitlements); fi
 # Optional variants (app/AppARM64.xcconfig): JIT-capable runtime, GPU device
 # (needs scripts/build-gpu-deps.sh iphoneos first). Both stay off until enabled in Settings.
