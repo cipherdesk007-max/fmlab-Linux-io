@@ -590,4 +590,42 @@
     XCUIElement *open = app.buttons[@"Open Desktop"];
     if ([open waitForExistenceWithTimeout:10]) { [open tap]; [NSThread sleepForTimeInterval:90]; [self releaseShot:app name:@"linuxrunner-desktop"]; }
 }
+// FMLAB: screenshot dell'app vera nel simulatore, in italiano, a ogni aggiornamento (workflow "screenshot").
+// Ogni passo è facoltativo: se un pulsante non c'è (es. nessuna distribuzione installata) si va avanti.
+- (BOOL)fmlabTocca:(XCUIElementQuery *)query label:(NSString *)label {
+    XCUIElement *e = query[label].firstMatch;
+    if (![e waitForExistenceWithTimeout:6]) return NO;
+    [e tap]; [NSThread sleepForTimeInterval:2]; return YES;
+}
+- (void)testFMLABScreenshots {
+    self.continueAfterFailure = YES;
+    XCUIApplication *app = [XCUIApplication new];
+    app.launchArguments = @[@"-FMLAB.lingua", @"it", @"-AppleLanguages", @"(it)", @"-AppleLocale", @"it_IT",
+                            @"-LinuxRunnerRuntimeAutoStart", @"NO"];
+    [app launch];
+    [NSThread sleepForTimeInterval:6];
+    if ([app.buttons[@"Più tardi"] waitForExistenceWithTimeout:8]) {   // primo avvio: procedura guidata
+        [self releaseShot:app name:@"01-benvenuto"];
+        [app.buttons[@"Più tardi"] tap]; [NSThread sleepForTimeInterval:2];
+    }
+    XCTAssertTrue([app.tabBars.buttons[@"Home"] waitForExistenceWithTimeout:30]);
+    [self releaseShot:app name:@"02-home"];
+    if ([self fmlabTocca:app.tabBars.buttons label:@"Distribuzioni"]) [self releaseShot:app name:@"03-distribuzioni"];
+    if ([self fmlabTocca:app.tabBars.buttons label:@"Sessioni"]) [self releaseShot:app name:@"04-sessioni"];
+    for (NSString *tab in @[@"Sessioni", @"Home"]) {   // Impostazioni del desktop
+        [self fmlabTocca:app.tabBars.buttons label:tab];
+        if ([self fmlabTocca:app.buttons label:@"Impostazioni del desktop"]) {
+            [self releaseShot:app name:@"05-impostazioni-desktop"];
+            [app swipeUp]; [NSThread sleepForTimeInterval:1]; [self releaseShot:app name:@"06-impostazioni-desktop-2"];
+            [self fmlabTocca:app.buttons label:@"Fine"];
+            break;
+        }
+    }
+    if ([self fmlabTocca:app.tabBars.buttons label:@"Impostazioni"]) {
+        [self releaseShot:app name:@"07-impostazioni"];
+        for (int i = 0; i < 8 && ![app.staticTexts[@"FMLAB"].firstMatch isHittable]; i++) [app swipeUp];
+        [NSThread sleepForTimeInterval:1];
+        [self releaseShot:app name:@"08-impostazioni-fmlab"];
+    }
+}
 @end

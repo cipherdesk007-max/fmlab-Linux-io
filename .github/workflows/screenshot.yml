@@ -1,0 +1,107 @@
+name: screenshot
+
+# FMLAB Linux: dopo ogni versione pubblicata fotografa l'app vera nel simulatore iPhone, in italiano
+# (test testFMLABScreenshots), e mette le immagini in docs/screenshots/ultima-versione.
+on:
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: screenshot
+  cancel-in-progress: true
+
+jobs:
+  simulatore:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: macos-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: false
+      - name: Sottomoduli (quelli che servono, alle versioni fissate)
+        run: git submodule update --init --recursive --checkout -- deps/libapps deps/libarchive deps/glslang deps/spirv-cross
+      - name: Xcode più recente e strumenti
+        run: |
+          X=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          sudo xcode-select -s "$X/Contents/Developer"
+          echo "DEVELOPER_DIR=$X/Contents/Developer" >> "$GITHUB_ENV"
+          xcodebuild -version
+          brew install meson ninja lld >/dev/null || true
+          echo "$(brew --prefix lld)/bin" >> "$GITHUB_PATH"
+      - name: Traduzione italiana
+        run: python3 strumenti/genera_lingue.py
+      - name: Simulatore iPhone Pro Max (il più nuovo disponibile)
+        run: |
+          ID=$(xcrun simctl list devices available -j | python3 -c '
+          import json,sys,re
+          d=json.load(sys.stdin)["devices"]
+          c=[(rt,x) for rt,l in d.items() if "iOS" in rt for x in l if "Pro Max" in x["name"]]
+          c.sort(key=lambda t:[int(n) for n in re.findall(r"\d+",t[0])]+[int(n) for n in re.findall(r"\d+",t[1]["name"])])
+          print(c[-1][1]["udid"]); print(c[-1][0], c[-1][1]["name"], file=sys.stderr)')
+          echo "SIM=$ID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$ID" || true
+          xcrun simctl bootstatus "$ID" -b
+          xcrun simctl status_bar "$ID" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 || true
+      - name: Compila e fotografa
+        run: |
+          set -o pipefail
+          V=$(tr -d '[:space:]' < VERSIONE-FMLAB); B=$(tr -d '[:space:]' < BASE-LINUXRUNNER)
+          ARGS=(-project iSH.xcodeproj -scheme LinuxRunner -configuration Debug -destination "id=$SIM"
+                -derivedDataPath build/sim-derived
+                "LINUXRUNNER_CMAKE=$(command -v cmake)" "FMLAB_VERSION=$V" "FMLAB_BASE_LINUXRUNNER=$B"
+                ROOT_BUNDLE_IDENTIFIER=dev.fmlab.linux CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO DEVELOPMENT_TEAM=)
+          mkdir -p build
+          xcodebuild build-for-testing "${ARGS[@]}" > build/screenshot.log 2>&1 ||
+            { grep -E "error:|\*\* " build/screenshot.log | tail -60; tail -40 build/screenshot.log; exit 1; }
+          # l'italiano non è nel progetto Xcode: si aggiunge all'app come fa build-ipa.sh
+          APP=$(find build/sim-derived/Build/Products -maxdepth 2 -name "LinuxRunner.app" | head -1)
+          [ -n "$APP" ] || { find build/sim-derived/Build/Products -maxdepth 2 -name "*.app"; exit 1; }
+          echo "app: $APP"; rm -rf "$APP/it.lproj"; cp -R app/FMLAB/it.lproj "$APP/it.lproj"
+          codesign --force --sign - --preserve-metadata=entitlements "$APP" || true
+          xcodebuild test-without-building "${ARGS[@]}" -resultBundlePath build/screenshot.xcresult \
+            -only-testing:iSHUITests/LinuxRunnerUITests/testFMLABScreenshots >> build/screenshot.log 2>&1 ||
+            { grep -E "error:|\*\* TEST|Test Case|failed" build/screenshot.log | tail -60; tail -40 build/screenshot.log; }
+          grep -E "\*\* TEST|Test Case" build/screenshot.log | tail -5
+      - name: Estrai le immagini
+        run: |
+          mkdir -p build/allegati docs/screenshots/ultima-versione
+          xcrun xcresulttool export attachments --path build/screenshot.xcresult --output-path build/allegati
+          python3 - <<'PY'
+          import json, os, shutil
+          m = json.load(open("build/allegati/manifest.json"))
+          n = 0
+          for test in m:
+              for a in test.get("attachments", []):
+                  nome = a.get("suggestedHumanReadableName", "")
+                  base = nome.split("_")[0] if "_" in nome else os.path.splitext(nome)[0]
+                  if not base[:2].isdigit():
+                      continue
+                  shutil.copy(os.path.join("build/allegati", a["exportedFileName"]), f"docs/screenshots/ultima-versione/{base}.png")
+                  n += 1
+          print("immagini:", n)
+          assert n >= 2, "troppo poche immagini"
+          PY
+          ls -la docs/screenshots/ultima-versione
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshot
+          path: |
+            docs/screenshots/ultima-versione/
+            build/screenshot.log
+      - name: Pubblica nel repo
+        run: |
+          tr -d '[:space:]' < VERSIONE-FMLAB > docs/screenshots/ultima-versione/VERSIONE.txt
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add docs/screenshots/ultima-versione
+          git diff --cached --quiet || git commit -m "Screenshot automatici $(cat docs/screenshots/ultima-versione/VERSIONE.txt) [skip ci]"
+          git push || { git pull --rebase && git push; }
