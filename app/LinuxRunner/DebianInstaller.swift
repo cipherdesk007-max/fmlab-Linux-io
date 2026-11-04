@@ -49,7 +49,7 @@ private final class InstallCancellation: @unchecked Sendable {
     private var operation: Task<Void, Never>?
     private var cancellation = InstallCancellation()
     func cancel() { cancellation.cancel(); operation?.cancel() }
-    func install(completion: @escaping (LinuxEnvironment) -> Void) {
+    func install(name: String = "Debian GNU/Linux", completion: @escaping (LinuxEnvironment) -> Void) {
         guard !running else { return }; running = true; failure = nil; cancellation = InstallCancellation()
         let token = cancellation
         UserDefaults.standard.set(true, forKey: "InstallerActive")
@@ -114,7 +114,7 @@ private final class InstallCancellation: @unchecked Sendable {
                     try LRRuntimeBridge.importVerifiedEnvironment(archive, root: root, sha256: sha, progress: { value, _ in Task { @MainActor in self.fraction = 0.75 + value * 0.25 } }, cancel: { token.check() })
                 }.value
                 // Root remains isolated; the running Alpine environment is untouched.
-                var environment = LinuxEnvironment(name: "Debian GNU/Linux", rootfsName: root)
+                var environment = LinuxEnvironment(name: name, rootfsName: root)
                 environment.distribution = "Debian GNU/Linux"; environment.distributionID = "debian"; environment.packageManager = "apt"
                 environment.rootfsVersion = manifest.version; environment.defaultShell = "/bin/bash"
                 environment.installationState = "Imported; package configuration runs on first boot"

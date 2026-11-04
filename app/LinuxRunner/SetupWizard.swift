@@ -25,6 +25,7 @@ struct SetupWizardView: View {
     @State private var problem: String?
     @State private var desktopReady = false
     @State private var extraDesktops: Set<String> = []
+    @State private var retroReady = false
     private var step: SetupStep { SetupStep(rawValue: stepRaw) ?? .welcome }
 
     var body: some View {
@@ -55,9 +56,10 @@ struct SetupWizardView: View {
             Section { Button("Continue") { stepRaw = SetupStep.distribution.rawValue } }
         case .distribution:
             Section(footer: Text("Debian is recommended. Arch Linux ARM provides a rolling release with pacman and an experimental X11 desktop. Alpine is small and mainly for the terminal. Wayland is not supported.")) {
-                Picker("Distribution", selection: $distribution) { Text("Debian GNU/Linux 13 (ARM64) — recommended").tag("debian"); Text("Arch Linux ARM (ARM64) — experimental").tag("arch"); Text("Alpine Linux 3.24 (ARM64)").tag("alpine") }.pickerStyle(.inline).labelsHidden()
+                Picker("Distribution", selection: $distribution) { Text("Debian GNU/Linux 13 (ARM64) — recommended").tag("debian"); Text("FMLAB Retro — Debian 13 for classic consoles (FMLAB)").tag("fmlab-retro"); Text("Arch Linux ARM (ARM64) — experimental").tag("arch"); Text("Alpine Linux 3.24 (ARM64)").tag("alpine") }.pickerStyle(.inline).labelsHidden()
             }
-            let installed = manager.environments.filter { ($0.distributionID ?? "alpine") == distribution }
+            let installed = manager.environments.filter { distribution == "fmlab-retro" ? FMLABRetro.is($0) : ($0.distributionID ?? "alpine") == distribution && !FMLABRetro.is($0) }
+            if distribution == "fmlab-retro" { Section { Text("Official Debian 13 with RetroArch, emulators tuned for the iPhone and rk-giochi, from the signed FMLAB repository. It updates with apt together with Debian. No games are included: you add your own.").font(.footnote) } }
             if !installed.isEmpty {
                 Section("Already Installed") {
                     ForEach(installed) { environment in
@@ -86,17 +88,18 @@ struct SetupWizardView: View {
         let free = (try? LRRuntimeBridge.managedStorageURL().resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage) ?? 0
         let manifest = try? DebianManifest.load()
         let alpineBytes = Int64((try? Bundle.main.url(forResource: "root", withExtension: "tar.gz")?.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
-        let download = distribution == "debian" ? (manifest?.downloadBytes ?? 0) : 0
-        let installed = distribution == "debian" ? (manifest?.installedBytes ?? 0) : alpineBytes * 3
+        let debianLike = distribution == "debian" || distribution == "fmlab-retro"
+        let download = debianLike ? (manifest?.downloadBytes ?? 0) : 0
+        let installed = debianLike ? (manifest?.installedBytes ?? 0) : alpineBytes * 3
         Section("Storage") {
-            row("Download", distribution == "arch" ? "Calculated from the signed package selection" : distribution == "debian" ? ByteCountFormatter.string(fromByteCount: download, countStyle: .file) : "None (included in the app)")
-            row(distribution == "debian" ? "Installed size" : "Installed size (estimate)", distribution == "arch" ? "At least 1.5 GB free for base installation" : ByteCountFormatter.string(fromByteCount: installed, countStyle: .file))
+            row("Download", distribution == "arch" ? "Calculated from the signed package selection" : debianLike ? ByteCountFormatter.string(fromByteCount: download, countStyle: .file) : "None (included in the app)")
+            row(debianLike ? "Installed size" : "Installed size (estimate)", distribution == "arch" ? "At least 1.5 GB free for base installation" : ByteCountFormatter.string(fromByteCount: installed, countStyle: .file))
             row("Available", ByteCountFormatter.string(fromByteCount: free, countStyle: .file))
         }
-        if distribution == "debian" {
+        if debianLike {
             Section {
                 if debian.running { Text(LF(debian.message)); ProgressView(value: debian.fraction); Button("Cancel", role: .destructive) { debian.cancel() } }
-                else { Button("Install Debian") { startInstall() }.disabled(free < max(Int64(1 << 30), download + installed)) }
+                else { Button(distribution == "fmlab-retro" ? "Install FMLAB Retro" : "Install Debian") { startInstall() }.disabled(free < max(Int64(1 << 30), download + installed)) }
                 if let failure = debian.failure { Text(LF(failure)).foregroundStyle(.red); Button("Try Again") { startInstall() } }
             } footer: { Text("Official Debian packages, checked against Debian's signed index. The desktop, sound and account tools are added in the next steps.") }
         } else if distribution == "arch" {
@@ -143,6 +146,12 @@ struct SetupWizardView: View {
             if desktopReady { Label("Desktop components installed", systemImage: "checkmark") ; Button("Continue") { stepRaw = SetupStep.done.rawValue } }
             else { Button("Install Desktop Components") { prepareDesktop() }.disabled(working != nil) }
         }
+        if desktopReady, let active = manager.environments.first(where: { manager.active($0) }), FMLABRetro.is(active) {
+            Section(header: Text("FMLAB Retro"), footer: Text("Adds the signed FMLAB repository and installs RetroArch with the FMLAB settings, the emulators and rk-giochi. Later updates arrive with apt update && apt upgrade.")) {
+                if retroReady || LRRuntimeBridge.fmlabRetroInstalled() { Label("FMLAB Retro installed", systemImage: "gamecontroller.fill") }
+                else { Button("Install FMLAB Retro") { installRetro() }.disabled(working != nil) }
+            }
+        }
         if desktopReady {
             Section(header: Text("Another Desktop (Optional)"), footer: Text("Each comes from the distribution's own packages (network needed; Enlightenment is a large download, about 450 MB on Debian). The one installed last opens with Open Desktop; switch any time in Settings › Desktop Environment.")) {
                 extraDesktopRow("LXQt", "lxqt", installed: LRRuntimeBridge.lxqtInstalled()) { LRRuntimeBridge.installLXQt($0, completion: $1) }
@@ -179,8 +188,8 @@ struct SetupWizardView: View {
             setupRoot = root; LRRuntimeBridge.setNextRootName(root)
             stepRaw = (LRRuntimeBridge.isRunning() && LRRuntimeBridge.activeRootName() == root) ? SetupStep.account.rawValue : SetupStep.relaunch.rawValue
         }
-        if distribution == "debian" {
-            debian.install { environment in manager.acceptInstalled(environment); finish(environment.rootfsName) }
+        if distribution == "debian" || distribution == "fmlab-retro" {
+            debian.install(name: distribution == "fmlab-retro" ? FMLABRetro.name : "Debian GNU/Linux") { environment in manager.acceptInstalled(environment); finish(environment.rootfsName) }
         } else if distribution == "arch" {
             arch.install { environment in manager.acceptInstalled(environment); finish(environment.rootfsName) }
         } else {
@@ -223,6 +232,14 @@ struct SetupWizardView: View {
         }
     }
 
+    private func installRetro() {
+        problem = nil; working = "Starting"
+        LRRuntimeBridge.installFMLABRetro({ working = $0 }) { error in
+            working = nil
+            if let error { problem = error.localizedDescription } else { retroReady = true }
+        }
+    }
+
     private func prepareDesktop() {
         problem = nil; working = "Starting"
         LRRuntimeBridge.prepareDesktopProfile({ working = $0 }) { error in
@@ -230,4 +247,14 @@ struct SetupWizardView: View {
             if let error { problem = error.localizedDescription } else { desktopReady = true }
         }
     }
+}
+
+// MARK: - FMLAB Retro
+// Una distribuzione Debian 13 vera (stesso installatore verificato) con il nome
+// FMLAB Retro: dopo il desktop si aggiunge l'archivio apt FMLAB firmato e il
+// pacchetto fmlab-retro. Il riconoscimento va per nome, così tutto il resto
+// dell'app la tratta come Debian (desktop, pacchetti, account).
+enum FMLABRetro {
+    static let name = "FMLAB Retro"
+    static func `is`(_ environment: LinuxEnvironment) -> Bool { environment.name.hasPrefix(name) }
 }

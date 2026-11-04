@@ -694,6 +694,17 @@ TR.update({
 "Only one distribution runs at a time. After choosing, close FMLAB Linux from the app switcher and open it again. Files are preserved.": "Funziona una distribuzione alla volta. Dopo averla scelta, chiudi FMLAB Linux dal multitasking e riaprila. I file restano.",
 "%@ selected": "%@ scelta",
 "Now close FMLAB Linux: swipe up from the bottom, hold, then swipe the app away. Open it again and it starts with the new distribution.": "Ora chiudi FMLAB Linux: scorri dal basso verso l'alto, tieni premuto, poi butta via l'app verso l'alto. Riaprila e parte con la nuova distribuzione.",
+"FMLAB Retro": "FMLAB Retro",
+"FMLAB Retro installed": "FMLAB Retro installata",
+"FMLAB Retro — Debian 13 for classic consoles (FMLAB)": "FMLAB Retro — Debian 13 per le console classiche (FMLAB)",
+"Install FMLAB Retro": "Installa FMLAB Retro",
+"Installing FMLAB Retro": "Installazione di FMLAB Retro",
+"Adding the FMLAB Retro repository": "Aggiungo l'archivio FMLAB Retro",
+"Needs the desktop components (Setup or Open Desktop) and the network.": "Servono i componenti del desktop (Configura o Apri desktop) e la rete.",
+"Use it on next launch to install or open FMLAB Retro.": "Usala al prossimo avvio per installare o aprire FMLAB Retro.",
+"Adds the signed FMLAB repository and installs RetroArch with the FMLAB settings, the emulators and rk-giochi. Later updates arrive with apt update && apt upgrade.": "Aggiunge l'archivio FMLAB firmato e installa RetroArch con le impostazioni FMLAB, gli emulatori e rk-giochi. Gli aggiornamenti dopo arrivano con apt update && apt upgrade.",
+"Official Debian 13 with RetroArch, emulators tuned for the iPhone and rk-giochi, from the signed FMLAB repository. It updates with apt together with Debian. No games are included: you add your own.": "Debian 13 ufficiale con RetroArch, emulatori regolati per l'iPhone e rk-giochi, dall'archivio FMLAB firmato. Si aggiorna con apt insieme a Debian. Nessun gioco incluso: li metti tu.",
+"Updates: in the terminal, sudo apt update && sudo apt upgrade (Debian and FMLAB together). Put your games in Files › FMLAB Linux › Shared › Giochi, then run rk-giochi importa.": "Aggiornamenti: nel terminale sudo apt update && sudo apt upgrade (Debian e FMLAB insieme). Metti i tuoi giochi in File › FMLAB Linux › Shared › Giochi, poi lancia rk-giochi importa.",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

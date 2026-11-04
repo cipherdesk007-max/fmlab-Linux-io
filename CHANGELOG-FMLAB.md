@@ -2,6 +2,14 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.8.8
+- **Nuova distribuzione FMLAB Retro** (console classiche): Distribuzioni → Configura Linux… → *FMLAB Retro*. È
+  Debian 13 ufficiale, installato e verificato come Debian; dopo account e desktop c'è *Installa FMLAB Retro*, che
+  aggiunge l'archivio apt FMLAB **firmato** (chiave nell'app, stessa impronta del repository fmlab-retro) e installa
+  RetroArch con le impostazioni FMLAB, gli emulatori e `rk-giochi`. Da lì si aggiorna con `apt upgrade`, Debian e FMLAB
+  insieme. Nessun gioco incluso. In Distribuzioni e nella Home ha l'icona del controller; nella sua pagina c'è il
+  pulsante per installarla se hai saltato il passo.
+
 ## 0.8.7
 - **Cambio distribuzione con un tocco dalla Home**: in *Distribuzioni installate* tocchi quella che vuoi, confermi, e
   l'app ti dice di chiuderla dal multitasking e riaprirla. Accanto a ognuna si vede se è *In funzione*, *Al prossimo

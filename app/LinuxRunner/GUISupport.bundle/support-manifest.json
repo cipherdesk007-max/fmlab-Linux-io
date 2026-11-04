@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "3",
+  "version": "4",
   "resources": [
     {
       "name": "audio-relay.c",
@@ -84,7 +84,7 @@
     },
     {
       "name": "desktop-profile.sh",
-      "sha256": "a5ca752fae6083c67680f5d194f2972c54971b982f2f04a4abe0c50bff8699c6",
+      "sha256": "f8d53867ca21ec6b6ebd3835f980ae7091c0dab7356920106e8cd17abef1557d",
       "mode": "0755"
     },
     {
@@ -115,6 +115,16 @@
     {
       "name": "firefox-test.html",
       "sha256": "b0a9675d3205c935c4e3df331d3819e494898d32ee3f81ffd1f7a4bcfe8ca743",
+      "mode": "0644"
+    },
+    {
+      "name": "fmlab-retro.gpg",
+      "sha256": "592a032924a96894826b749dceb4ac3a2f1f9d4e49261f287f960afe355a9e5d",
+      "mode": "0644"
+    },
+    {
+      "name": "fmlab-retro.sources",
+      "sha256": "2c6e1d3df3c8db1ff0697384b4c98e4503c29cf314d143bf64631c028adb7246",
       "mode": "0644"
     },
     {
@@ -324,7 +334,7 @@
     },
     {
       "name": "installer-run.sh",
-      "sha256": "02f0d885bd489f862d9b27842495bfc6bf487514926dc8a3ad4ab25fe77280b7",
+      "sha256": "8776f9bcace64c50b6a2307aa5ef7676f52d5fa4c44191d2b40102e2a7f4c34b",
       "mode": "0755"
     },
     {
@@ -439,7 +449,7 @@
     },
     {
       "name": "support-version",
-      "sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2",
+      "sha256": "7de1555df0c2700329e815b93b32c571c3ea54dc967b89e81ab73b9972b72d1d",
       "mode": "0644"
     },
     {

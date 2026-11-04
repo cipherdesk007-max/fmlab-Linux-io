@@ -1278,6 +1278,13 @@ static void LRWaitForProcess(TerminalViewController *process, NSTimeInterval tim
     for (NSString *path in @[@"/usr/bin/wayfire", @"/usr/bin/wf-panel", @"/usr/bin/foot"]) if (!LRReadGuestFile(path, 4).length) return NO;
     return YES;
 }
++ (void)installFMLABRetro:(void (^)(NSString *stage))progress completion:(void (^)(NSError * _Nullable error))completion {
+    [self runSupportInstall:@[@"fmlab-retro"] title:@"Installing FMLAB Retro" progress:progress completion:completion];
+}
++ (BOOL)fmlabRetroInstalled {
+    for (NSString *path in @[@"/usr/bin/fmlab-retro", @"/usr/bin/retroarch", @"/usr/bin/rk-giochi"]) if (!LRReadGuestFile(path, 4).length) return NO;
+    return YES;
+}
 + (void)installHyprland:(void (^)(NSString *stage))progress completion:(void (^)(NSError * _Nullable error))completion {
     [self runDesktopProfile:@"hyprland" progress:progress completion:completion];
 }

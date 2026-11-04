@@ -185,6 +185,8 @@
 "Add applications any time from Packages › App Catalog." = "Aggiungi applicazioni quando vuoi da Pacchetti › Catalogo app.";
 "Add or Manage Shared Folders" = "Aggiungi o gestisci cartelle condivise";
 "Adding sound support" = "Aggiunta dell'audio";
+"Adding the FMLAB Retro repository" = "Aggiungo l'archivio FMLAB Retro";
+"Adds the signed FMLAB repository and installs RetroArch with the FMLAB settings, the emulators and rk-giochi. Later updates arrive with apt update && apt upgrade." = "Aggiunge l'archivio FMLAB firmato e installa RetroArch con le impostazioni FMLAB, gli emulatori e rk-giochi. Gli aggiornamenti dopo arrivano con apt update && apt upgrade.";
 "Administrator (can use sudo)" = "Amministratore (può usare sudo)";
 "Advanced" = "Avanzate";
 "Advanced Command Launcher" = "Avvio comandi avanzato";
@@ -504,6 +506,9 @@
 "FMLAB Linux %lf available" = "FMLAB Linux %lf disponibile";
 "FMLAB Linux %lld available" = "FMLAB Linux %lld disponibile";
 "FMLAB Linux is based on LinuxRunner by Leminos, derived from iSH and ios-linuxkit. GPL-3.0 license." = "FMLAB Linux è basata su LinuxRunner di Leminos, che deriva da iSH e ios-linuxkit. Licenza GPL-3.0.";
+"FMLAB Retro" = "FMLAB Retro";
+"FMLAB Retro installed" = "FMLAB Retro installata";
+"FMLAB Retro — Debian 13 for classic consoles (FMLAB)" = "FMLAB Retro — Debian 13 per le console classiche (FMLAB)";
 "FMlab - RunnerKit" = "FMlab - RunnerKit";
 "Failed" = "Non riuscito";
 "Failed: %@. Close LinuxRunner and try again." = "Non riuscito: %@. Chiudi LinuxRunner e riprova.";
@@ -621,6 +626,7 @@
 "Install Debian ARM64" = "Installa Debian ARM64";
 "Install Desktop Components" = "Installa componenti del desktop";
 "Install Enlightenment" = "Installa Enlightenment";
+"Install FMLAB Retro" = "Installa FMLAB Retro";
 "Install Hyprland" = "Installa Hyprland";
 "Install KDE Plasma" = "Installa KDE Plasma";
 "Install LXQt" = "Installa LXQt";
@@ -647,6 +653,7 @@
 "Installing Administrator Tools (sudo)" = "Installazione degli strumenti di amministratore (sudo)";
 "Installing Desktop Components" = "Installazione dei pezzi del desktop";
 "Installing Enlightenment" = "Installazione di Enlightenment";
+"Installing FMLAB Retro" = "Installazione di FMLAB Retro";
 "Installing Hyprland" = "Installazione di Hyprland";
 "Installing KDE Plasma" = "Installazione di KDE Plasma";
 "Installing LXQt" = "Installazione di LXQt";
@@ -805,6 +812,7 @@
 "Native Theme" = "Tema dell'app";
 "Navigating away retains windows. iOS may suspend or terminate the app; saved files remain persistent." = "Uscendo, le finestre restano. iOS può sospendere o chiudere l'app; i file salvati restano.";
 "Nearby Wi-Fi scanning and raw interface control are unavailable through ordinary public iOS APIs. This screen does not request location access or a Wi-Fi entitlement." = "Cercare reti Wi-Fi vicine e controllare direttamente le interfacce non si può con le normali funzioni di iOS. Questa schermata non chiede la posizione né permessi Wi-Fi.";
+"Needs the desktop components (Setup or Open Desktop) and the network." = "Servono i componenti del desktop (Configura o Apri desktop) e la rete.";
 "Network" = "Rete";
 "New Environment" = "Nuovo ambiente";
 "New Folder" = "Nuova cartella";
@@ -844,6 +852,7 @@
 "Now close FMLAB Linux: swipe up from the bottom, hold, then swipe the app away. Open it again and it starts with the new distribution." = "Ora chiudi FMLAB Linux: scorri dal basso verso l'alto, tieni premuto, poi butta via l'app verso l'alto. Riaprila e parte con la nuova distribuzione.";
 "OK" = "OK";
 "Off in Settings" = "Spento nelle Impostazioni";
+"Official Debian 13 with RetroArch, emulators tuned for the iPhone and rk-giochi, from the signed FMLAB repository. It updates with apt together with Debian. No games are included: you add your own." = "Debian 13 ufficiale con RetroArch, emulatori regolati per l'iPhone e rk-giochi, dall'archivio FMLAB firmato. Si aggiorna con apt insieme a Debian. Nessun gioco incluso: li metti tu.";
 "Official Debian packages, checked against Debian's signed index. The desktop, sound and account tools are added in the next steps." = "Pacchetti ufficiali Debian, controllati con l'indice firmato di Debian. Desktop, audio e strumenti per gli account si aggiungono nei passi successivi.";
 "Official signed Arch Linux ARM packages. Verified downloads are kept for retry. First-start configuration finishes before desktop packages are installed." = "Pacchetti ufficiali firmati di Arch Linux ARM. I file scaricati e verificati restano per riprovare. La prima configurazione finisce prima di installare i pacchetti del desktop.";
 "On My iPhone / app folder" = "Sul mio iPhone / cartella dell'app";
@@ -1251,6 +1260,7 @@
 "Unknown" = "Sconosciuto";
 "Unpacking Alpine Linux…" = "Estrazione di Alpine Linux…";
 "Update RunnerKit" = "Aggiorna RunnerKit";
+"Updates: in the terminal, sudo apt update && sudo apt upgrade (Debian and FMLAB together). Put your games in Files › FMLAB Linux › Shared › Giochi, then run rk-giochi importa." = "Aggiornamenti: nel terminale sudo apt update && sudo apt upgrade (Debian e FMLAB insieme). Metti i tuoi giochi in File › FMLAB Linux › Shared › Giochi, poi lancia rk-giochi importa.";
 "Use %@?" = "Usare %@?";
 "Use %lf?" = "Usare %lf?";
 "Use %lld?" = "Usare %lld?";
@@ -1261,6 +1271,7 @@
 "Use an existing account" = "Usa un account esistente";
 "Use for New Sessions" = "Usa per le nuove sessioni";
 "Use iPhone as Trackpad" = "Usa l'iPhone come trackpad";
+"Use it on next launch to install or open FMLAB Retro." = "Usala al prossimo avvio per installare o aprire FMLAB Retro.";
 "Use on Next Launch" = "Usa al prossimo avvio";
 "User ID" = "ID utente";
 "Username" = "Nome utente";
