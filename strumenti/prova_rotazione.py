@@ -68,6 +68,9 @@ def main():
     run("xrandr", "-q")
     assert run("sh", RUOTA, "1398", "644").returncode == 0, "rotazione iniziale non riuscita"
     assert misura() == "1398x644", misura()
+    # finestre: un gestore finestre vero (openbox) e una finestra larga; girando deve restare tutta dentro
+    wm = subprocess.Popen(["openbox"], env=env); time.sleep(2)
+    xl = subprocess.Popen(["xlogo", "-geometry", "1200x500+150+60"], env=env); time.sleep(2)
     vnc = subprocess.Popen(["x11vnc", "-display", D, "-localhost", "-rfbport", "5977", "-nopw", "-forever",
                             "-xrandr", "newfbsize", "-noxrecord", "-noxdamage", "-quiet"], env=env)
     time.sleep(3)
@@ -82,11 +85,18 @@ def main():
     s.sendall(struct.pack(">BxHii", 2, 2, 0, -223))                                        # Raw + DesktopSize
     assert run("sh", RUOTA, "644", "1398").returncode == 0
     assert misura() == "644x1398", misura()
+    time.sleep(1)
+    info = run("xwininfo", "-name", "xlogo").stdout
+    v = {k.strip(): int(x.split()[0]) for k, x in (l.split(":", 1) for l in info.splitlines() if ":" in l)
+         if k.strip() in ("Absolute upper-left X", "Absolute upper-left Y", "Width", "Height")}
+    print("finestra in verticale:", v)
+    assert v["Absolute upper-left X"] >= 0 and v["Absolute upper-left X"] + v["Width"] <= 644, "finestra fuori in larghezza"
+    assert v["Absolute upper-left Y"] >= 0 and v["Absolute upper-left Y"] + v["Height"] <= 1398, "finestra fuori in altezza"
     w, h = aspetta_misura(s, w, h, (644, 1398))
     assert run("sh", RUOTA, "1398", "644").returncode == 0
     aspetta_misura(s, w, h, (1398, 644))
-    s.close(); vnc.terminate(); xv.terminate()
-    print("OK rotazione: orizzontale -> verticale -> orizzontale senza riavviare il desktop")
+    s.close(); vnc.terminate(); xl.terminate(); wm.terminate(); xv.terminate()
+    print("OK rotazione: orizzontale -> verticale -> orizzontale senza riavviare il desktop, finestre dentro lo schermo")
 
 
 if __name__ == "__main__":

@@ -34,10 +34,64 @@ def ruota(w, h):
     return g.width, g.height
 
 
+def adatta_finestre(d, root, vecchio, nuovo):
+    """Dopo la rotazione ogni finestra resta dentro lo schermo nuovo (le massimizzate le rifà il gestore delle
+    finestre): si rimpicciolisce se non ci sta e si sposta in proporzione, cosi' niente resta fuori o tagliato."""
+    import time
+    A = lambda n: d.intern_atom(n)
+    (ow, oh), (W, H) = vecchio, nuovo
+    time.sleep(0.4)   # il gestore finestre aggiorna prima la sua area di lavoro
+    wa = root.get_full_property(A("_NET_WORKAREA"), X.AnyPropertyType)
+    ax, ay, aw, ah = (list(wa.value[:4]) if wa and len(wa.value) >= 4 else [0, 0, W, H - 40])
+    if aw > W or ah > H or aw < 100 or ah < 100:
+        ax, ay, aw, ah = 0, 0, W, H - 40
+    lista = root.get_full_property(A("_NET_CLIENT_LIST"), X.AnyPropertyType)
+    salta = {A(f"_NET_WM_WINDOW_TYPE_{t}") for t in ("DOCK", "DESKTOP", "NOTIFICATION", "TOOLTIP", "SPLASH")}
+    massimizzata = {A("_NET_WM_STATE_MAXIMIZED_HORZ"), A("_NET_WM_STATE_MAXIMIZED_VERT")}
+    n = 0
+    for wid in (lista.value if lista else []):
+        try:
+            w = d.create_resource_object("window", wid)
+            tipo = w.get_full_property(A("_NET_WM_WINDOW_TYPE"), X.AnyPropertyType)
+            if tipo and set(tipo.value) & salta:
+                continue
+            stato = w.get_full_property(A("_NET_WM_STATE"), X.AnyPropertyType)
+            if stato and massimizzata <= set(stato.value):
+                continue
+            g = w.get_geometry(); p = w.translate_coords(root, 0, 0)
+            x, y = -p.x, -p.y
+            ext = w.get_full_property(A("_NET_FRAME_EXTENTS"), X.AnyPropertyType)
+            l, r, t, b = (list(ext.value[:4]) if ext and len(ext.value) >= 4 else [0, 0, 0, 0])
+            cw, ch = min(g.width, aw - l - r), min(g.height, ah - t - b)
+            # posizione in proporzione allo schermo vecchio, poi dentro l'area di lavoro
+            nx = ax + l + int((x - l) * max(1, aw - cw - l - r) / max(1, ow - g.width - l - r)) if ow > g.width else ax + l
+            ny = ay + t + int((y - t) * max(1, ah - ch - t - b) / max(1, oh - g.height - t - b)) if oh > g.height else ay + t
+            nx = max(ax + l, min(nx, ax + aw - r - cw)); ny = max(ay + t, min(ny, ay + ah - b - ch))
+            if (nx, ny, cw, ch) == (x, y, g.width, g.height):
+                continue
+            # _NET_MOVERESIZE_WINDOW: gravita' statica (coordinate della finestra), x y larghezza altezza, da "pager"
+            flags = 10 | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (2 << 12)
+            from Xlib.protocol import event
+            ev = event.ClientMessage(window=w, client_type=A("_NET_MOVERESIZE_WINDOW"), data=(32, [flags, nx, ny, cw, ch]))
+            root.send_event(ev, event_mask=X.SubstructureRedirectMask | X.SubstructureNotifyMask)
+            n += 1
+        except Exception:
+            continue
+    d.sync()
+    return n
+
+
 if __name__ == "__main__":
     w, h = int(sys.argv[1]), int(sys.argv[2])
     if not (240 <= w <= 2560 and 240 <= h <= 2560):
         sys.exit("FMLAB_ROTAZIONE: misura non valida")
+    _d = display.Display(); _g = _d.screen().root.get_geometry(); prima = (_g.width, _g.height); _d.close()
     gw, gh = ruota(w, h)
-    print(f"FMLAB_ROTAZIONE: {gw}x{gh}")
+    n = 0
+    if (gw, gh) == (w, h) and prima != (w, h):
+        try:
+            _d = display.Display(); n = adatta_finestre(_d, _d.screen().root, prima, (w, h)); _d.close()
+        except Exception as e:
+            print("FMLAB_ROTAZIONE: finestre non adattate:", e)
+    print(f"FMLAB_ROTAZIONE: {gw}x{gh} (finestre adattate: {n})")
     sys.exit(0 if (gw, gh) == (w, h) else 1)
