@@ -42,6 +42,8 @@ jobs:
         run: |
           echo "LINUXRUNNER_JIT=YES" >> "$GITHUB_ENV"
           if [ -f build/gpu/iphoneos/lib/libangle.a ]; then echo "LINUXRUNNER_VIRGL=YES" >> "$GITHUB_ENV"; echo "GPU Metal: sì"; else echo "GPU Metal: non ancora (manca la cache)"; fi
+      - name: Traduzione italiana completa?
+        run: python3 strumenti/genera_lingue.py --controlla
       - name: Controllo prerequisiti
         run: scripts/bootstrap-macos.sh
       - name: "Compila, senza firma (la mettono LiveContainer o SideStore)"
@@ -68,6 +70,8 @@ jobs:
           plutil -p /tmp/Info.plist | grep -E "CFBundleIdentifier|CFBundleDisplayName|CFBundleShortVersionString"
           plutil -p /tmp/Info.plist | grep -q '"CFBundleIdentifier" => "dev.fmlab.linux"'
           plutil -p /tmp/Info.plist | grep -q '"CFBundleDisplayName" => "FMLAB Linux"'
+          unzip -l build/releases/FMLAB-Linux.ipa | grep -q "LinuxRunner.app/it.lproj/Localizable.strings"
+          unzip -p build/releases/FMLAB-Linux.ipa Payload/LinuxRunner.app/it.lproj/Localizable.strings | plutil -lint -
           ls -la build/releases/FMLAB-Linux.ipa
       - uses: actions/upload-artifact@v4
         with:

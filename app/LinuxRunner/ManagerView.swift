@@ -337,6 +337,7 @@ struct ManagerView: View {
     @AppStorage("LinuxRunner.appearance") private var appearance = "dark"
     @StateObject private var fmlabAggiornamenti = FMLABAggiornamenti()
     @StateObject private var fmlabImporta = FMLABImporta()
+    @State private var fmlabDaEliminare: LinuxEnvironment?
     private let sessionTimer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
     /// What the full-screen graphical cover shows. The request is the cover's
     /// item, so its content receives the request itself: separate @State
@@ -476,7 +477,7 @@ struct ManagerView: View {
                         Image("FMLABLogo").resizable().scaledToFit().frame(width: 54, height: 54).cornerRadius(12)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("FMLAB Linux").font(.system(size: 30, weight: .bold, design: .rounded)).tracking(-1)
-                            Text("Linux vero sul tuo iPhone.").font(.subheadline).foregroundColor(.secondary)
+                            Text("Real Linux on your iPhone.").font(.subheadline).foregroundColor(.secondary)
                         }
                     }
                     HStack(spacing: 7) {
@@ -500,16 +501,16 @@ struct ManagerView: View {
                 Section { FMLABAvvisoAggiornamento(agg: fmlabAggiornamenti) }
             }
             if !fmlabImporta.trovati.isEmpty || fmlabImporta.messaggio != nil || fmlabImporta.impostazioniDisponibili {
-                Section { FMLABImportaView(imp: fmlabImporta, manager: manager) } header: { Text("Da LinuxRunner") }
+                Section { FMLABImportaView(imp: fmlabImporta, manager: manager) } header: { Text("From LinuxRunner") }
             }
             if LRRuntimeBridge.isRunning(), LRRuntimeBridge.activeEnvironmentIsDebian() {
                 Section {
                     if FMLABRunnerKit.installato() {
-                        Label("RunnerKit installato: TouchPad, Centro, Pulizia e il comando rk", systemImage: "checkmark.seal.fill")
+                        Label("RunnerKit installed: TouchPad, Center, Cleanup and the rk command", systemImage: "checkmark.seal.fill")
                     } else {
-                        Text("RunnerKit (TouchPad, Centro, Pulizia, RunnerBoost, comando rk) si installa da solo la prima volta: serve un minuto e la connessione.")
+                        Text("RunnerKit (TouchPad, Center, Cleanup, RunnerBoost, rk command) installs itself the first time: it takes a minute and needs a connection.")
                             .font(.footnote).foregroundColor(.secondary)
-                        Button { installaRunnerKit() } label: { Label("Installa RunnerKit ora", systemImage: "square.and.arrow.down") }
+                        Button { installaRunnerKit() } label: { Label("Install RunnerKit Now", systemImage: "square.and.arrow.down") }
                     }
                 } header: { Text("FMlab - RunnerKit") }
                 .onAppear { if FMLABRunnerKit.daInstallareDaSolo() { installaRunnerKit() } }
@@ -682,6 +683,19 @@ struct ManagerView: View {
                 }
                 NavigationLink("Files", destination: files(environment))
             }
+            Section {
+                if manager.active(environment) || LRRuntimeBridge.nextRootName() == environment.rootfsName {
+                    Text("To delete this distribution, first choose another one with Use on Next Launch and reopen the app.")
+                        .font(.footnote).foregroundColor(.secondary)
+                } else {
+                    Button(role: .destructive) { fmlabDaEliminare = environment } label: { Label("Delete This Distribution…", systemImage: "trash") }
+                }
+            } header: { Text("Space") } footer: { Text(manager.size(environment)) }
+            .confirmationDialog("Delete \(fmlabDaEliminare?.name ?? "")?", isPresented: Binding(get: { fmlabDaEliminare != nil }, set: { if !$0 { fmlabDaEliminare = nil } }), titleVisibility: .visible) {
+                Button("Delete Permanently", role: .destructive) {
+                    if let e = fmlabDaEliminare { do { try manager.fmlabElimina(e) } catch { manager.error = error.localizedDescription } }
+                }
+            } message: { Text("Its packages, accounts and files are deleted and the space is freed. You can install it again any time.") }
             Section("Applications") {
                 ForEach(manager.environments.first(where: { $0.id == environment.id })?.applications ?? []) { app in
                     VStack(alignment: .leading) {
@@ -905,6 +919,17 @@ struct PackageView: View {
                 Text(status).font(.caption).textSelection(.enabled)
             }
             if environment.distributionID == "debian" {
+                Section {
+                    if enabled && FMLABRunnerKit.installato() {
+                        Label("RunnerKit installed: TouchPad, Center, Cleanup and the rk command", systemImage: "checkmark.seal.fill")
+                        Button { run(FMLABRunnerKit.programma(FMLABRunnerKit.comando)) } label: { Label("Update RunnerKit", systemImage: "arrow.triangle.2.circlepath") }
+                        Button(role: .destructive) { run(FMLABRunnerKit.programma(FMLABRunnerKit.comandoTogli)) } label: { Label("Remove RunnerKit", systemImage: "trash") }
+                    } else {
+                        Button { run(FMLABRunnerKit.programma(FMLABRunnerKit.comando)) } label: { Label("Install RunnerKit", systemImage: "square.and.arrow.down") }.disabled(!enabled)
+                    }
+                } header: { Text("FMlab - RunnerKit") } footer: {
+                    Text("TouchPad, Center (system, cleanup, processes), RunnerBoost and the rk command, made for this Debian. It comes preinstalled; removing it restores the system as it was.")
+                }
                 Section {
                     ForEach(CatalogApplication.debian.filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) || $0.package.contains(query.lowercased()) }) { item in
                         CatalogRow(item: item, installed: apps.first { ($0.command as NSString).lastPathComponent == item.executable }, enabled: enabled,
@@ -2767,6 +2792,10 @@ private struct ProcessDetailView: View {
 }
 
 
+// MARK: - FMLAB: lingua
+/// Testo tradotto (it.lproj) per le stringhe che non passano da Text("...")
+func LF(_ s: String) -> String { NSLocalizedString(s, comment: "") }
+
 // MARK: - FMLAB: aggiornamenti come in FMLAB Cleaner
 // Il numero di versione e il file .ipa escono insieme nella pubblicazione "ultima" del repository: l'avviso compare
 // solo quando il file nuovo è davvero pronto. Per installarlo non si scarica niente: si copia il link e
@@ -2810,11 +2839,11 @@ final class FMLABAggiornamenti: ObservableObject {
               (risposta as? HTTPURLResponse)?.statusCode == 200,
               let v = String(data: dati, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
               v.range(of: #"^\d+\.\d+\.\d+$"#, options: .regularExpression) != nil else {
-            if manuale { esito = "Nessuna connessione con GitHub: riprova più tardi." }
+            if manuale { esito = LF("No connection to GitHub: try again later.") }
             return
         }
         if Self.piuNuova(v, di: attuale) { nuova = v; esito = nil }
-        else { nuova = nil; if manuale { esito = "Sei già all'ultima versione (\(attuale))." } }
+        else { nuova = nil; if manuale { esito = String(format: LF("You already have the latest version (%@)."), attuale) } }
     }
 
     static func piuNuova(_ a: String, di b: String) -> Bool {
@@ -2835,21 +2864,21 @@ struct FMLABAvvisoAggiornamento: View {
     var body: some View {
         if let v = agg.nuova {
             VStack(alignment: .leading, spacing: 10) {
-                Label("FMLAB Linux \(v) disponibile", systemImage: "arrow.down.circle.fill").font(.headline)
+                Label("FMLAB Linux \(v) available", systemImage: "arrow.down.circle.fill").font(.headline)
                 Text(copiato
-                     ? "Link copiato. Ora: chiudi FMLAB Linux, in LiveContainer tocca + → Installa dall'URL → Incolla → OK. Si installa sopra questa, Linux e i dati restano."
-                     : "Senza scaricare file: copia il link e installalo da LiveContainer (+ → Installa dall'URL).")
+                     ? LF("Link copied. Now close FMLAB Linux, then in LiveContainer tap + → Install from URL → Paste → OK. It installs over this one; Linux and your data stay.")
+                     : LF("No file to download: copy the link and install it from LiveContainer (+ → Install from URL)."))
                     .font(copiato ? .callout : .footnote).foregroundColor(copiato ? .primary : .secondary)
                 Button {
                     UIPasteboard.general.string = FMLABAggiornamenti.urlIpa.absoluteString
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     copiato = true
                 } label: {
-                    Label(copiato ? "Link copiato" : "Copia link di installazione", systemImage: copiato ? "checkmark" : "doc.on.doc")
+                    Label(copiato ? LF("Link Copied") : LF("Copy Install Link"), systemImage: copiato ? "checkmark" : "doc.on.doc")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                Button("Oppure scarica il file .ipa") { apri(FMLABAggiornamenti.urlIpa) }.font(.footnote)
+                Button("Or download the .ipa file") { apri(FMLABAggiornamenti.urlIpa) }.font(.footnote)
             }
             .padding(.vertical, 4)
         }
@@ -2860,23 +2889,32 @@ struct FMLABAvvisoAggiornamento: View {
 struct FMLABInformazioni: View {
     @ObservedObject var agg: FMLABAggiornamenti
     @Environment(\.openURL) private var apri
+    @AppStorage("FMLAB.lingua") private var lingua = "en"
+    @State private var linguaCambiata = false
 
     var body: some View {
         Section {
+            Picker(selection: $lingua) { Text("English").tag("en"); Text("Italiano").tag("it") } label: { Label("Language", systemImage: "globe") }
+                .onChange(of: lingua) { nuova in UserDefaults.standard.set([nuova], forKey: "AppleLanguages"); linguaCambiata = true }
+            if linguaCambiata {
+                Text(lingua == "it" ? "Chiudi FMLAB Linux dal multitasking e riaprila per vederla in italiano."
+                                    : "Close FMLAB Linux from the app switcher and reopen it to see it in English.")
+                    .font(.footnote).foregroundColor(.orange)
+            }
             HStack { Text("FMLAB Linux"); Spacer(); Text(agg.attuale).foregroundColor(.secondary) }
-            Button(agg.controllo ? "Controllo…" : "Controlla aggiornamenti") { Task { await agg.controlla(manuale: true) } }
+            Button(agg.controllo ? LF("Checking…") : LF("Check for Updates")) { Task { await agg.controlla(manuale: true) } }
                 .disabled(agg.controllo)
             if let e = agg.esito { Text(e).font(.footnote).foregroundColor(.secondary) }
             FMLABAvvisoAggiornamento(agg: agg)
-            HStack { Text("Basata su LinuxRunner"); Spacer(); Text(agg.base).foregroundColor(.secondary) }
+            HStack { Text("Based on LinuxRunner"); Spacer(); Text(agg.base).foregroundColor(.secondary) }
             if let o = agg.originaleNuova {
-                Label("LinuxRunner originale è passato alla \(o): FMLAB Linux la riprenderà. Quando è pronta arriva qui come aggiornamento.", systemImage: "sparkles")
+                Label("Original LinuxRunner is now at \(o): FMLAB Linux will catch up. When ready, it arrives here as an update.", systemImage: "sparkles")
                     .font(.footnote).foregroundColor(.orange)
             }
-            Button("Codice sorgente e segnalazioni (GitHub)") { apri(URL(string: FMLABAggiornamenti.repo)!) }
-            Button("LinuxRunner originale (Leminos)") { apri(URL(string: "https://github.com/mxhm11cr/LinuxRunner")!) }
+            Button("Source Code and Reports (GitHub)") { apri(URL(string: FMLABAggiornamenti.repo)!) }
+            Button("Original LinuxRunner (Leminos)") { apri(URL(string: "https://github.com/mxhm11cr/LinuxRunner")!) }
         } header: { Text("FMLAB") } footer: {
-            Text("FMLAB Linux è basata su LinuxRunner di Leminos, che deriva da iSH e ios-linuxkit. Licenza GPL-3.0.")
+            Text("FMLAB Linux is based on LinuxRunner by Leminos, derived from iSH and ios-linuxkit. GPL-3.0 license.")
         }
     }
 }
@@ -2886,12 +2924,21 @@ struct FMLABInformazioni: View {
 // La prima volta che Debian è pronto, FMLAB Linux apre un terminale che installa FMlab - RunnerKit dal ramo
 // "stabile" (lo stesso comando del README di RunnerKit). Un solo tentativo automatico per ambiente; poi c'è il pulsante.
 enum FMLABRunnerKit {
-    static let comando = "echo '== FMLAB Linux: installo FMlab - RunnerKit =='; " +
+    static let comando = "echo '== FMLAB Linux: installing FMlab - RunnerKit =='; " +
         "S=''; [ \"$(id -u)\" -ne 0 ] && S=sudo; " +
         "command -v curl >/dev/null 2>&1 || $S apt-get install -y curl || { $S apt-get update && $S apt-get install -y curl; }; " +
         "curl -fsSL https://raw.githubusercontent.com/cipherdesk007-max/FMlab---RunnerKit/stabile/install.sh | sh; " +
-        "echo; echo 'Fatto. Puoi chiudere questa finestra.'; exec sh"
+        "echo; echo 'Done. You can close this window.'; exec sh"
 
+    /// `rk disinstalla` toglie tutto RunnerKit e rimette il sistema com'era (README di RunnerKit)
+    static let comandoTogli = "if command -v rk >/dev/null 2>&1; then rk disinstalla; else echo 'RunnerKit is not installed.'; fi; " +
+        "echo; echo 'Done. You can close this window.'; exec sh"
+    /// Comando per il terminale dell'app (gli avviatori in modalità terminale)
+    static func programma(_ comando: String) -> LinuxApplication {
+        var a = LinuxApplication(name: "FMlab - RunnerKit", command: "/bin/sh", arguments: ["-c", comando])
+        a.workingDirectory = "/"
+        return a
+    }
     private static func radice() -> URL { LRRuntimeBridge.rootURL(LRRuntimeBridge.activeRootName()) }
     static func installato() -> Bool {
         FileManager.default.fileExists(atPath: radice().appendingPathComponent("data/usr/local/bin/touchpad").path)
@@ -3022,7 +3069,7 @@ final class FMLABImporta: ObservableObject {
 
     func prendi(_ t: FMLABDistribuzioneTrovata, sposta: Bool, manager: EnvironmentManager) {
         guard !lavoro else { return }
-        lavoro = true; messaggio = sposta ? "Sposto \(t.nome)…" : "Copio \(t.nome)… (può volerci qualche minuto)"
+        lavoro = true; messaggio = sposta ? String(format: LF("Moving %@…"), t.nome) : String(format: LF("Copying %@… (may take a few minutes)"), t.nome)
         let mieRadici = LRRuntimeBridge.catalogURL().deletingLastPathComponent().appendingPathComponent("roots")
         let mieiScambi = LRRuntimeBridge.catalogURL().deletingLastPathComponent().appendingPathComponent("exchanges")
         Task.detached(priority: .userInitiated) {
@@ -3046,14 +3093,14 @@ final class FMLABImporta: ObservableObject {
             } catch { errore = error.localizedDescription }
             await MainActor.run {
                 self.lavoro = false
-                if let errore { self.messaggio = "Non riuscito: \(errore). Chiudi LinuxRunner e riprova."; return }
+                if let errore { self.messaggio = String(format: LF("Failed: %@. Close LinuxRunner and try again."), errore); return }
                 if let amb = t.ambiente, !manager.environments.contains(where: { $0.id == amb.id || $0.rootfsName == amb.rootfsName }) {
                     manager.environments.append(amb); try? manager.persist()
                 }
                 self.trovati.removeAll { $0.id == t.id }
                 let n = self.importaImpostazioni()
-                self.messaggio = "\(t.nome) è in FMLAB Linux" + (n > 0 ? ", con le tue impostazioni di LinuxRunner (\(n))" : "") +
-                    ". Chiudi FMLAB Linux dal multitasking e riaprila: poi la scegli in Distributions."
+                self.messaggio = String(format: LF(n > 0 ? "%@ is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions."
+                                                       : "%@ is now in FMLAB Linux. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions."), t.nome)
             }
         }
     }
@@ -3068,15 +3115,15 @@ struct FMLABImportaView: View {
         if imp.lavoro { HStack { ProgressView(); Text(imp.messaggio ?? "") } }
         else if let m = imp.messaggio { Text(m).font(.footnote) }
         if !imp.trovati.isEmpty && !imp.lavoro {
-            Text("Hai già queste distribuzioni in LinuxRunner. Prendile qui senza reinstallare niente (chiudi prima LinuxRunner).")
+            Text("You already have these distributions in LinuxRunner. Take them here without reinstalling anything (close LinuxRunner first).")
                 .font(.footnote).foregroundColor(.secondary)
         }
         if imp.impostazioniDisponibili && !imp.lavoro {
             Button {
                 let n = imp.importaImpostazioni()
-                imp.messaggio = n > 0 ? "Prese \(n) impostazioni da LinuxRunner (tema, terminale, mouse, grafica, desktop…). Chiudi e riapri FMLAB Linux per vederle tutte."
-                                      : "Nessuna impostazione da prendere."
-            } label: { Label("Prendi le impostazioni di LinuxRunner", systemImage: "slider.horizontal.3") }
+                imp.messaggio = n > 0 ? String(format: LF("Took %lld settings from LinuxRunner (theme, terminal, mouse, graphics, desktop…). Close and reopen FMLAB Linux to see them all."), n)
+                                      : LF("No settings to take.")
+            } label: { Label("Take Settings from LinuxRunner", systemImage: "slider.horizontal.3") }
         }
         ForEach(imp.trovati) { t in
             Button { scelta = t } label: {
@@ -3087,9 +3134,28 @@ struct FMLABImportaView: View {
                 }
             }.disabled(imp.lavoro)
         }
-        .confirmationDialog("Prendere \(scelta?.nome ?? "") da LinuxRunner?", isPresented: Binding(get: { scelta != nil }, set: { if !$0 { scelta = nil } }), titleVisibility: .visible) {
-            Button("Sposta (istantaneo, nessuno spazio in più)") { if let t = scelta { imp.prendi(t, sposta: true, manager: manager) } }
-            Button("Copia (resta anche in LinuxRunner)") { if let t = scelta { imp.prendi(t, sposta: false, manager: manager) } }
-        } message: { Text("Sposta: la distribuzione passa a FMLAB Linux e LinuxRunner non la avrà più. Copia: occupa il doppio dello spazio.") }
+        .confirmationDialog("Take \(scelta?.nome ?? "") from LinuxRunner?", isPresented: Binding(get: { scelta != nil }, set: { if !$0 { scelta = nil } }), titleVisibility: .visible) {
+            Button("Move (instant, no extra space)") { if let t = scelta { imp.prendi(t, sposta: true, manager: manager) } }
+            Button("Copy (also stays in LinuxRunner)") { if let t = scelta { imp.prendi(t, sposta: false, manager: manager) } }
+        } message: { Text("Move: the distribution goes to FMLAB Linux and LinuxRunner no longer has it. Copy: uses twice the space.") }
+    }
+}
+
+
+// MARK: - FMLAB: ogni distribuzione si può eliminare, anche Alpine di base
+// In LinuxRunner la Alpine inclusa non si cancella. Qui sì, purché non sia quella attiva né quella scelta per il
+// prossimo avvio (il sistema rifiuta di cancellare la radice predefinita). Spazio liberato subito.
+extension EnvironmentManager {
+    func fmlabElimina(_ e: LinuxEnvironment) throws {
+        guard !active(e), LRRuntimeBridge.nextRootName() != e.rootfsName else { throw EnvironmentError.invalidMetadata }
+        let fm = FileManager.default
+        let radice = LRRuntimeBridge.rootURL(e.rootfsName)
+        if fm.fileExists(atPath: radice.path) { try fm.removeItem(at: radice) }
+        let scambio = LRRuntimeBridge.exchangeURL(e.rootfsName)
+        if fm.fileExists(atPath: scambio.path) { try? fm.removeItem(at: scambio) }
+        environments.removeAll { $0.id == e.id }
+        try persist()
+        error = String(format: LF("%@ deleted. Space is freed; it disappears from the list for good after reopening the app."), e.name)
+        refresh()
     }
 }

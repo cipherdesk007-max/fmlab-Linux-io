@@ -25,6 +25,13 @@ int main(int argc, char * argv[]) {
     @autoreleasepool {
 #ifdef LINUXRUNNER
         LRStartupInitialize();
+        // FMLAB: lingua dell'app. Di base inglese; l'italiano si sceglie in Impostazioni → FMLAB → Language.
+        {
+            NSUserDefaults *d = NSUserDefaults.standardUserDefaults;
+            NSString *lingua = [d stringForKey:@"FMLAB.lingua"];
+            if (lingua == nil) { lingua = @"en"; [d setObject:lingua forKey:@"FMLAB.lingua"]; }
+            [d setObject:@[lingua] forKey:@"AppleLanguages"];
+        }
         LRBootEvent("application initialization: entering UIApplicationMain");
 #endif
         return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));

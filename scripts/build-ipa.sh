@@ -84,6 +84,8 @@ with open(sys.argv[1], 'wb') as out:
 PYADHOC
     # Retain exactly the signed executable shipped in the IPA, so the archive
     # provenance check remains byte-for-byte strict after ad-hoc signing.
+    # FMLAB: traduzione italiana (strumenti/genera_lingue.py), aggiunta all'app prima della firma
+    if [[ -d app/FMLAB/it.lproj ]]; then rm -rf "$app/it.lproj"; cp -R app/FMLAB/it.lproj "$app/it.lproj"; fi
     codesign --force --sign - --timestamp=none --generate-entitlement-der --entitlements "$staging/entitlements.plist" "$app"
     codesign --verify --strict "$app"
     ditto --norsrc --noextattr --noacl --noqtn "$app" "$staging/Payload/LinuxRunner.app"

@@ -2,6 +2,16 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.4.0
+- **Inglese o italiano**: Impostazioni → FMLAB → Lingua. Di base l'app è in inglese; con "Italiano" (e riaprendo
+  l'app) tutta l'interfaccia è tradotta: 475 testi, controllati a ogni compilazione (`strumenti/genera_lingue.py`
+  ferma la compilazione se un testo nuovo non ha la traduzione). Dove l'app parla di sé dice "FMLAB Linux".
+- **Ogni distribuzione si può eliminare, anche Alpine di base**: Distribuzioni → tocca la distribuzione →
+  Spazio → Elimina questa distribuzione. Mostra quanto occupa e libera lo spazio subito. Non si elimina quella in
+  uso né quella scelta per il prossimo avvio.
+- **RunnerKit anche in Gestione app** (Debian): installato o no, con **Aggiorna RunnerKit** e **Togli RunnerKit**
+  (`rk disinstalla`, rimette il sistema com'era). Resta l'installazione automatica la prima volta.
+
 ## 0.3.1
 - **Anche le impostazioni di LinuxRunner**: quando prendi una distribuzione da LinuxRunner, FMLAB Linux copia anche
   le tue impostazioni (tema, terminale e caratteri, mouse e touchpad, grafica, audio, desktop, schermo esterno), così
