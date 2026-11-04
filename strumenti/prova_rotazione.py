@@ -63,14 +63,6 @@ def main():
     xv = subprocess.Popen(["Xvfb", D, "-screen", "0", "1398x1398x24", "-nolisten", "tcp"])
     time.sleep(2)
     run("xrandr", "-q")
-    # diagnostica di tre modi possibili
-    run("xrandr", "--newmode", "pA", "60", "1398", "1406", "1414", "1422", "644", "647", "650", "653", "-HSync", "--verbose",
-        "--addmode", "screen", "pA", "--output", "screen", "--mode", "pA", "--fb", "1398x644")
-    run("xrandr", "-q")
-    run("xrandr", "--fb", "644x1398", "--output", "screen", "--off")
-    run("xrandr", "-q"); run("xdpyinfo")
-    run("xrandr", "--output", "screen", "--auto", "--fb", "1398x1398")
-    run("xrandr", "-q")
     assert run("sh", RUOTA, "1398", "644").returncode == 0, "rotazione iniziale non riuscita"
     assert misura() == "1398x644", misura()
     vnc = subprocess.Popen(["x11vnc", "-display", D, "-localhost", "-rfbport", "5977", "-nopw", "-forever",

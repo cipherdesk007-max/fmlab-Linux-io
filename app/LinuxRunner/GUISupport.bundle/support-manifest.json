@@ -118,8 +118,13 @@
       "mode": "0644"
     },
     {
+      "name": "fmlab-ruota.py",
+      "sha256": "36b695ebbec1bac2d8be407416bdfe097063ba62a25f1328857c6a88c11bfdcc",
+      "mode": "0644"
+    },
+    {
       "name": "fmlab-ruota.sh",
-      "sha256": "b6e874689c4800a1e7e90daefaa8a3d2750373c3a9039a1eeac82442dc68630e",
+      "sha256": "a05e9e714bdc4554568419effde7a624385ad33aa865666d503a7c2ca8648221",
       "mode": "0755"
     },
     {
