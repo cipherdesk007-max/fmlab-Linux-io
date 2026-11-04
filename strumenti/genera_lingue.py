@@ -104,7 +104,7 @@ LIT = re.compile(r'@"((?:[^"\\]|\\.)*)"')
 NON_UI = re.compile(r'(logCategory:|event:|desktopTrace:|result:|LRBootEvent\(|NSLog\(|accessibilityIdentifier\s*=|'
                     r'URLByAppendingPathComponent:|[Ff]orKey:|containsString:|hasPrefix:|isEqual:|isEqualToString:|'
                     r'rangeOfString:|PathComponent:|systemImageNamed:|NSSelectorFromString\(|Notification|desktopStartLog:|'
-                    r'imageNamed:|pathForResource:|componentsSeparatedByString:)\s*$')
+                    r'imageNamed:|pathForResource:|componentsSeparatedByString:|InfoDictionaryKey:)\s*$')
 TECNICI = {
     # errori interni, registri e pulsanti di prova (nascosti nel desktop), lasciati com'è
     "Managed support directory is a symbolic link.", "Invalid bundled GUI support manifest.",
