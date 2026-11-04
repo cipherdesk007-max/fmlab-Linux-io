@@ -375,13 +375,14 @@ struct ManagerView: View {
                 .tabItem { Label("Settings", systemImage: "slider.horizontal.3") }.tag(3)
         }
         .overlay(alignment: .bottom) { InstallProgressCard() }
+        .overlay(alignment: .top) { FMLABBarraDatiFluttuante() }
         // FMLAB: modalità "Solo giochi" (Game Emulator a tutto schermo; il tasto Linux torna qui)
         .fullScreenCover(isPresented: $fmlabSoloGiochi) { GameEmulatorSoloGiochi().accentColor(Color(red: 0xBF / 255, green: 0x6D / 255, blue: 0x6F / 255)).preferredColorScheme(appearance == "system" ? nil : appearance == "light" ? .light : .dark) }
         .accentColor(Color(red: 0xBF / 255, green: 0x6D / 255, blue: 0x6F / 255))
         .preferredColorScheme(appearance == "system" ? nil : appearance == "light" ? .light : .dark)
         .task { fmlabImporta.cerca(); await fmlabAggiornamenti.controlla(); await fmlabAggiornamenti.controllaOriginale() }
         .onAppear {
-            FMLABDati.carica(); FMLABEmulatore.preparaCartelle()
+            FMLABDati.carica(); FMLABEmulatore.preparaCartelle(); FMLABDati.aggiorna()
             desktopSummary = LRRuntimeBridge.desktopSessionSummary()
             // First launch without Linux, or setup waiting for its relaunch/account step.
             // Once per launch, so "Later" is respected.
@@ -423,7 +424,7 @@ struct ManagerView: View {
         .alert("FMLAB Linux", isPresented: Binding(get: { manager.error != nil }, set: { if !$0 { DispatchQueue.main.async { manager.error = nil } } })) {
             Button("OK") { manager.error = nil }
         } message: { Text(manager.error ?? "") }
-        .onChange(of: phase) { _ in manager.refresh() }
+        .onChange(of: phase) { fase in manager.refresh(); if fase == .active { FMLABDati.aggiorna() } }
     }
     private var activeEnvironment: LinuxEnvironment? { manager.environments.first(where: manager.active) }
     @AppStorage("LinuxRunnerGraphics.mode") private var graphicsMode = "mesa"

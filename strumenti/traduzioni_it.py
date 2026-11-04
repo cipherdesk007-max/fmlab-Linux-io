@@ -774,6 +774,14 @@ TR.update({
 "The downloaded data was not valid and was ignored": "I dati scaricati non erano validi e sono stati ignorati",
 "Updated from fmlab-retro": "Aggiornati da fmlab-retro",
 "Version": "Versione",
+"Checking engine data on fmlab-retro…": "Controllo i dati del motore su fmlab-retro…",
+"Could not check engine data: using the saved copy": "Non riesco a controllare i dati del motore: uso la copia salvata",
+"Downloading engine data…": "Scarico i dati del motore…",
+"Engine data already up to date (%@)": "Dati del motore già aggiornati (%@)",
+"Engine data updated: %@": "Dati del motore aggiornati: %@",
+"New data": "Dati nuovi",
+"Valid from the next game you open. Nothing to install.": "Valgono dal prossimo gioco che apri. Niente da installare.",
+"Verifying engine data…": "Verifico i dati del motore…",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

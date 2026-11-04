@@ -286,6 +286,7 @@
 "Check Wi-Fi or mobile data, then tap Retry." = "Controlla Wi-Fi o dati cellulare, poi tocca Riprova.";
 "Check for Updates" = "Controlla aggiornamenti";
 "Checking" = "Controllo";
+"Checking engine data on fmlab-retro…" = "Controllo i dati del motore su fmlab-retro…";
 "Checking existing installation" = "Controllo dell'installazione esistente";
 "Checking the Linux desktop" = "Controllo del desktop Linux";
 "Checking…" = "Controllo…";
@@ -341,6 +342,7 @@
 "Copying %lf… (may take a few minutes)" = "Copio %lf… (può volerci qualche minuto)";
 "Copying %lld… (may take a few minutes)" = "Copio %lld… (può volerci qualche minuto)";
 "Core Graphics framebuffer presenter" = "Visualizzazione con Core Graphics";
+"Could not check engine data: using the saved copy" = "Non riesco a controllare i dati del motore: uso la copia salvata";
 "Could not check the Linux desktop" = "Non è stato possibile controllare il desktop Linux";
 "Could not verify the Debian server certificate" = "Non è stato possibile verificare il certificato del server Debian";
 "Crash Details" = "Dettagli dell'arresto";
@@ -448,6 +450,7 @@
 "Distributions" = "Distribuzioni";
 "Done" = "Fine";
 "Download" = "Download";
+"Downloading engine data…" = "Scarico i dati del motore…";
 "Downloading from iCloud. Pull down to refresh in a moment." = "Download da iCloud in corso. Tra poco tira giù la lista per aggiornarla.";
 "Downloading/verifying %@ (%lld/%lld)" = "Download e verifica di %@ (%lld/%lld)";
 "Downloading/verifying %lf (%lld/%lld)" = "Download e verifica di %lf (%lld/%lld)";
@@ -473,6 +476,12 @@
 "Engine data %@ from fmlab-retro: updated by itself, without a new app." = "Dati del motore %@ da fmlab-retro: si aggiornano da soli, senza nuova app.";
 "Engine data %lf from fmlab-retro: updated by itself, without a new app." = "Dati del motore %lf da fmlab-retro: si aggiornano da soli, senza nuova app.";
 "Engine data %lld from fmlab-retro: updated by itself, without a new app." = "Dati del motore %lld da fmlab-retro: si aggiornano da soli, senza nuova app.";
+"Engine data already up to date (%@)" = "Dati del motore già aggiornati (%@)";
+"Engine data already up to date (%lf)" = "Dati del motore già aggiornati (%lf)";
+"Engine data already up to date (%lld)" = "Dati del motore già aggiornati (%lld)";
+"Engine data updated: %@" = "Dati del motore aggiornati: %@";
+"Engine data updated: %lf" = "Dati del motore aggiornati: %lf";
+"Engine data updated: %lld" = "Dati del motore aggiornati: %lld";
 "English" = "English";
 "Enlightenment" = "Enlightenment";
 "Enlightenment (X11 session with its own software compositor: shelf, main menu on a desktop click, Terminology terminal) from the distribution's own packages. If it is not installed, Open Desktop starts the LinuxRunner Desktop." = "Enlightenment (sessione X11 con il suo compositore software: barra, menu principale toccando il desktop, terminale Terminology) dai pacchetti della distribuzione. Se non è installato, Apri desktop avvia il Desktop LinuxRunner.";
@@ -857,6 +866,7 @@
 "Never" = "Mai";
 "New Environment" = "Nuovo ambiente";
 "New Folder" = "Nuova cartella";
+"New data" = "Dati nuovi";
 "New ordinary terminals log in as the selected user using the distribution's su. Existing terminals, managed desktops and administrative/package launches retain their identity." = "I nuovi terminali entrano con l'utente scelto tramite su della distribuzione. Terminali già aperti, desktop gestiti e avvii di amministrazione o pacchetti mantengono la loro identità.";
 "New password" = "Nuova password";
 "Next Desktop Start" = "Prossimo avvio del desktop";
@@ -1345,7 +1355,9 @@
 "User ID" = "ID utente";
 "Username" = "Nome utente";
 "Uses the existing environment, accounts and files. Switching environments takes effect after relaunch." = "Usa l'ambiente, gli account e i file che ci sono già. Il cambio di ambiente vale dopo aver riaperto l'app.";
+"Valid from the next game you open. Nothing to install." = "Valgono dal prossimo gioco che apri. Niente da installare.";
 "Verified: passed LinuxRunner's automated Mac tests. Partial: works with known gaps. Experimental: works in testing with open issues. Untested: no test evidence yet. Installation uses Debian's package manager in a Linux terminal." = "Verificata: ha superato i test automatici di LinuxRunner su Mac. Parziale: funziona con limiti noti. Sperimentale: funziona nelle prove ma con problemi aperti. Non provata: ancora nessuna prova. L'installazione usa il gestore di pacchetti di Debian in un terminale Linux.";
+"Verifying engine data…" = "Verifico i dati del motore…";
 "Version" = "Versione";
 "Version %@ (%@)" = "Versione %@ (%@)";
 "Version %@ (%lf)" = "Versione %@ (%lf)";

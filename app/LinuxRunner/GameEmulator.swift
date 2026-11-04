@@ -147,6 +147,63 @@ struct FMLABRiquadroGioco: View {
     }
 }
 
+/// Cosa sta facendo l'aggiornamento dei dati del motore, per la barra (Game Emulator e Distribuzioni).
+final class FMLABStatoDati: ObservableObject {
+    static let shared = FMLABStatoDati()
+    enum Fase { case controllo, scarico, verifico, aggiornati, giaAggiornati, errore }
+    @Published var fase: Fase?
+    @Published var frazione: Double = 0
+    private var chiudi: DispatchWorkItem?
+    func imposta(_ f: Fase?, _ x: Double) {
+        chiudi?.cancel(); fase = f; frazione = x
+        if let f, [.aggiornati, .giaAggiornati, .errore].contains(f) {   // l'esito resta qualche secondo, poi la barra sparisce
+            let w = DispatchWorkItem { [weak self] in self?.fase = nil }
+            chiudi = w; DispatchQueue.main.asyncAfter(deadline: .now() + (f == .aggiornati ? 6 : 3), execute: w)
+        }
+    }
+    var testo: String {
+        switch fase {
+        case .controllo: return LF("Checking engine data on fmlab-retro…")
+        case .scarico: return LF("Downloading engine data…")
+        case .verifico: return LF("Verifying engine data…")
+        case .aggiornati: return String(format: LF("Engine data updated: %@"), FMLABDati.versione)
+        case .giaAggiornati: return String(format: LF("Engine data already up to date (%@)"), FMLABDati.versione)
+        case .errore: return LF("Could not check engine data: using the saved copy")
+        case nil: return ""
+        }
+    }
+}
+
+/// La barra: compare mentre controlla/scarica/verifica e mostra l'esito per qualche secondo.
+struct FMLABBarraDati: View {
+    @ObservedObject private var stato = FMLABStatoDati.shared
+    var body: some View {
+        if let f = stato.fase {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    Image(systemName: f == .aggiornati || f == .giaAggiornati ? "checkmark.circle.fill" : f == .errore ? "exclamationmark.triangle.fill" : "arrow.down.circle")
+                        .foregroundColor(f == .errore ? .orange : f == .aggiornati || f == .giaAggiornati ? .green : .accentColor)
+                    Text(stato.testo).font(.caption.weight(.semibold)).lineLimit(2)
+                }
+                ProgressView(value: stato.frazione).tint(f == .errore ? .orange : f == .aggiornati || f == .giaAggiornati ? .green : .accentColor)
+            }.padding(.vertical, 4).animation(.easeInOut(duration: 0.25), value: stato.frazione)
+        }
+    }
+}
+
+/// La stessa barra in un riquadro sopra tutta l'app (all'apertura, qualunque scheda tu stia guardando).
+struct FMLABBarraDatiFluttuante: View {
+    @ObservedObject private var stato = FMLABStatoDati.shared
+    var body: some View {
+        if stato.fase != nil {
+            FMLABBarraDati().padding(.horizontal, 14).padding(.vertical, 8)
+                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.ultraThinMaterial))
+                .padding(.horizontal, 16).padding(.top, 4)
+                .transition(.move(edge: .top).combined(with: .opacity))
+        }
+    }
+}
+
 // MARK: - Dati del motore (fmlab-retro/dati/emulatore.json)
 // Solo dati, niente codice: estensioni, opzioni dei core, BIOS controllati, avvisi. Si aggiornano da GitHub senza
 // nuova versione dell'app; se la rete manca valgono l'ultima copia scaricata o quella scritta qui sotto.
@@ -189,6 +246,7 @@ enum FMLABDati {
                   let o = c["opzioni"] as? [String: String], o.keys.allSatisfy({ $0.replacingOccurrences(of: "_", with: "").allSatisfy { $0.isLetter || $0.isNumber } }) else { return nil }
             for campo in ["nome", "nota"] where c[campo] != nil { guard c[campo] is [String: String] else { return nil } }
         }
+        if d["novita"] != nil { guard d["novita"] is [String: String] else { return nil } }
         return d
     }
     private static func usa(_ d: [String: Any]) {
@@ -200,23 +258,51 @@ enum FMLABDati {
         if let d = (try? Data(contentsOf: copia)).flatMap(valido) { usa(d) }
         else if let d = valido(Data(interno.utf8)) { usa(d) }
     }
-    /// Al massimo ogni 6 ore (o subito con forza): scarica, controlla e usa i dati nuovi.
+    /// Novità dell'ultimo aggiornamento non ancora viste (versione), e il testo "cosa è cambiato".
+    static let chiaveNuovi = "FMLAB.dati.novitaDaVedere"
+    static var novita: String? {
+        let t = (attuali["novita"] as? [String: String])?[lingua]
+        return (t?.isEmpty == false) ? t : nil
+    }
+    /// All'apertura dell'app e del Game Emulator, al massimo ogni 10 minuti (o subito con forza):
+    /// scarica, controlla e usa i dati nuovi. Il file è di pochi KB.
     static func aggiorna(forza: Bool = false, fatto: (() -> Void)? = nil) {
         let chiave = "FMLAB.dati.ultimoControllo"
-        if !forza, Date().timeIntervalSince1970 - UserDefaults.standard.double(forKey: chiave) < 6 * 3600 { fatto?(); return }
+        if !forza, Date().timeIntervalSince1970 - UserDefaults.standard.double(forKey: "FMLAB.dati.ultimoTentativo") < 10 * 60 { fatto?(); return }
         UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "FMLAB.dati.ultimoTentativo")
+        let stato = FMLABStatoDati.shared
+        stato.imposta(.controllo, 0.1)
         var r = URLRequest(url: indirizzo, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
         r.setValue("FMLAB-Linux", forHTTPHeaderField: "User-Agent")
-        URLSession.shared.dataTask(with: r) { data, risposta, _ in
+        var osserva: NSKeyValueObservation?
+        let compito = URLSession.shared.dataTask(with: r) { data, risposta, _ in
             DispatchQueue.main.async {
+                osserva?.invalidate()
                 defer { fatto?() }
-                guard (risposta as? HTTPURLResponse)?.statusCode == 200, let data else { UserDefaults.standard.set("rete", forKey: "FMLAB.dati.esito"); return }
-                guard data.count < 512 * 1024, let d = valido(data) else { UserDefaults.standard.set("scartati", forKey: "FMLAB.dati.esito"); return }
+                guard (risposta as? HTTPURLResponse)?.statusCode == 200, let data else {
+                    UserDefaults.standard.set("rete", forKey: "FMLAB.dati.esito"); stato.imposta(.errore, 1); return
+                }
+                stato.imposta(.verifico, 0.85)
+                guard data.count < 512 * 1024, let d = valido(data) else {
+                    UserDefaults.standard.set("scartati", forKey: "FMLAB.dati.esito"); stato.imposta(.errore, 1); return
+                }
                 UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: chiave)
-                if (d["versione"] as? String) != versione { try? data.write(to: copia, options: .atomic); usa(d); UserDefaults.standard.set("nuovi", forKey: "FMLAB.dati.esito") }
-                else { UserDefaults.standard.set("uguali", forKey: "FMLAB.dati.esito") }
+                if (d["versione"] as? String) != versione {
+                    try? data.write(to: copia, options: .atomic); usa(d)
+                    UserDefaults.standard.set("nuovi", forKey: "FMLAB.dati.esito")
+                    UserDefaults.standard.set(versione, forKey: chiaveNuovi)   // avviso e pallino finché non li guardi
+                    stato.imposta(.aggiornati, 1)
+                } else {
+                    UserDefaults.standard.set("uguali", forKey: "FMLAB.dati.esito")
+                    stato.imposta(.giaAggiornati, 1)
+                }
             }
-        }.resume()
+        }
+        // avanzamento vero del download (il file è piccolo: spesso va da 10% a 80% in un attimo)
+        osserva = compito.progress.observe(\.fractionCompleted) { p, _ in
+            DispatchQueue.main.async { if stato.fase == .controllo || stato.fase == .scarico { stato.imposta(.scarico, 0.1 + p.fractionCompleted * 0.7) } }
+        }
+        compito.resume()
     }
 }
 
@@ -232,14 +318,17 @@ enum FMLABRecenti {
 
 /// Riga della sezione "Game Emulator" in Distribuzioni.
 struct GameEmulatorRow: View {
+    @AppStorage(FMLABDati.chiaveNuovi) private var nuovi = ""
     var body: some View {
         NavigationLink(destination: GameEmulatorView()) {
             HStack(spacing: 14) {
                 Image(systemName: "gamecontroller.fill").font(.title2).foregroundColor(.accentColor)
+                    .overlay(alignment: .topTrailing) { if !nuovi.isEmpty { Circle().fill(Color.red).frame(width: 10, height: 10).offset(x: 4, y: -3) } }
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("Game Emulator").font(.headline)
+                    HStack { Text("Game Emulator").font(.headline); if !nuovi.isEmpty { Text("New data").font(.caption2.weight(.bold)).foregroundColor(.white).padding(.horizontal, 6).padding(.vertical, 2).background(Capsule().fill(Color.red)) } }
                     Text(FMLABEmulatore.core().isEmpty ? LF("Emulators not included in this build") : FMLABEmulatore.core().map(\.console).joined(separator: " · "))
                         .font(.caption).foregroundColor(.secondary).lineLimit(2)
+                    FMLABBarraDati()
                 }
             }.padding(.vertical, 6)
         }.accessibilityIdentifier("game-emulator")
@@ -271,6 +360,8 @@ struct GameEmulatorView: View {
     @State private var statoBIOS: [String: Bool] = [:]     // file -> impronta giusta
     @State private var controllando = false
     @State private var versioneDati = FMLABDati.versione
+    @AppStorage(FMLABDati.chiaveNuovi) private var nuovi = ""
+    @ObservedObject private var stato = FMLABStatoDati.shared
     @AppStorage("FMLAB.comandi.scala") private var scala = 1.0
     @AppStorage("FMLAB.comandi.opacita") private var opacita = 0.9
     @AppStorage("FMLAB.comandi.vibra") private var vibra = true
@@ -293,6 +384,17 @@ struct GameEmulatorView: View {
                         Text("Choose the folder where you keep your games (On My iPhone, iCloud Drive, a USB drive…): FMLAB reads them from there and sorts them by console. Or import single files, or put them in Files › FMLAB Linux › Giochi.").font(.callout).foregroundColor(.secondary)
                         Text("No games are included or downloaded by FMLAB: only use files you own or free homebrew.").font(.footnote).foregroundColor(.secondary)
                     }.padding(.vertical, 6)
+                }
+            }
+            if stato.fase != nil { Section { FMLABBarraDati() } }
+            if !nuovi.isEmpty {
+                Section {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label(String(format: LF("Engine data updated: %@"), nuovi), systemImage: "sparkles").font(.callout.weight(.semibold)).foregroundColor(.green)
+                        if let n = FMLABDati.novita { Text(n).font(.callout) }
+                        Text("Valid from the next game you open. Nothing to install.").font(.caption).foregroundColor(.secondary)
+                    }.padding(.vertical, 4)
+                    Button("OK") { nuovi = "" }
                 }
             }
             if let a = FMLABDati.avviso { Section { Label(a, systemImage: "info.circle").font(.callout) } }
