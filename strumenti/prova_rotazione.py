@@ -63,11 +63,13 @@ def main():
     xv = subprocess.Popen(["Xvfb", D, "-screen", "0", "1398x1398x24", "-nolisten", "tcp"])
     time.sleep(2)
     run("xrandr", "-q")
-    # diagnostica: mode creato e agganciato nello stesso comando (in Xvfb un mode resta solo se usato)
-    run("xrandr", "--newmode", "p2", "60", "1398", "1406", "1414", "1422", "644", "647", "650", "653", "--addmode", "screen", "p2")
+    # diagnostica di tre modi possibili
+    run("xrandr", "--newmode", "pA", "60", "1398", "1406", "1414", "1422", "644", "647", "650", "653", "-HSync", "--verbose",
+        "--addmode", "screen", "pA", "--output", "screen", "--mode", "pA", "--fb", "1398x644")
     run("xrandr", "-q")
-    run("xrandr", "--newmode", "p3", "60", "644", "652", "660", "668", "1398", "1401", "1404", "1407", "--addmode", "screen", "p3",
-        "--output", "screen", "--mode", "p3", "--fb", "644x1398")
+    run("xrandr", "--fb", "644x1398", "--output", "screen", "--off")
+    run("xrandr", "-q"); run("xdpyinfo")
+    run("xrandr", "--output", "screen", "--auto", "--fb", "1398x1398")
     run("xrandr", "-q")
     assert run("sh", RUOTA, "1398", "644").returncode == 0, "rotazione iniziale non riuscita"
     assert misura() == "1398x644", misura()
