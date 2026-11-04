@@ -15,6 +15,13 @@ Foto vere dal telefono (iPhone 15 Pro Max). Le schermate dell'app nel simulatore
 aggiornano da sole a ogni versione in [docs/screenshots/ultima-versione](docs/screenshots/ultima-versione).
 
 <p align="center">
+  <img src="docs/images/0.7.2/home.png" width="24%" alt="Home">
+  <img src="docs/images/0.7.2/distribuzioni.png" width="24%" alt="Distribuzioni">
+  <img src="docs/images/0.7.2/sessioni.png" width="24%" alt="Sessioni">
+  <img src="docs/images/0.7.2/impostazioni.png" width="24%" alt="Impostazioni">
+</p>
+
+<p align="center">
   <img src="docs/images/0.6.0/prima-desktop-con-bordi.png" width="100%" alt="Desktop a schermo intero">
 </p>
 <p align="center">
