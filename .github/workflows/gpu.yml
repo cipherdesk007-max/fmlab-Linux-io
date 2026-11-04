@@ -1,0 +1,69 @@
+name: gpu
+
+# Dipendenze grafiche per la GPU Metal (virglrenderer, libepoxy, ANGLE) alle versioni fissate da LinuxRunner
+# (docs/BUILDING.md). È lunga: si fa una volta sola e il risultato resta in cache; "build" lo usa da lì.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/build-gpu-deps.sh
+      - scripts/gpu/**
+      - .github/workflows/gpu.yml
+
+concurrency:
+  group: gpu
+  cancel-in-progress: false
+
+jobs:
+  gpu:
+    runs-on: macos-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache già pronta?
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: build/gpu/iphoneos
+          key: gpu-iphoneos-${{ hashFiles('scripts/build-gpu-deps.sh', 'scripts/gpu/**') }}-e0a1caf-d1f952c-feebf60fe0
+      - name: Xcode più recente e strumenti
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          X=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          sudo xcode-select -s "$X/Contents/Developer"
+          echo "DEVELOPER_DIR=$X/Contents/Developer" >> "$GITHUB_ENV"
+          brew install meson ninja pkg-config >/dev/null || true
+          df -h /
+      - name: Sorgenti alle versioni fissate
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          G="$RUNNER_TEMP/gpu-deps"; mkdir -p "$G"; echo "GPU_DEPS=$G" >> "$GITHUB_ENV"
+          git clone -q https://chromium.googlesource.com/chromium/tools/depot_tools.git "$G/depot_tools"
+          git -C "$G/depot_tools" checkout -q --detach a20039648c0de69d8156906b18052bd47e9bf230
+          echo "$G/depot_tools" >> "$GITHUB_PATH"
+          git clone -q https://gitlab.freedesktop.org/virgl/virglrenderer.git "$G/virglrenderer"
+          git -C "$G/virglrenderer" checkout -q --detach e0a1caf3b147bb26dfe524dbb85ded1177e7e49e
+          git clone -q https://github.com/anholt/libepoxy.git "$G/libepoxy"
+          git -C "$G/libepoxy" checkout -q --detach d1f952c4565c389d82fd1657153e84e050f35b27
+          git clone -q https://chromium.googlesource.com/angle/angle "$G/angle"
+          git -C "$G/angle" checkout -q --detach feebf60fe088ccec3a26a7419d6ac68edf542c7a
+      - name: ANGLE (bootstrap e sync per iOS)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          export DEPOT_TOOLS_UPDATE=0
+          cd "$GPU_DEPS/angle"
+          python3 scripts/bootstrap.py
+          grep -q target_os .gclient || echo "target_os = ['ios', 'mac']" >> .gclient
+          cat .gclient
+          gclient sync --no-history --shallow -j8
+          df -h /
+      - name: Compila le dipendenze grafiche
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          export DEPOT_TOOLS_UPDATE=0
+          scripts/build-gpu-deps.sh iphoneos
+          cat build/gpu/iphoneos/REVISIONS
+          rm -rf build/gpu/iphoneos/work
+      - name: Risultato
+        run: ls -la build/gpu/iphoneos/lib

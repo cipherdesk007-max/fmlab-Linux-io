@@ -33,6 +33,15 @@ jobs:
           xcrun --sdk iphoneos --show-sdk-version
           brew install meson ninja lld >/dev/null || true
           echo "$(brew --prefix lld)/bin" >> "$GITHUB_PATH"
+      - name: Dipendenze grafiche GPU Metal (dalla cache del workflow "gpu", se pronte)
+        uses: actions/cache/restore@v4
+        with:
+          path: build/gpu/iphoneos
+          key: gpu-iphoneos-${{ hashFiles('scripts/build-gpu-deps.sh', 'scripts/gpu/**') }}-e0a1caf-d1f952c-feebf60fe0
+      - name: Variante (JIT sempre, GPU Metal se le dipendenze ci sono)
+        run: |
+          echo "LINUXRUNNER_JIT=YES" >> "$GITHUB_ENV"
+          if [ -f build/gpu/iphoneos/lib/libangle.a ]; then echo "LINUXRUNNER_VIRGL=YES" >> "$GITHUB_ENV"; echo "GPU Metal: sì"; else echo "GPU Metal: non ancora (manca la cache)"; fi
       - name: Controllo prerequisiti
         run: scripts/bootstrap-macos.sh
       - name: "Compila, senza firma (la mettono LiveContainer o SideStore)"
