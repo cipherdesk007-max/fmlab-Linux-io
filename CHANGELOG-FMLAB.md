@@ -2,6 +2,13 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.8.5
+- **Niente desktop sotto la fotocamera**: in orizzontale a schermo intero il lato della Dynamic Island resta una banda
+  nera (le icone non finiscono più lì sotto), l'altro lato va fino al bordo. L'app capisce da sola da che parte è la
+  fotocamera quando giri il telefono a destra o a sinistra.
+- La misura "Telefono" tiene conto della banda: sul 15 Pro Max **1308×644** (sempre 2× esatto), così il desktop
+  riempie tutto lo spazio rimasto senza bande sopra e sotto. Vale al prossimo avvio del desktop.
+
 ## 0.8.4
 - **Anche le finestre si adattano quando giri il telefono**: dopo la rotazione ogni finestra resta dentro lo schermo
   nuovo. Se non ci sta si rimpicciolisce, e si sposta in proporzione. Quelle a tutto schermo (massimizzate) le

@@ -531,6 +531,7 @@ static NSString *ApplicationPreflightFailure(NSURL *session) {
 
 @interface LRGUIViewController ()
 @property NSArray<NSLayoutConstraint *> *fmlabBordiNormali,*fmlabBordiPieni;   // FMLAB: tutto schermo vero
+@property NSLayoutConstraint *fmlabSinistra,*fmlabDestra;   // FMLAB: banda nera solo dal lato della fotocamera
 @property NSString *fmlabUltimiMargini;   // FMLAB: ultimo contenuto di fmlab-schermo scritto
 @property LRFramebufferView *surface;
 @property UILabel *status;
@@ -817,7 +818,9 @@ static NSString *DesktopDegradedNotice(NSString *state);
     // Schermo intero: il desktop va da bordo a bordo dello schermo (anche sotto la Dynamic Island e l'indicatore
     // Home), così l'immagine 1168×540 riempie tutto l'iPhone senza bande nere.
     _fmlabBordiNormali=@[[_stack.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:8],[_stack.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],[_stack.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],[_stack.bottomAnchor constraintEqualToAnchor:self.view.keyboardLayoutGuide.topAnchor constant:-8]];
-    _fmlabBordiPieni=@[[_stack.topAnchor constraintEqualToAnchor:self.view.topAnchor],[_stack.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],[_stack.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],[_stack.bottomAnchor constraintEqualToAnchor:self.view.keyboardLayoutGuide.topAnchor]];
+    // FMLAB 0.8.5: sul lato della fotocamera (Dynamic Island) resta una banda nera; l'altro lato va fino al bordo.
+    _fmlabSinistra=[_stack.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor];_fmlabDestra=[self.view.trailingAnchor constraintEqualToAnchor:_stack.trailingAnchor];
+    _fmlabBordiPieni=@[[_stack.topAnchor constraintEqualToAnchor:self.view.topAnchor],_fmlabSinistra,_fmlabDestra,[_stack.bottomAnchor constraintEqualToAnchor:self.view.keyboardLayoutGuide.topAnchor]];
     [NSLayoutConstraint activateConstraints:_fmlabBordiNormali];
     UIStackView *actions=[UIStackView new];actions.spacing=12;actions.distribution=UIStackViewDistributionFillEqually;
     for(NSArray *item in @[@[@"Install GUI Support",@"install"],@[@"Run X11 Test",@"runTest"],@[@"Run xterm",@"runXterm"]]){UIButton *b=[UIButton buttonWithType:UIButtonTypeSystem];[b setTitle:item[0] forState:UIControlStateNormal];b.titleLabel.font=[UIFont systemFontOfSize:13];b.accessibilityIdentifier=item[0];[b addTarget:self action:NSSelectorFromString(item[1]) forControlEvents:UIControlEventTouchUpInside];[actions addArrangedSubview:b];}
@@ -1464,7 +1467,7 @@ static NSString *DesktopDegradedNotice(NSString *state){
 // FMLAB 0.7.0: "Phone" reads the screen and picks the sharpest size by itself.
 // It divides the screen's real pixels by a whole number (2, 3…) so that every Linux pixel becomes an exact
 // square of iPhone pixels (sharp, no uneven rows), choosing the division that gives 540–720 rows.
-// iPhone 15 Pro Max: 2796×1290 pixels ÷ 2 = 1398×644 (before: 1168×540 stretched 2.39×, slightly blocky).
+// iPhone 15 Pro Max: (2796 − 177 della fotocamera)×1290 pixels ÷ 2 = 1308×644 (0.8.5; prima 1398×644) (before: 1168×540 stretched 2.39×, slightly blocky).
 // If the phone is hot (thermal state Serious/Critical) or in Low Power Mode it uses the lighter 540-row size,
 // so the desktop never pushes a hot phone harder. An external monitor keeps the previous rule.
 - (NSString *)fmlabPhoneGeometry{
@@ -1487,6 +1490,9 @@ static NSString *DesktopDegradedNotice(NSString *state){
     }
     CGSize nativo=UIScreen.mainScreen.nativeBounds.size;   // real pixels, portrait (15 Pro Max: 1290×2796)
     unsigned pl=(unsigned)MAX(nativo.width,nativo.height),pc=(unsigned)MIN(nativo.width,nativo.height);
+    // FMLAB 0.8.5: la banda della fotocamera non è desktop: lato lungo meno la zona sicura (15 Pro Max: 59 pt × 3)
+    if(UIDevice.currentDevice.userInterfaceIdiom==UIUserInterfaceIdiomPhone){UIEdgeInsets si=self.view.window.safeAreaInsets;
+        CGFloat isola=MAX(MAX(si.left,si.right),si.top)*UIScreen.mainScreen.nativeScale;if(isola>0&&isola<pl/4)pl-=(unsigned)isola;}
     for(unsigned k=2;k<=4&&pc>0;k++){
         unsigned H=pc/k/2*2,W=pl/k/2*2;   // session.sh wants even sizes up to 2560×1600
         if(H>=540&&H<=720&&W<=2560){
@@ -1709,9 +1715,22 @@ static NSString *DesktopDegradedNotice(NSString *state){
     if(_desktopMode&&_fmlabBordiNormali){[NSLayoutConstraint deactivateConstraints:hide?_fmlabBordiNormali:_fmlabBordiPieni];[NSLayoutConstraint activateConstraints:hide?_fmlabBordiPieni:_fmlabBordiNormali];
         if(@available(iOS 17.0,*))self.view.keyboardLayoutGuide.usesBottomSafeArea=!hide;
         self.view.backgroundColor=hide?UIColor.blackColor:UIColor.systemBackgroundColor;_stack.spacing=hide?0:10;
-        [self.view setNeedsLayout];[self.surface fitViewport];}
+        [self fmlabLatoFotocamera];[self.view setNeedsLayout];[self.surface fitViewport];}
     [self setNeedsStatusBarAppearanceUpdate];[self setNeedsUpdateOfHomeIndicatorAutoHidden];[self setNeedsUpdateOfScreenEdgesDeferringSystemGestures];}
 - (BOOL)prefersStatusBarHidden{return _desktopMode&&_inputToolbar.hidden;}
+// Lato della Dynamic Island in orizzontale: home a destra (LandscapeRight) -> fotocamera a sinistra, e viceversa.
+// Su iPad o senza tacca/isola (zona sicura laterale 0) niente banda.
+- (void)fmlabLatoFotocamera{
+    if(!_fmlabSinistra)return;
+    CGFloat l=0,r=0;UIEdgeInsets ins=self.view.window.safeAreaInsets;
+    if(_desktopMode&&_inputToolbar.hidden&&UIDevice.currentDevice.userInterfaceIdiom==UIUserInterfaceIdiomPhone&&MAX(ins.left,ins.right)>0){
+        UIInterfaceOrientation o=self.view.window.windowScene.interfaceOrientation;
+        if(o==UIInterfaceOrientationLandscapeRight)l=ins.left;else if(o==UIInterfaceOrientationLandscapeLeft)r=ins.right;
+    }
+    if(_fmlabSinistra.constant!=l)_fmlabSinistra.constant=l;
+    if(_fmlabDestra.constant!=r)_fmlabDestra.constant=r;
+}
+- (void)viewSafeAreaInsetsDidChange{[super viewSafeAreaInsetsDidChange];[self fmlabLatoFotocamera];}
 // FMLAB 0.8: giri il telefono -> lo schermo di Linux si gira (orizzontale 1398×644 <-> verticale 644×1398) senza
 // riavviare il desktop: la sessione lancia fmlab-ruota.sh (xrandr) e x11vnc manda al visore la misura nuova.
 - (void)fmlabRuotaVerso:(CGSize)size{
@@ -1731,7 +1750,8 @@ static NSString *DesktopDegradedNotice(NSString *state){
 // RunnerKit/TouchPad tiene i suoi pallini e finestre nella parte visibile. Si scrive solo se cambia.
 - (void)fmlabScriviMargini{
     if(!_desktopMode||!_sessionURL||!_surface.pixelWidth||!_surface.pixelHeight)return;
-    BOOL pieno=_inputToolbar.hidden;CGSize v=self.view.bounds.size;UIEdgeInsets m=pieno?self.view.safeAreaInsets:UIEdgeInsetsZero;
+    // Il lato della fotocamera non fa parte del desktop (banda nera): resta coperta solo la riga dell'indicatore Home.
+    BOOL pieno=_inputToolbar.hidden;CGSize v=_surface.bounds.size;UIEdgeInsets m=pieno?UIEdgeInsetsMake(0,0,self.view.safeAreaInsets.bottom,0):UIEdgeInsetsZero;
     if(v.width<1||v.height<1)return;
     CGFloat sx=_surface.pixelWidth/v.width,sy=_surface.pixelHeight/v.height;
     NSString *testo=[NSString stringWithFormat:@"# FMLAB Linux: parte del desktop coperta da Dynamic Island, angoli e indicatore Home (pixel di Linux)\nmargini=%d %d %d %d\nschermo_intero=%d\nlarghezza=%u\naltezza=%u\n",
@@ -1741,7 +1761,7 @@ static NSString *DesktopDegradedNotice(NSString *state){
     if([testo writeToURL:url atomically:YES encoding:NSUTF8StringEncoding error:nil]){
         [NSFileManager.defaultManager setAttributes:@{NSFilePosixPermissions:@0644} ofItemAtPath:url.path error:nil];_fmlabUltimiMargini=testo;}
 }
-- (void)viewDidLayoutSubviews{[super viewDidLayoutSubviews];[self fmlabScriviMargini];}
+- (void)viewDidLayoutSubviews{[super viewDidLayoutSubviews];[self fmlabLatoFotocamera];[self fmlabScriviMargini];}
 - (void)toggleImmersive{[self setImmersive:!_inputToolbar.hidden];}
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
