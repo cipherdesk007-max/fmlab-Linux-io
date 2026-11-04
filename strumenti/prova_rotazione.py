@@ -63,7 +63,7 @@ def aspetta_misura(s, w0, h0, voluta, secondi=20):
 
 
 def main():
-    xv = subprocess.Popen(["Xvfb", D, "-screen", "0", "1398x1398x24", "-nolisten", "tcp"])
+    xv = subprocess.Popen(["Xvfb", D, "-screen", "0", "1398x1398x24", "-noreset", "-nolisten", "tcp"])
     time.sleep(2)
     run("xrandr", "-q")
     assert run("sh", RUOTA, "1398", "644").returncode == 0, "rotazione iniziale non riuscita"

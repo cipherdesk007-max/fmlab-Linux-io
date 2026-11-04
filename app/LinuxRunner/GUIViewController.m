@@ -1404,6 +1404,9 @@ static NSString *LRSessionGraphicsMode(void){
     if(!selectedDesktop && LRRuntimeBridge.activeEnvironmentIsDebian)selectedDesktop=[NSUserDefaults.standardUserDefaults stringForKey:@"LinuxRunnerDesktop.environment"];
     NSDictionary *files=@{@"desktop-environment":([selectedDesktop isEqual:@"plasma"]||[selectedDesktop isEqual:@"lxqt"]||[selectedDesktop isEqual:@"enlightenment"]||[selectedDesktop isEqual:@"wayfire"]||[selectedDesktop isEqual:@"hyprland"])?selectedDesktop:@"linuxrunner",@"guest-user":_sessionGuestUser,@"geometry":geometry,@"glx-mode":glxMode,@"gpu-mode":LRSessionGraphicsMode(),@"input-mode":[NSUserDefaults.standardUserDefaults boolForKey:@"LinuxRunnerGUIEagerInput"]?@"eager":@"legacy",@"shm-mode":[NSUserDefaults.standardUserDefaults boolForKey:@"LinuxRunnerGUISharedImages"]?@"sysv":@"off",@"vnc-timing":[NSUserDefaults.standardUserDefaults boolForKey:@"LinuxRunnerGUILowLatencyInput"]?@"threads":@"default",@"password":password,@"cookie":cookie,@"port":[NSString stringWithFormat:@"%u",port],@"audio-port":_audioPort?[NSString stringWithFormat:@"%u",_audioPort]:@"",@"display":[NSString stringWithFormat:@"%u",display]};
     for(NSString *name in files){NSURL *url=[_sessionURL URLByAppendingPathComponent:name];if(![files[name] writeToURL:url atomically:YES encoding:NSUTF8StringEncoding error:&error]||![NSFileManager.defaultManager setAttributes:@{NSFilePosixPermissions:@0600} ofItemAtPath:url.path error:&error]){[self message:error.localizedDescription];return;}}
+    // FMLAB 0.8: con "Telefono" lo schermo di Linux si gira col telefono senza riavviare (session.sh, fmlab-ruota.sh).
+    {NSURL *ruota=[_sessionURL URLByAppendingPathComponent:@"fmlab-rotazione"];[NSFileManager.defaultManager removeItemAtURL:ruota error:nil];
+     if(_desktopMode&&_resolution.selectedSegmentIndex==5&&[@[@"linuxrunner",@"lxqt",@"plasma"] containsObject:files[@"desktop-environment"]])[@"1\n" writeToURL:ruota atomically:YES encoding:NSUTF8StringEncoding error:nil];}
     NSString *xkb=[NSUserDefaults.standardUserDefaults stringForKey:@"LinuxRunnerGUIXKBMode"]?:@"xkb";
     [xkb writeToURL:[_sessionURL URLByAppendingPathComponent:@"xkb-mode"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
     if([mode isEqual:@"custom"]){
@@ -1465,6 +1468,12 @@ static NSString *DesktopDegradedNotice(NSString *state){
 // If the phone is hot (thermal state Serious/Critical) or in Low Power Mode it uses the lighter 540-row size,
 // so the desktop never pushes a hot phone harder. An external monitor keeps the previous rule.
 - (NSString *)fmlabPhoneGeometry{
+    // In verticale (telefono dritto) la stessa misura girata: 644×1398 invece di 1398×644.
+    NSString *g=[self fmlabPhoneGeometryOrizzontale];unsigned w=0,h=0;CGSize v=self.view.bounds.size;
+    if(![self externalOutputActive]&&v.height>v.width&&sscanf(g.UTF8String,"%ux%u",&w,&h)==2)return [NSString stringWithFormat:@"%ux%u",h,w];
+    return g;
+}
+- (NSString *)fmlabPhoneGeometryOrizzontale{
     UIWindow *target=([self externalOutputActive]?LRCurrentExternalDisplay.view.window:nil)?:self.view.window;
     CGSize s=target?target.bounds.size:UIScreen.mainScreen.bounds.size;
     CGFloat lungo=MAX(s.width,s.height),corto=MAX(1,MIN(s.width,s.height));
@@ -1703,6 +1712,20 @@ static NSString *DesktopDegradedNotice(NSString *state){
         [self.view setNeedsLayout];[self.surface fitViewport];}
     [self setNeedsStatusBarAppearanceUpdate];[self setNeedsUpdateOfHomeIndicatorAutoHidden];[self setNeedsUpdateOfScreenEdgesDeferringSystemGestures];}
 - (BOOL)prefersStatusBarHidden{return _desktopMode&&_inputToolbar.hidden;}
+// FMLAB 0.8: giri il telefono -> lo schermo di Linux si gira (orizzontale 1398×644 <-> verticale 644×1398) senza
+// riavviare il desktop: la sessione lancia fmlab-ruota.sh (xrandr) e x11vnc manda al visore la misura nuova.
+- (void)fmlabRuotaVerso:(CGSize)size{
+    if(!_desktopMode||!_sessionURL||_sessionTerminal.sessionPid<=0||_resolution.selectedSegmentIndex!=5||[self externalOutputActive])return;
+    if(![NSFileManager.defaultManager fileExistsAtPath:[_sessionURL URLByAppendingPathComponent:@"fmlab-rotazione"].path])return;
+    NSString *g=[NSString stringWithContentsOfURL:[_sessionURL URLByAppendingPathComponent:@"geometry"] encoding:NSUTF8StringEncoding error:nil];
+    unsigned a=0,b=0;if(!g||sscanf(g.UTF8String,"%ux%u",&a,&b)!=2)return;
+    unsigned L=MAX(a,b),S=MIN(a,b);BOOL verticale=size.height>size.width;unsigned W=verticale?S:L,H=verticale?L:S;
+    if(_surface.pixelWidth==W&&_surface.pixelHeight==H)return;
+    [LRRuntimeBridge logCategory:@"FMLAB_DISPLAY" event:[NSString stringWithFormat:@"rotate to %ux%u",W,H]];
+    NSString *script=[NSString stringWithFormat:@"/home/mobile/Downloads/%@/fmlab-ruota.sh",LRGUIFolder];
+    [self launchDesktopApplication:@{@"executable":@"/bin/sh",@"directory":@"/",@"arguments":@[script,[NSString stringWithFormat:@"%u",W],[NSString stringWithFormat:@"%u",H]],
+                                     @"environment":@{},@"requestID":NSUUID.UUID.UUIDString}];
+}
 // FMLAB 0.7.2: a schermo intero il desktop va sotto la Dynamic Island, gli angoli arrotondati e l'indicatore
 // Home. Si scrive nella cartella della sessione quanta parte del desktop (in pixel di Linux) cade lì, così
 // RunnerKit/TouchPad tiene i suoi pallini e finestre nella parte visibile. Si scrive solo se cambia.
@@ -1722,6 +1745,7 @@ static NSString *DesktopDegradedNotice(NSString *state){
 - (void)toggleImmersive{[self setImmersive:!_inputToolbar.hidden];}
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    [self fmlabRuotaVerso:size];
     if(_desktopMode){id automatic=[NSUserDefaults.standardUserDefaults objectForKey:@"LinuxRunnerDesktop.autoFullscreen"];
         if(!automatic||[automatic boolValue])[coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>c){[self setImmersive:size.width>size.height];} completion:nil];}
 }
