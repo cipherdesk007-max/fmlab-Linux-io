@@ -2,6 +2,20 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.9.0
+- **Game Emulator (FMLAB)**: emulatori **nativi dentro l'app**, senza Linux e senza JIT, nella sezione *Game Emulator ·
+  FMLAB* sotto le distribuzioni. Console: NES, Game Boy / Color, Game Boy Advance, Super Nintendo, PlayStation,
+  Nintendo DS (core libretro FCEUmm, Gambatte, mGBA, bsnes, PCSX ReARMed, DeSmuME, compilati per iPhone dal progetto
+  [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) a commit fissi; l'app controlla l'impronta SHA-256).
+  - giochi tuoi in File › FMLAB Linux › Giochi o con *Importa* (nessun gioco incluso), elenco per console
+  - comandi a schermo multi-tocco: in verticale sotto il gioco, in orizzontale ai lati; si adattano quando giri il
+    telefono e lasciano libera la Dynamic Island; croce a 8 direzioni, vibrazione leggera
+  - controller MFi/Xbox/PlayStation (i comandi a schermo spariscono da soli), tocco sullo schermo del DS
+  - salvataggio automatico della memoria del gioco, salva/carica stato, avanti veloce, pausa e ripresa automatica
+  - italiano e inglese
+- Tolta *FMLAB Retro* da Configura Linux (era una Debian per i giochi: lenta, perché passava dall'interprete).
+- Distribuzioni: mentre rimisura lo spazio si vede l'ultima misura invece di "Calcolo…".
+
 ## 0.8.8
 - **Nuova distribuzione FMLAB Retro** (console classiche): Distribuzioni → Configura Linux… → *FMLAB Retro*. È
   Debian 13 ufficiale, installato e verificato come Debian; dopo account e desktop c'è *Installa FMLAB Retro*, che
