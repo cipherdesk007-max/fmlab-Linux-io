@@ -34,6 +34,8 @@ jobs:
           sudo xcode-select -s "$X/Contents/Developer"
           echo "DEVELOPER_DIR=$X/Contents/Developer" >> "$GITHUB_ENV"
           brew install meson ninja pkg-config >/dev/null || true
+          python3 -m pip install --break-system-packages --quiet pyyaml || python3 -m pip install --user --quiet pyyaml
+          python3 -c "import yaml; print('pyyaml ok')"
           df -h /
       - name: Sorgenti alle versioni fissate
         if: steps.cache.outputs.cache-hit != 'true'

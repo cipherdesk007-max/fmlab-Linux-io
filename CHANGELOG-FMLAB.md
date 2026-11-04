@@ -2,6 +2,9 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.4.1
+- L'avviso "LinuxRunner originale è passato alla …" compare anche nella **Home**, non solo in Impostazioni.
+
 ## 0.4.0
 - **Inglese o italiano**: Impostazioni → FMLAB → Lingua. Di base l'app è in inglese; con "Italiano" (e riaprendo
   l'app) tutta l'interfaccia è tradotta: 475 testi, controllati a ogni compilazione (`strumenti/genera_lingue.py`

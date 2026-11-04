@@ -500,6 +500,12 @@ struct ManagerView: View {
             if fmlabAggiornamenti.nuova != nil {
                 Section { FMLABAvvisoAggiornamento(agg: fmlabAggiornamenti) }
             }
+            if let o = fmlabAggiornamenti.originaleNuova {
+                Section {
+                    Label("Original LinuxRunner is now at \(o): FMLAB Linux will catch up. When ready, it arrives here as an update.", systemImage: "sparkles")
+                        .font(.footnote).foregroundColor(.orange)
+                }
+            }
             if !fmlabImporta.trovati.isEmpty || fmlabImporta.messaggio != nil || fmlabImporta.impostazioniDisponibili {
                 Section { FMLABImportaView(imp: fmlabImporta, manager: manager) } header: { Text("From LinuxRunner") }
             }
