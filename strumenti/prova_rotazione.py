@@ -62,6 +62,7 @@ def aspetta_misura(s, w0, h0, voluta, secondi=20):
 def main():
     xv = subprocess.Popen(["Xvfb", D, "-screen", "0", "1398x1398x24", "-nolisten", "tcp"])
     time.sleep(2)
+    run("xrandr", "-q")
     assert run("sh", RUOTA, "1398", "644").returncode == 0, "rotazione iniziale non riuscita"
     assert misura() == "1398x644", misura()
     vnc = subprocess.Popen(["x11vnc", "-display", D, "-localhost", "-rfbport", "5977", "-nopw", "-forever",
