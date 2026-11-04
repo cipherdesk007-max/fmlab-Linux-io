@@ -1,5 +1,7 @@
 # FMLAB Linux 🐧📱
 
+🇮🇹 Italiano · [🇬🇧 English](README.en.md)
+
 Linux vero sull'iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), versione FMLAB di
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. Niente jailbreak, niente macchina virtuale:
 i programmi Linux ARM64 girano dentro l'app grazie a un interprete e a uno strato che traduce le chiamate di sistema.
