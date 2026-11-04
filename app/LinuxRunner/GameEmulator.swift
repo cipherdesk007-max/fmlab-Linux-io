@@ -85,18 +85,12 @@ struct GameEmulatorView: View {
         .toolbar { Button { importa = true } label: { Image(systemName: "plus") }.accessibilityLabel(LF("Import Games…")) }
         .onAppear(perform: aggiorna)
         .refreshable { aggiorna() }
-        .fileImporter(isPresented: $importa, allowedContentTypes: [.data], allowsMultipleSelection: true) { risultato in
-            guard case .success(let urls) = risultato else { return }
-            var scartati: [String] = []
-            for u in urls {
-                let accesso = u.startAccessingSecurityScopedResource(); defer { if accesso { u.stopAccessingSecurityScopedResource() } }
-                guard FMLABEmulatore.core(per: u.lastPathComponent) != nil else { scartati.append(u.lastPathComponent); continue }
-                let dest = FMLABEmulatore.cartellaGiochi().appendingPathComponent(u.lastPathComponent)
-                try? FileManager.default.removeItem(at: dest)
-                do { try FileManager.default.copyItem(at: u, to: dest) } catch { errore = error.localizedDescription }
-            }
-            if !scartati.isEmpty { errore = String(format: LF("Not a supported game file (unzip it first): %@"), scartati.joined(separator: ", ")) }
-            aggiorna()
+        // FMLAB: selettore di iOS diretto. Il .fileImporter di SwiftUI qui non funziona: più in alto
+        // nell'app ce n'è già un altro (file di Linux) e il file scelto finiva a quello.
+        .onChange(of: importa) { apri in
+            guard apri else { return }
+            importa = false
+            FMLABSceltaFile.apri { urls in importaFile(urls) }
         }
         .fullScreenCover(item: $inGioco) { gioco in FMLABGiocoSchermo(gioco: gioco).ignoresSafeArea() }
         .alert(String(format: LF("Delete %@?"), daTogliere?.nome ?? ""), isPresented: Binding(get: { daTogliere != nil }, set: { if !$0 { daTogliere = nil } })) {
@@ -104,6 +98,26 @@ struct GameEmulatorView: View {
             Button("Cancel", role: .cancel) { daTogliere = nil }
         } message: { Text("The game file is deleted. Its saves in Giochi/Salvataggi are kept.") }
         .alert("Game Emulator", isPresented: Binding(get: { errore != nil }, set: { if !$0 { errore = nil } })) { Button("OK") { errore = nil } } message: { Text(errore ?? "") }
+    }
+
+    private func importaFile(_ urls: [URL]) {
+        let base = FMLABEmulatore.cartellaGiochi()
+        DispatchQueue.global(qos: .userInitiated).async {
+            var scartati: [String] = []
+            for u in urls {
+                guard FMLABEmulatore.core(per: u.lastPathComponent) != nil else { scartati.append(u.lastPathComponent); continue }
+                let dest = base.appendingPathComponent(u.lastPathComponent)
+                try? FileManager.default.removeItem(at: dest)
+                // asCopy: iOS ci ha già dato una copia nostra, basta spostarla
+                do { try FileManager.default.moveItem(at: u, to: dest) } catch {
+                    do { try FileManager.default.copyItem(at: u, to: dest) } catch { DispatchQueue.main.async { errore = error.localizedDescription } }
+                }
+            }
+            DispatchQueue.main.async {
+                if !scartati.isEmpty { errore = String(format: LF("Not a supported game file (unzip it first): %@"), scartati.joined(separator: ", ")) }
+                aggiorna()
+            }
+        }
     }
 
     private func aggiorna() {
@@ -123,6 +137,24 @@ struct GameEmulatorView: View {
         }
         giochi = trovati
     }
+}
+
+/// Selettore di file di iOS (copia i file scelti nell'app), presentato sopra quello che c'è a schermo.
+final class FMLABSceltaFile: NSObject, UIDocumentPickerDelegate {
+    private static var attivo: FMLABSceltaFile?
+    private let fatto: ([URL]) -> Void
+    private init(_ fatto: @escaping ([URL]) -> Void) { self.fatto = fatto }
+    static func apri(_ fatto: @escaping ([URL]) -> Void) {
+        let scelta = FMLABSceltaFile(fatto); attivo = scelta
+        let p = UIDocumentPickerViewController(forOpeningContentTypes: [.data, .item], asCopy: true)
+        p.allowsMultipleSelection = true
+        p.delegate = scelta
+        guard var cima = UIApplication.shared.connectedScenes.compactMap({ ($0 as? UIWindowScene)?.keyWindow }).first?.rootViewController else { return }
+        while let sopra = cima.presentedViewController { cima = sopra }
+        cima.present(p, animated: true)
+    }
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) { fatto(urls); Self.attivo = nil }
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) { Self.attivo = nil }
 }
 
 struct FMLABGiocoSchermo: UIViewControllerRepresentable {

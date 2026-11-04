@@ -2,6 +2,11 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.9.2
+- Game Emulator: **Importa giochi** funziona. Prima il file scelto finiva all'importatore dei file di Linux (due
+  importatori SwiftUI nella stessa schermata) e non succedeva nulla; ora usa direttamente il selettore di iOS,
+  copia anche file grandi (es. DS da 60+ MB) senza bloccare l'app e accetta più file insieme.
+
 ## 0.9.1
 - Game Emulator: console e giochi in ordine di uscita (NES, Game Boy, SNES, PlayStation, GBA, DS).
 - Tolta la vecchia parte Debian di FMLAB Retro (chiave e archivio apt): i giochi si fanno solo col Game Emulator nativo.
