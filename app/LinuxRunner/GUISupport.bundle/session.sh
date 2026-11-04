@@ -218,7 +218,16 @@ umask 077
 xauth -f "$XAUTHORITY" add "$DISPLAY" . "$(cat "$session/cookie")"
 echo "GUI_SESSION: root=${LINUXRUNNER_ENVIRONMENT:-current} distribution=$distro DISPLAY=$DISPLAY geometry=${width}x${height} backend=xvfb-rfb interpreter-baseline"
 echo "GUI_SESSION: starting X.Org software display, ${width}x${height}, no JIT"
-Xvfb "$DISPLAY" -screen 0 "${width}x${height}x24" -nolisten tcp -auth "$XAUTHORITY" "$shm_switch" MIT-SHM "$glx_switch" GLX > "$session/xvfb.log" 2>&1 & xpid=$!
+# FMLAB: rotazione. Con "Telefono" l'app chiede (fmlab-rotazione) uno schermo che si gira col telefono: Xvfb
+# parte quadrato grande quanto il lato lungo e xrandr lo mette in orizzontale o in verticale senza riavviare
+# niente (Xvfb non puo' crescere oltre la misura di partenza). Solo desktop X11 (LinuxRunner, LXQt, Plasma).
+fmlab_ruota=no screen_w=$width screen_h=$height
+if [ "$mode" = desktop ] && [ -f "$session/fmlab-rotazione" ] && command -v xrandr >/dev/null; then
+    case "$desktop_environment" in linuxrunner|lxqt|plasma)
+        fmlab_ruota=yes; screen_w=$((width > height ? width : height)); screen_h=$screen_w;; esac
+fi
+if [ -f ./fmlab-ruota.sh ]; then . ./fmlab-ruota.sh; else fmlab_ruota=no screen_w=$width screen_h=$height; fi   # fmlab_modo L A
+Xvfb "$DISPLAY" -screen 0 "${screen_w}x${screen_h}x24" -nolisten tcp -auth "$XAUTHORITY" "$shm_switch" MIT-SHM "$glx_switch" GLX > "$session/xvfb.log" 2>&1 & xpid=$!
 i=0
 while [ ! -S "/tmp/.X11-unix/X$display" ]; do
     [ ! -f "$session/stop" ] || exit 0
@@ -226,6 +235,10 @@ while [ ! -S "/tmp/.X11-unix/X$display" ]; do
     i=$((i+1)); [ "$i" -lt 100 ] || { echo 'GUI_SESSION: X server timeout'; exit 5; }; sleep .1
 done
 echo "GUI_SESSION: stage=x11-ready socket=/tmp/.X11-unix/X$display polls=$i"
+if [ "$fmlab_ruota" = yes ]; then
+    if fmlab_modo "$width" "$height" >> "$session/xvfb.log" 2>&1; then echo "FMLAB_ROTAZIONE: pronta ${width}x${height} (massimo ${screen_w}x${screen_h})"
+    else echo "FMLAB_ROTAZIONE: xrandr non riuscito, schermo ${screen_w}x${screen_h}"; fi
+fi
 if [ "$mode" != desktop ]; then
 # Session-wide focus policy for all X11 clients; no app-name/key special cases.
 ./focus-manager "$session/stop" > "$session/focus.log" 2>&1 & wpid=$!
@@ -339,7 +352,7 @@ case "$mode:$(cat "$session/desktop-environment" 2>/dev/null)" in
     desktop:wayfire) if [ -c /dev/dri/card1 ] && command -v wayfire >/dev/null; then vnc_cursor_option=-nocursor; fi;;
 esac
 [ -z "$vnc_cursor_option" ] || echo 'GUI_SESSION: pointer=compositor (x11vnc draws none)'
-x11vnc -norc -display "$DISPLAY" -auth "$XAUTHORITY" -localhost -no6 -rfbport "$port" -passwdfile "$session/password" $vnc_lifetime $vnc_shm_option $vnc_timing_options -noxrecord -noscr -nosel -noclipboard -nocursorshape $vnc_cursor_option -nolookup $input_option "$xkb" > "$session/display.log" 2>&1 & vpid=$!
+x11vnc -norc -display "$DISPLAY" -auth "$XAUTHORITY" -localhost -no6 -rfbport "$port" -passwdfile "$session/password" $([ "$fmlab_ruota" = yes ] && echo -xrandr newfbsize) $vnc_lifetime $vnc_shm_option $vnc_timing_options -noxrecord -noscr -nosel -noclipboard -nocursorshape $vnc_cursor_option -nolookup $input_option "$xkb" > "$session/display.log" 2>&1 & vpid=$!
 echo "GUI_SESSION: stage=vnc-started port=$port"
 if [ "$mode" = test ]; then ./gui-test > "$session/application.log" 2>&1 &
 elif [ "$mode" = xterm ]; then xterm -geometry 80x24+0+0 -fn fixed -xrm 'XTerm*renderFont: false' > "$session/application.log" 2>&1 &

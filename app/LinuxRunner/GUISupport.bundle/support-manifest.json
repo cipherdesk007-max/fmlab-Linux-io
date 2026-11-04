@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "1",
+  "version": "2",
   "resources": [
     {
       "name": "audio-relay.c",
@@ -116,6 +116,11 @@
       "name": "firefox-test.html",
       "sha256": "b0a9675d3205c935c4e3df331d3819e494898d32ee3f81ffd1f7a4bcfe8ca743",
       "mode": "0644"
+    },
+    {
+      "name": "fmlab-ruota.sh",
+      "sha256": "0e2d7f69bf107cbc47ccce5162e74952ea46d491ea3d1709852c41570d32c274",
+      "mode": "0755"
     },
     {
       "name": "focus-manager.c",
@@ -409,7 +414,7 @@
     },
     {
       "name": "session.sh",
-      "sha256": "7d33bc02a949ae221e24f9bf5861a8fb0238211b3c125d2f1d1a2bb46bd60ba0",
+      "sha256": "2fd49331ad9a8d64479797807aeca25bd3965d030a5344effcdd664e51d26c91",
       "mode": "0755"
     },
     {
@@ -429,7 +434,7 @@
     },
     {
       "name": "support-version",
-      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
       "mode": "0644"
     },
     {

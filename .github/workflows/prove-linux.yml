@@ -1,0 +1,20 @@
+name: prove-linux
+
+# Prove che non hanno bisogno di un Mac: girano su Linux normale come dentro il telefono.
+on:
+  push:
+    branches: [main]
+    paths: ["app/LinuxRunner/GUISupport.bundle/**", "strumenti/**", ".github/workflows/prove-linux.yml"]
+  workflow_dispatch:
+
+jobs:
+  rotazione:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Programmi (come sul Debian del telefono)
+        run: sudo apt-get update -q && sudo apt-get install -y -q xvfb x11vnc x11-xserver-utils x11-utils
+      - name: Script della sessione
+        run: sh -n app/LinuxRunner/GUISupport.bundle/session.sh && sh -n app/LinuxRunner/GUISupport.bundle/fmlab-ruota.sh && python3 scripts/generate-gui-support-manifest.py --check
+      - name: Rotazione del desktop senza riavvio (Xvfb + xrandr + x11vnc + visore RFB)
+        run: timeout 120 python3 strumenti/prova_rotazione.py
