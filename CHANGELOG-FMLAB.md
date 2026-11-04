@@ -2,6 +2,19 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.8.0
+- **Il desktop si gira col telefono**: con la risoluzione **Telefono** lo schermo di Linux passa da solo da
+  orizzontale (1398×644) a verticale (644×1398) quando giri l'iPhone, **senza riavviare il desktop** né chiudere i
+  programmi. Lo schermo di Linux parte grande quanto il lato lungo e RandR lo gira (`fmlab-ruota.py`, una sola
+  connessione: con `xrandr` Xvfb perdeva la misura nuova); x11vnc avvisa il visore dell'app. Se apri il desktop col
+  telefono in verticale parte già in verticale. Serve RunnerKit (Python + Xlib); senza, resta come prima.
+  Provato su Linux a ogni modifica (workflow `prove-linux`: orizzontale → verticale → orizzontale, il visore riceve
+  ogni volta la misura giusta).
+- **File rimasti di LinuxRunner**: in Home → Da LinuxRunner ogni distribuzione rimasta (anche dopo aver tolto
+  LinuxRunner) si può **prendere** (Sposta/Copia) o **eliminare** per liberare lo spazio (es. Alpine 730 MB).
+- Schermate dell'app vera nel simulatore iPhone, in italiano, a ogni versione (workflow `screenshot`,
+  `docs/screenshots/ultima-versione`) e foto dal telefono nel README.
+
 ## 0.7.2
 - **RunnerKit si adatta a FMLAB Linux**: a schermo intero l'app scrive nella cartella della sessione
   (`fmlab-schermo`) quanta parte del desktop cade sotto Dynamic Island, angoli e indicatore Home, in pixel di

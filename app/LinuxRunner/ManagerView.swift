@@ -3114,6 +3114,34 @@ final class FMLABImporta: ObservableObject {
     }
 }
 
+extension FMLABImporta {
+    /// Elimina una distribuzione rimasta nei file di LinuxRunner (es. dopo averlo tolto da LiveContainer, i suoi
+    /// dati restano). Toglie radice e cartella di scambio e la voce nel suo elenco. FMLAB Linux non viene toccata.
+    func elimina(_ t: FMLABDistribuzioneTrovata) {
+        guard !lavoro else { return }
+        lavoro = true; messaggio = String(format: LF("Deleting %@…"), t.nome)
+        Task.detached(priority: .userInitiated) {
+            let fm = FileManager.default
+            var errore: String?
+            do {
+                try fm.removeItem(at: t.sorgente.appendingPathComponent("roots").appendingPathComponent(t.nomeRadice))
+                try? fm.removeItem(at: t.sorgente.appendingPathComponent("exchanges").appendingPathComponent(t.nomeRadice))
+                if var cat = try? EnvironmentCatalog.read(t.sorgente.appendingPathComponent("environments.json")) {
+                    cat.environments.removeAll { $0.rootfsName == t.nomeRadice }
+                    try? cat.write(t.sorgente.appendingPathComponent("environments.json"))
+                }
+            } catch { errore = error.localizedDescription }
+            await MainActor.run {
+                self.lavoro = false
+                if let errore { self.messaggio = String(format: LF("Failed: %@. Close LinuxRunner and try again."), errore); return }
+                self.trovati.removeAll { $0.id == t.id }
+                self.messaggio = String(format: LF("%@ deleted from LinuxRunner's files. Freed %@."), t.nome,
+                                        ByteCountFormatter.string(fromByteCount: t.byte, countStyle: .file))
+            }
+        }
+    }
+}
+
 struct FMLABImportaView: View {
     @ObservedObject var imp: FMLABImporta
     @ObservedObject var manager: EnvironmentManager
@@ -3123,7 +3151,7 @@ struct FMLABImportaView: View {
         if imp.lavoro { HStack { ProgressView(); Text(imp.messaggio ?? "") } }
         else if let m = imp.messaggio { Text(m).font(.footnote) }
         if !imp.trovati.isEmpty && !imp.lavoro {
-            Text("You already have these distributions in LinuxRunner. Take them here without reinstalling anything (close LinuxRunner first).")
+            Text("These distributions are in LinuxRunner's files (they stay even after removing LinuxRunner). Tap one to take it here without reinstalling, or to delete it and free the space.")
                 .font(.footnote).foregroundColor(.secondary)
         }
         if imp.impostazioniDisponibili && !imp.lavoro {
@@ -3145,7 +3173,9 @@ struct FMLABImportaView: View {
         .confirmationDialog("Take \(scelta?.nome ?? "") from LinuxRunner?", isPresented: Binding(get: { scelta != nil }, set: { if !$0 { scelta = nil } }), titleVisibility: .visible) {
             Button("Move (instant, no extra space)") { if let t = scelta { imp.prendi(t, sposta: true, manager: manager) } }
             Button("Copy (also stays in LinuxRunner)") { if let t = scelta { imp.prendi(t, sposta: false, manager: manager) } }
-        } message: { Text("Move: the distribution goes to FMLAB Linux and LinuxRunner no longer has it. Copy: uses twice the space.") }
+            Button(role: .destructive) { if let t = scelta { imp.elimina(t) } } label: { Text(String(format: LF("Delete It (frees %@)"), ByteCountFormatter.string(fromByteCount: scelta?.byte ?? 0, countStyle: .file))) }
+            Button("Cancel", role: .cancel) { }
+        } message: { Text("Move: the distribution goes to FMLAB Linux and LinuxRunner no longer has it. Copy: uses twice the space. Delete: removes it from LinuxRunner's files for good.") }
     }
 }
 

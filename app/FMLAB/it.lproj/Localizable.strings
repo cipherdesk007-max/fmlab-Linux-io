@@ -29,6 +29,9 @@
 "%@ %@ · ARM64" = "%@ %@ · ARM64";
 "%@ %lf · ARM64" = "%@ %lf · ARM64";
 "%@ %lld · ARM64" = "%@ %lld · ARM64";
+"%@ deleted from LinuxRunner's files. Freed %@." = "%@ eliminata dai file di LinuxRunner. Liberati %@.";
+"%@ deleted from LinuxRunner's files. Freed %lf." = "%@ eliminata dai file di LinuxRunner. Liberati %lf.";
+"%@ deleted from LinuxRunner's files. Freed %lld." = "%@ eliminata dai file di LinuxRunner. Liberati %lld.";
 "%@ deleted. Space is freed; it disappears from the list for good after reopening the app." = "%@ eliminata. Lo spazio è libero; sparisce del tutto dall'elenco dopo aver riaperto l'app.";
 "%@ installed" = "%@ installato";
 "%@ is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%@ è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
@@ -71,6 +74,9 @@
 "%lf %@ · ARM64" = "%lf %@ · ARM64";
 "%lf %lf · ARM64" = "%lf %lf · ARM64";
 "%lf %lld · ARM64" = "%lf %lld · ARM64";
+"%lf deleted from LinuxRunner's files. Freed %@." = "%lf eliminata dai file di LinuxRunner. Liberati %@.";
+"%lf deleted from LinuxRunner's files. Freed %lf." = "%lf eliminata dai file di LinuxRunner. Liberati %lf.";
+"%lf deleted from LinuxRunner's files. Freed %lld." = "%lf eliminata dai file di LinuxRunner. Liberati %lld.";
 "%lf deleted. Space is freed; it disappears from the list for good after reopening the app." = "%lf eliminata. Lo spazio è libero; sparisce del tutto dall'elenco dopo aver riaperto l'app.";
 "%lf installed" = "%lf installato";
 "%lf is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lf è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
@@ -113,6 +119,9 @@
 "%lld %@ · ARM64" = "%lld %@ · ARM64";
 "%lld %lf · ARM64" = "%lld %lf · ARM64";
 "%lld %lld · ARM64" = "%lld %lld · ARM64";
+"%lld deleted from LinuxRunner's files. Freed %@." = "%lld eliminata dai file di LinuxRunner. Liberati %@.";
+"%lld deleted from LinuxRunner's files. Freed %lf." = "%lld eliminata dai file di LinuxRunner. Liberati %lf.";
+"%lld deleted from LinuxRunner's files. Freed %lld." = "%lld eliminata dai file di LinuxRunner. Liberati %lld.";
 "%lld deleted. Space is freed; it disappears from the list for good after reopening the app." = "%lld eliminata. Lo spazio è libero; sparisce del tutto dall'elenco dopo aver riaperto l'app.";
 "%lld installed" = "%lld installato";
 "%lld is now in FMLAB Linux, with your LinuxRunner settings. Close FMLAB Linux from the app switcher and reopen it, then choose it in Distributions." = "%lld è in FMLAB Linux, con le tue impostazioni di LinuxRunner. Chiudi FMLAB Linux dal multitasking e riaprila, poi sceglila in Distribuzioni.";
@@ -349,8 +358,14 @@
 "Delete %@?" = "Eliminare %@?";
 "Delete %lf?" = "Eliminare %lf?";
 "Delete %lld?" = "Eliminare %lld?";
+"Delete It (frees %@)" = "Eliminala (libera %@)";
+"Delete It (frees %lf)" = "Eliminala (libera %lf)";
+"Delete It (frees %lld)" = "Eliminala (libera %lld)";
 "Delete Permanently" = "Elimina per sempre";
 "Delete This Distribution…" = "Elimina questa distribuzione…";
+"Deleting %@…" = "Eliminazione di %@…";
+"Deleting %lf…" = "Eliminazione di %lf…";
+"Deleting %lld…" = "Eliminazione di %lld…";
 "Desktop" = "Desktop";
 "Desktop & Input" = "Desktop e comandi";
 "Desktop Diagnostics" = "Diagnostica del desktop";
@@ -769,6 +784,7 @@
 "Mouse sensitivity: %.2g×" = "Sensibilità del mouse: %.2g×";
 "Move (instant, no extra space)" = "Sposta (istantaneo, nessuno spazio in più)";
 "Move: the distribution goes to FMLAB Linux and LinuxRunner no longer has it. Copy: uses twice the space." = "Sposta: la distribuzione passa a FMLAB Linux e LinuxRunner non la avrà più. Copia: occupa il doppio dello spazio.";
+"Move: the distribution goes to FMLAB Linux and LinuxRunner no longer has it. Copy: uses twice the space. Delete: removes it from LinuxRunner's files for good." = "Sposta: la distribuzione passa a FMLAB Linux e LinuxRunner non l'ha più. Copia: occupa il doppio. Elimina: la toglie per sempre dai file di LinuxRunner.";
 "Moving %@…" = "Sposto %@…";
 "Moving %lf…" = "Sposto %lf…";
 "Moving %lld…" = "Sposto %lld…";
@@ -1140,6 +1156,7 @@
 "There is not enough free storage on this iPhone. Free some space and try again." = "Non c'è abbastanza spazio libero sull'iPhone. Libera un po' di spazio e riprova.";
 "These Arch repositories do not provide the Plasma X11 session required by LinuxRunner. Choose LinuxRunner Desktop. Wayland is not supported." = "Questi repository di Arch non hanno la sessione Plasma X11 che serve a FMLAB Linux. Scegli il Desktop LinuxRunner. Wayland non è supportato.";
 "These are real host addresses, shared with iOS and other apps; LinuxRunner has no separate network namespace. Review addresses before sharing a screenshot. No network requests are sent by this screen." = "Sono gli indirizzi veri del telefono, condivisi con iOS e le altre app; FMLAB Linux non ha una rete separata. Controllali prima di condividere uno screenshot. Questa schermata non manda richieste in rete.";
+"These distributions are in LinuxRunner's files (they stay even after removing LinuxRunner). Tap one to take it here without reinstalling, or to delete it and free the space." = "Queste distribuzioni sono nei file di LinuxRunner (restano anche dopo averlo tolto). Toccane una per prenderla qui senza reinstallare, oppure per eliminarla e liberare lo spazio.";
 "Third-Party Notices & Credits" = "Note e riconoscimenti di terze parti";
 "This build has no Metal GPU device" = "Questa versione non ha la GPU Metal";
 "This build is interpreter-only" = "Questa versione ha solo l'interprete";

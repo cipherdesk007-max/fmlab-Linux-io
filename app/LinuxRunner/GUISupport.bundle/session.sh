@@ -222,7 +222,8 @@ echo "GUI_SESSION: starting X.Org software display, ${width}x${height}, no JIT"
 # parte quadrato grande quanto il lato lungo e xrandr lo mette in orizzontale o in verticale senza riavviare
 # niente (Xvfb non puo' crescere oltre la misura di partenza). Solo desktop X11 (LinuxRunner, LXQt, Plasma).
 fmlab_ruota=no screen_w=$width screen_h=$height
-if [ "$mode" = desktop ] && [ -f "$session/fmlab-rotazione" ] && command -v xrandr >/dev/null; then
+# Serve python3 con Xlib (lo installa RunnerKit): senza, lo schermo resta fisso come prima (mai quadrato).
+if [ "$mode" = desktop ] && [ -f "$session/fmlab-rotazione" ] && [ -f ./fmlab-ruota.py ] && python3 -c 'import Xlib' 2>/dev/null; then
     case "$desktop_environment" in linuxrunner|lxqt|plasma)
         fmlab_ruota=yes; screen_w=$((width > height ? width : height)); screen_h=$screen_w;; esac
 fi
