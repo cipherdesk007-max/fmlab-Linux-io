@@ -8,7 +8,7 @@ fmlab_modo() {
     # uscita di Xvfb (di solito "screen"): la prima collegata
     out=$(xrandr -q 2>/dev/null | awk '$2=="connected"{print $1; exit}'); out=${out:-screen}
     xrandr -q 2>/dev/null | grep -q "^ *$n " || {
-        xrandr --newmode "$n" 60 "$1" $(($1+8)) $(($1+16)) $(($1+24)) "$2" $(($2+3)) $(($2+6)) $(($2+9)) 2>/dev/null
+        xrandr --newmode "$n" 60 "$1" $(($1+8)) $(($1+16)) $(($1+24)) "$2" $(($2+3)) $(($2+6)) $(($2+9))
         xrandr --addmode "$out" "$n"
     }
     xrandr --output "$out" --mode "$n" --fb "$n" || xrandr --fb "$n" --output "$out" --mode "$n"
