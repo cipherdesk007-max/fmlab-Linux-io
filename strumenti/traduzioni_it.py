@@ -762,6 +762,18 @@ TR.update({
 "Start Over": "Dall'inizio",
 "Vibration": "Vibrazione",
 "When you quit a game it is saved; next time you can continue from there.": "Quando esci da un gioco si salva; la volta dopo puoi continuare da lì.",
+"%ld games": "%ld giochi",
+"1 game": "1 gioco",
+"Already up to date": "Già aggiornati",
+"Check Now": "Controlla ora",
+"Engine Data": "Dati del motore",
+"Extensions, emulator options, BIOS list and notices come from fmlab-retro (dati/emulatore.json) and update by themselves, without a new app. The emulators themselves arrive with app updates.": "Estensioni, opzioni degli emulatori, elenco dei BIOS e avvisi arrivano da fmlab-retro (dati/emulatore.json) e si aggiornano da soli, senza nuova app. Gli emulatori veri arrivano con gli aggiornamenti dell'app.",
+"Last check": "Ultimo controllo",
+"Never": "Mai",
+"No connection: using the saved copy": "Nessuna connessione: uso la copia salvata",
+"The downloaded data was not valid and was ignored": "I dati scaricati non erano validi e sono stati ignorati",
+"Updated from fmlab-retro": "Aggiornati da fmlab-retro",
+"Version": "Versione",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

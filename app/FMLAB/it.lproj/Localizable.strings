@@ -55,6 +55,7 @@
 "%@ · UID %lld" = "%@ · UID %lld";
 "%@ · code region verified (test code returned the expected value); no guest code translated yet — start or use Linux" = "%@ · zona di codice verificata (la prova ha dato il valore giusto); nessun codice Linux tradotto ancora: avvia o usa Linux";
 "%@. CLI remains available. GUI Logs includes application stdout/stderr." = "%@. Il terminale resta disponibile. I registri grafica contengono l'uscita dell'applicazione.";
+"%ld games" = "%ld giochi";
 "%lf\n\n%@\nError: %@" = "%lf\n\n%@\nErrore: %@";
 "%lf\n\n%@\nError: %lf" = "%lf\n\n%@\nErrore: %lf";
 "%lf\n\n%@\nError: %lld" = "%lf\n\n%@\nErrore: %lld";
@@ -152,6 +153,7 @@
 "%lld · code region verified (test code returned the expected value); no guest code translated yet — start or use Linux" = "%lld · zona di codice verificata (la prova ha dato il valore giusto); nessun codice Linux tradotto ancora: avvia o usa Linux";
 "%lld. CLI remains available. GUI Logs includes application stdout/stderr." = "%lld. Il terminale resta disponibile. I registri grafica contengono l'uscita dell'applicazione.";
 "..." = "...";
+"1 game" = "1 gioco";
 "1024 × 768" = "1024 × 768";
 "640 × 480" = "640 × 480";
 "800 × 600" = "800 × 600";
@@ -196,6 +198,7 @@
 "Alpine Applications" = "Applicazioni Alpine";
 "Alpine Linux 3.24 (ARM64)" = "Alpine Linux 3.24 (ARM64)";
 "Already Installed" = "Già installate";
+"Already up to date" = "Già aggiornati";
 "An Ethernet adapter recognized by iOS can carry LinuxRunner connections through the host route. This list does not identify its USB chipset or grant Linux direct adapter ownership. The active connection type appears above." = "Un adattatore Ethernet riconosciuto da iOS può portare le connessioni di FMLAB Linux. Questo elenco non dice che chip USB ha e non dà a Linux il controllo diretto dell'adattatore. Il tipo di connessione attiva è indicato sopra.";
 "An earlier installation was interrupted. Tap Retry to let it complete." = "Un'installazione precedente si è interrotta. Tocca Riprova per completarla.";
 "Another Desktop (Optional)" = "Un altro desktop (facoltativo)";
@@ -279,6 +282,7 @@
 "Check / Repair Package State" = "Controlla / ripara i pacchetti";
 "Check Access" = "Controlla accesso";
 "Check Dependencies" = "Controlla dipendenze";
+"Check Now" = "Controlla ora";
 "Check Wi-Fi or mobile data, then tap Retry." = "Controlla Wi-Fi o dati cellulare, poi tocca Riprova.";
 "Check for Updates" = "Controlla aggiornamenti";
 "Checking" = "Controllo";
@@ -465,6 +469,7 @@
 "End Process" = "Chiudi processo";
 "End Process (SIGTERM)" = "Chiudi processo (SIGTERM)";
 "Ending a desktop component (window manager, panel, compositor) can close the desktop session." = "Chiudere un pezzo del desktop (gestore finestre, pannello, compositore) può chiudere la sessione del desktop.";
+"Engine Data" = "Dati del motore";
 "Engine data %@ from fmlab-retro: updated by itself, without a new app." = "Dati del motore %@ da fmlab-retro: si aggiornano da soli, senza nuova app.";
 "Engine data %lf from fmlab-retro: updated by itself, without a new app." = "Dati del motore %lf da fmlab-retro: si aggiornano da soli, senza nuova app.";
 "Engine data %lld from fmlab-retro: updated by itself, without a new app." = "Dati del motore %lld da fmlab-retro: si aggiornano da soli, senza nuova app.";
@@ -506,6 +511,7 @@
 "Export failed. Select a regular file up to 512 MiB; symlinks are refused." = "Esportazione non riuscita. Scegli un file normale fino a 512 MiB; i collegamenti simbolici non sono accettati.";
 "Export failed. Use regular files or directories without links/special files, up to 512 MiB, 4096 entries and 32 directory levels." = "Esportazione non riuscita. Usa file o cartelle normali senza collegamenti o file speciali, fino a 512 MiB, 4096 elementi e 32 livelli di cartelle.";
 "Export includes redacted diagnostic records and recent display logs. Browser profiles, cookies, keys, input payloads and arbitrary application output are excluded." = "L'esportazione include dati diagnostici ripuliti e i registri recenti dello schermo. Profili dei browser, cookie, chiavi, testo digitato e messaggi delle applicazioni sono esclusi.";
+"Extensions, emulator options, BIOS list and notices come from fmlab-retro (dati/emulatore.json) and update by themselves, without a new app. The emulators themselves arrive with app updates." = "Estensioni, opzioni degli emulatori, elenco dei BIOS e avvisi arrivano da fmlab-retro (dati/emulatore.json) e si aggiornano da soli, senza nuova app. Gli emulatori veri arrivano con gli aggiornamenti dell'app.";
 "External Desktop Output" = "Desktop su schermo esterno";
 "External Desktop Touchpad\nSlide: move · Tap: click · Hold and slide: drag\nTwo fingers: scroll or tap to right-click\nUse Keyboard below to type." = "Touchpad del desktop esterno\nScorri: muovi · Tocca: clic · Tieni premuto e scorri: trascina\nDue dita: scorri o tocca per il clic destro\nPer scrivere usa Tastiera qui sotto.";
 "External Monitor · USB-C or AirPlay" = "Monitor esterno · USB-C o AirPlay";
@@ -738,6 +744,7 @@
 "Last boot: %@" = "Ultimo avvio: %@";
 "Last boot: %lf" = "Ultimo avvio: %lf";
 "Last boot: %lld" = "Ultimo avvio: %lld";
+"Last check" = "Ultimo controllo";
 "Later" = "Più tardi";
 "Launch" = "Avvia";
 "Launch " = "Avvia ";
@@ -847,6 +854,7 @@
 "Nearby Wi-Fi scanning and raw interface control are unavailable through ordinary public iOS APIs. This screen does not request location access or a Wi-Fi entitlement." = "Cercare reti Wi-Fi vicine e controllare direttamente le interfacce non si può con le normali funzioni di iOS. Questa schermata non chiede la posizione né permessi Wi-Fi.";
 "Needs the desktop components (Setup or Open Desktop) and the network." = "Servono i componenti del desktop (Configura o Apri desktop) e la rete.";
 "Network" = "Rete";
+"Never" = "Mai";
 "New Environment" = "Nuovo ambiente";
 "New Folder" = "Nuova cartella";
 "New ordinary terminals log in as the selected user using the distribution's su. Existing terminals, managed desktops and administrative/package launches retain their identity." = "I nuovi terminali entrano con l'utente scelto tramite su della distribuzione. Terminali già aperti, desktop gestiti e avvii di amministrazione o pacchetti mantengono la loro identità.";
@@ -857,6 +865,7 @@
 "No applications match this filter." = "Nessuna applicazione con questo filtro.";
 "No connection to GitHub: try again later." = "Nessuna connessione con GitHub: riprova più tardi.";
 "No connection to the Debian servers" = "Nessuna connessione ai server Debian";
+"No connection: using the saved copy" = "Nessuna connessione: uso la copia salvata";
 "No environment" = "Nessun ambiente";
 "No file to download: copy the link and install it from LiveContainer (+ → Install from URL)." = "Senza scaricare file: copia il link e installalo da LiveContainer (+ → Installa dall'URL).";
 "No files in the shared folder." = "Nessun file nella cartella condivisa.";
@@ -1201,6 +1210,7 @@
 "The display did not appear" = "Lo schermo non è comparso";
 "The distribution updates its account databases. Home directories and files remain, with their existing numeric ownership. Close this user's sessions first. No forced deletion is used." = "La distribuzione aggiorna i suoi archivi degli account. Le cartelle Home e i file restano, con la proprietà numerica di prima. Chiudi prima le sessioni di questo utente. Non si cancella niente con la forza.";
 "The distribution's account-removal tool is missing. Install it using Package Center." = "Manca lo strumento della distribuzione per togliere gli account. Installalo dal Centro pacchetti.";
+"The downloaded data was not valid and was ignored" = "I dati scaricati non erano validi e sono stati ignorati";
 "The emulator could not be loaded: %s" = "Non è stato possibile caricare l'emulatore: %s";
 "The emulator could not open this game. Check that the file is complete and not zipped; some consoles need their BIOS in Giochi/BIOS." = "L'emulatore non riesce ad aprire questo gioco. Controlla che il file sia completo e non zippato; alcune console vogliono il BIOS in Giochi/BIOS.";
 "The executable cannot be read or executed. Check guest permissions." = "Il programma non si può leggere o avviare. Controlla i permessi in Linux.";
@@ -1318,6 +1328,7 @@
 "Unknown" = "Sconosciuto";
 "Unpacking Alpine Linux…" = "Estrazione di Alpine Linux…";
 "Update RunnerKit" = "Aggiorna RunnerKit";
+"Updated from fmlab-retro" = "Aggiornati da fmlab-retro";
 "Updates: in the terminal, sudo apt update && sudo apt upgrade (Debian and FMLAB together). Put your games in Files › FMLAB Linux › Shared › Giochi, then run rk-giochi importa." = "Aggiornamenti: nel terminale sudo apt update && sudo apt upgrade (Debian e FMLAB insieme). Metti i tuoi giochi in File › FMLAB Linux › Shared › Giochi, poi lancia rk-giochi importa.";
 "Use %@?" = "Usare %@?";
 "Use %lf?" = "Usare %lf?";
@@ -1335,6 +1346,7 @@
 "Username" = "Nome utente";
 "Uses the existing environment, accounts and files. Switching environments takes effect after relaunch." = "Usa l'ambiente, gli account e i file che ci sono già. Il cambio di ambiente vale dopo aver riaperto l'app.";
 "Verified: passed LinuxRunner's automated Mac tests. Partial: works with known gaps. Experimental: works in testing with open issues. Untested: no test evidence yet. Installation uses Debian's package manager in a Linux terminal." = "Verificata: ha superato i test automatici di LinuxRunner su Mac. Parziale: funziona con limiti noti. Sperimentale: funziona nelle prove ma con problemi aperti. Non provata: ancora nessuna prova. L'installazione usa il gestore di pacchetti di Debian in un terminale Linux.";
+"Version" = "Versione";
 "Version %@ (%@)" = "Versione %@ (%@)";
 "Version %@ (%lf)" = "Versione %@ (%lf)";
 "Version %@ (%lld)" = "Versione %@ (%lld)";

@@ -6,7 +6,7 @@ Real Linux on the iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), the FMLAB e
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. No jailbreak, no virtual machine: ARM64 Linux programs
 run inside the app through an interpreter and a layer that translates system calls.
 
-> **Status: 0.9.5.** LinuxRunner 1.1.0 (build 900), same engine (ARM64 interpreter, JIT, Metal GPU), with the FMLAB
+> **Status: 0.9.6.** LinuxRunner 1.1.0 (build 900), same engine (ARM64 interpreter, JIT, Metal GPU), with the FMLAB
 > name, logo and red-and-black colours, its own identifier (`dev.fmlab.linux`, so it installs **next to**
 > LinuxRunner without touching its data), in-app updates and the improvements listed below.
 
@@ -15,6 +15,15 @@ run inside the app through an interpreter and a layer that translates system cal
 Real photos from the phone (iPhone 15 Pro Max). Screenshots of the real app in the iPhone Simulator, in Italian,
 refresh by themselves on every release in [docs/screenshots/ultima-versione](docs/screenshots/ultima-versione).
 
+<p align="center">
+  <img src="docs/images/0.9.5/desktop-orizzontale.png" width="100%" alt="Desktop in landscape (0.9.5)">
+</p>
+<p align="center">
+  <img src="docs/images/0.9.5/home.png" width="24%" alt="Home">
+  <img src="docs/images/0.9.5/distribuzioni.png" width="24%" alt="Distributions with Game Emulator">
+  <img src="docs/images/0.9.5/game-emulator-console.png" width="24%" alt="Game Emulator: consoles">
+  <img src="docs/images/0.9.5/game-emulator-cartelle.png" width="24%" alt="Game Emulator: folders and controls">
+</p>
 <p align="center">
   <img src="docs/images/0.8.2/desktop-verticale-ruotato.png" width="24%" alt="Desktop rotated to portrait, buttons at the bottom">
   <img src="docs/images/0.8.2/desktop-orizzontale.png" width="72%" alt="Desktop in landscape">

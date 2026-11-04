@@ -2,6 +2,13 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.9.6
+- Game Emulator, sezione **Console** rifatta: per ogni console sigla colorata, nome e nota (dai dati del motore,
+  quindi cambiano senza nuova app), numero di giochi trovati ed estensioni.
+- Nuova sezione **Dati del motore**: versione in uso, ultimo controllo, esito (aggiornati / già aggiornati /
+  nessuna connessione / dati scartati) e *Controlla ora*.
+- *Solo giochi* in una riga a parte. Schermate nuove dal telefono nel README.
+
 ## 0.9.5
 - **Dati del motore da fmlab-retro, senza nuova app**: estensioni, opzioni degli emulatori, BIOS controllati e avvisi
   arrivano da `fmlab-retro/dati/emulatore.json`. Il Game Emulator li scarica da solo (al massimo ogni 6 ore, o

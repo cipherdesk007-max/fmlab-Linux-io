@@ -114,20 +114,23 @@ enum FMLABIcona {
     }
 }
 
+/// Sigla e colore di ogni console (riquadri dei giochi senza icona e righe delle console).
+func fmlabSigla(_ core: String, gbc: Bool = false) -> (String, Color) {
+    switch core {
+    case "fceumm": return ("NES", Color(red: 0.75, green: 0.15, blue: 0.15))
+    case "gambatte": return (gbc ? "GBC" : "GB", Color(red: 0.35, green: 0.45, blue: 0.25))
+    case "mgba": return ("GBA", Color(red: 0.35, green: 0.25, blue: 0.6))
+    case "bsnes": return ("SNES", Color(red: 0.45, green: 0.42, blue: 0.6))
+    case "pcsx_rearmed": return ("PS1", Color(red: 0.3, green: 0.3, blue: 0.35))
+    case "desmume": return ("DS", Color(red: 0.25, green: 0.4, blue: 0.6))
+    default: return ("?", .gray)
+    }
+}
+
 /// Riquadro del gioco: l'icona vera se c'è, altrimenti il colore e la sigla della console.
 struct FMLABRiquadroGioco: View {
     let gioco: FMLABGioco
-    private var sigla: (String, Color) {
-        switch gioco.core.nome {
-        case "fceumm": return ("NES", Color(red: 0.75, green: 0.15, blue: 0.15))
-        case "gambatte": return (gioco.url.pathExtension.lowercased() == "gbc" ? "GBC" : "GB", Color(red: 0.35, green: 0.45, blue: 0.25))
-        case "mgba": return ("GBA", Color(red: 0.35, green: 0.25, blue: 0.6))
-        case "bsnes": return ("SNES", Color(red: 0.45, green: 0.42, blue: 0.6))
-        case "pcsx_rearmed": return ("PS1", Color(red: 0.3, green: 0.3, blue: 0.35))
-        case "desmume": return ("DS", Color(red: 0.25, green: 0.4, blue: 0.6))
-        default: return ("?", .gray)
-        }
-    }
+    private var sigla: (String, Color) { fmlabSigla(gioco.core.nome, gbc: gioco.url.pathExtension.lowercased() == "gbc") }
     var body: some View {
         ZStack {
             if let img = gioco.icona {
@@ -156,10 +159,21 @@ enum FMLABDati {
         return d.appendingPathComponent("emulatore.json")
     }
     private(set) static var attuali: [String: Any] = [:]
+    /// Ultimo controllo su GitHub e com'è andato (si vede nella sezione Console).
+    static var ultimoControllo: Date? { let t = UserDefaults.standard.double(forKey: "FMLAB.dati.ultimoTentativo"); return t > 0 ? Date(timeIntervalSince1970: t) : nil }
+    static var esito: String { UserDefaults.standard.string(forKey: "FMLAB.dati.esito") ?? "" }
+    private static var lingua: String { UserDefaults.standard.string(forKey: "FMLAB.lingua") == "it" ? "it" : "en" }
+    private static func testo(_ core: String, _ campo: String) -> String? {
+        let c = (attuali["core"] as? [String: [String: Any]])?[core]
+        let t = (c?[campo] as? [String: String])?[lingua]
+        return (t?.isEmpty == false) ? t : nil
+    }
+    static func nome(_ core: FMLABCore) -> String { testo(core.nome, "nome") ?? LF(core.console) }
+    static func nota(_ core: FMLABCore) -> String? { testo(core.nome, "nota") }
     static var versione: String { attuali["versione"] as? String ?? "?" }
     static var bios: [[String: String]] { (attuali["bios"] as? [[String: Any]] ?? []).compactMap { $0 as? [String: String] } }
     static var avviso: String? {
-        let a = attuali["avviso"] as? [String: String]; let t = a?[UserDefaults.standard.string(forKey: "FMLAB.lingua") == "it" ? "it" : "en"]
+        let a = attuali["avviso"] as? [String: String]; let t = a?[lingua]
         return (t?.isEmpty == false) ? t : nil
     }
 
@@ -173,6 +187,7 @@ enum FMLABDati {
             guard noti.contains(n), let e = c["estensioni"] as? [String], !e.isEmpty,
                   e.allSatisfy({ $0.range(of: #"^[a-z0-9]{1,5}$"#, options: .regularExpression) != nil }),
                   let o = c["opzioni"] as? [String: String], o.keys.allSatisfy({ $0.replacingOccurrences(of: "_", with: "").allSatisfy { $0.isLetter || $0.isNumber } }) else { return nil }
+            for campo in ["nome", "nota"] where c[campo] != nil { guard c[campo] is [String: String] else { return nil } }
         }
         return d
     }
@@ -188,15 +203,18 @@ enum FMLABDati {
     /// Al massimo ogni 6 ore (o subito con forza): scarica, controlla e usa i dati nuovi.
     static func aggiorna(forza: Bool = false, fatto: (() -> Void)? = nil) {
         let chiave = "FMLAB.dati.ultimoControllo"
-        if !forza, Date().timeIntervalSince1970 - UserDefaults.standard.double(forKey: chiave) < 6 * 3600 { return }
+        if !forza, Date().timeIntervalSince1970 - UserDefaults.standard.double(forKey: chiave) < 6 * 3600 { fatto?(); return }
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "FMLAB.dati.ultimoTentativo")
         var r = URLRequest(url: indirizzo, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
         r.setValue("FMLAB-Linux", forHTTPHeaderField: "User-Agent")
         URLSession.shared.dataTask(with: r) { data, risposta, _ in
             DispatchQueue.main.async {
                 defer { fatto?() }
-                guard (risposta as? HTTPURLResponse)?.statusCode == 200, let data, data.count < 512 * 1024, let d = valido(data) else { return }
+                guard (risposta as? HTTPURLResponse)?.statusCode == 200, let data else { UserDefaults.standard.set("rete", forKey: "FMLAB.dati.esito"); return }
+                guard data.count < 512 * 1024, let d = valido(data) else { UserDefaults.standard.set("scartati", forKey: "FMLAB.dati.esito"); return }
                 UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: chiave)
-                if (d["versione"] as? String) != versione { try? data.write(to: copia, options: .atomic); usa(d) }
+                if (d["versione"] as? String) != versione { try? data.write(to: copia, options: .atomic); usa(d); UserDefaults.standard.set("nuovi", forKey: "FMLAB.dati.esito") }
+                else { UserDefaults.standard.set("uguali", forKey: "FMLAB.dati.esito") }
             }
         }.resume()
     }
@@ -251,6 +269,8 @@ struct GameEmulatorView: View {
     @State private var errore: String?
     @State private var cercando = false
     @State private var statoBIOS: [String: Bool] = [:]     // file -> impronta giusta
+    @State private var controllando = false
+    @State private var versioneDati = FMLABDati.versione
     @AppStorage("FMLAB.comandi.scala") private var scala = 1.0
     @AppStorage("FMLAB.comandi.opacita") private var opacita = 0.9
     @AppStorage("FMLAB.comandi.vibra") private var vibra = true
@@ -324,11 +344,42 @@ struct GameEmulatorView: View {
             }
             Section {
                 Toggle(isOn: $modoSoloGiochi) { VStack(alignment: .leading, spacing: 3) { Text("Games Only"); Text("FMLAB Linux opens straight into the Game Emulator. The Linux button brings back everything else.").font(.caption).foregroundColor(.secondary) } }
+            }
+            Section {
                 ForEach(FMLABEmulatore.core(), id: \.nome) { c in
-                    HStack { Text(LF(c.console)); Spacer(); Text(c.estensioni.map { "." + $0 }.joined(separator: " ")).font(.caption).foregroundColor(.secondary).lineLimit(1) }
+                    let quanti = giochi.filter { $0.core.nome == c.nome }.count
+                    HStack(spacing: 12) {
+                        let sg = fmlabSigla(c.nome)
+                        Text(sg.0).font(.system(size: 11, weight: .heavy, design: .rounded)).foregroundColor(.white).minimumScaleFactor(0.6)
+                            .frame(width: 40, height: 40).background(sg.1).clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack { Text(FMLABDati.nome(c)).font(.callout.weight(.semibold)); Spacer(); Text(quanti == 1 ? LF("1 game") : String(format: LF("%ld games"), quanti)).font(.caption).foregroundColor(.secondary) }
+                            if let n = FMLABDati.nota(c) { Text(n).font(.caption).foregroundColor(.secondary) }
+                            Text(c.estensioni.map { "." + $0 }.joined(separator: " ")).font(.caption2.monospaced()).foregroundColor(.secondary).lineLimit(1)
+                        }
+                    }.padding(.vertical, 2)
                 }
             } header: { Text("Consoles") } footer: {
-                Text(String(format: LF("Engine data %@ from fmlab-retro: updated by itself, without a new app."), FMLABDati.versione)) + Text("\n") + Text("Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers and hardware keyboards work too.")
+                Text("Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers and hardware keyboards work too.")
+            }
+            Section {
+                HStack { Text("Version"); Spacer(); Text(versioneDati).font(.callout.monospaced()).foregroundColor(.secondary) }
+                HStack {
+                    Text("Last check"); Spacer()
+                    Text(FMLABDati.ultimoControllo.map { DateFormatter.localizedString(from: $0, dateStyle: .short, timeStyle: .short) } ?? LF("Never")).foregroundColor(.secondary)
+                }
+                if !FMLABDati.esito.isEmpty {
+                    let e = FMLABDati.esito
+                    Label(LF(e == "nuovi" ? "Updated from fmlab-retro" : e == "uguali" ? "Already up to date" : e == "scartati" ? "The downloaded data was not valid and was ignored" : "No connection: using the saved copy"),
+                          systemImage: e == "nuovi" || e == "uguali" ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                        .foregroundColor(e == "nuovi" || e == "uguali" ? .green : .orange).font(.callout)
+                }
+                Button {
+                    controllando = true
+                    FMLABDati.aggiorna(forza: true) { controllando = false; versioneDati = FMLABDati.versione; aggiorna() }
+                } label: { HStack { Label("Check Now", systemImage: "arrow.triangle.2.circlepath"); if controllando { Spacer(); ProgressView() } } }.disabled(controllando)
+            } header: { Text("Engine Data") } footer: {
+                Text("Extensions, emulator options, BIOS list and notices come from fmlab-retro (dati/emulatore.json) and update by themselves, without a new app. The emulators themselves arrive with app updates.")
             }
         }
         .listStyle(.insetGrouped)
@@ -337,8 +388,8 @@ struct GameEmulatorView: View {
             Button { FMLABSceltaFile.apri(cartella: true) { aggiungiCartella($0.first) } } label: { Label("Choose Games Folder…", systemImage: "folder.badge.plus") }
             Button { FMLABSceltaFile.apri(cartella: false) { importaFile($0) } } label: { Label("Import Games…", systemImage: "square.and.arrow.down") }
         } label: { Image(systemName: "plus") }.accessibilityLabel(LF("Add Games")) } }
-        .onAppear { aggiorna(); controllaBIOS(); FMLABDati.aggiorna { aggiorna() } }
-        .refreshable { FMLABDati.aggiorna(forza: true) { aggiorna() }; aggiorna(); controllaBIOS() }
+        .onAppear { aggiorna(); controllaBIOS(); FMLABDati.aggiorna { versioneDati = FMLABDati.versione; aggiorna() } }
+        .refreshable { FMLABDati.aggiorna(forza: true) { versioneDati = FMLABDati.versione; aggiorna() }; aggiorna(); controllaBIOS() }
         .fullScreenCover(item: $inGioco) { gioco in FMLABGiocoSchermo(gioco: gioco).ignoresSafeArea() }
         .alert(String(format: LF("Delete %@?"), daTogliere?.nome ?? ""), isPresented: Binding(get: { daTogliere != nil }, set: { if !$0 { daTogliere = nil } })) {
             Button("Delete", role: .destructive) { if let g = daTogliere { try? FileManager.default.removeItem(at: g.url) }; daTogliere = nil; aggiorna() }
