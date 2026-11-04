@@ -86,6 +86,15 @@ PYADHOC
     # provenance check remains byte-for-byte strict after ad-hoc signing.
     # FMLAB: traduzione italiana (strumenti/genera_lingue.py), aggiunta all'app prima della firma
     if [[ -d app/FMLAB/it.lproj ]]; then rm -rf "$app/it.lproj"; cp -R app/FMLAB/it.lproj "$app/it.lproj"; fi
+    # FMLAB: Game Emulator, i core nativi (disco emulatore da fmlab-retro) dentro Frameworks/, firmati come l'app
+    if [[ -d build/FMLAB-Core ]]; then
+        mkdir -p "$app/Frameworks"
+        for fw in build/FMLAB-Core/*.framework; do
+            rm -rf "$app/Frameworks/$(basename "$fw")"; cp -R "$fw" "$app/Frameworks/"
+            codesign --force --sign - --timestamp=none "$app/Frameworks/$(basename "$fw")"
+        done
+        cp build/FMLAB-Core/core.json "$app/Frameworks/FMLAB-Core.json" 2>/dev/null || true
+    fi
     codesign --force --sign - --timestamp=none --generate-entitlement-der --entitlements "$staging/entitlements.plist" "$app"
     codesign --verify --strict "$app"
     ditto --norsrc --noextattr --noacl --noqtn "$app" "$staging/Payload/LinuxRunner.app"

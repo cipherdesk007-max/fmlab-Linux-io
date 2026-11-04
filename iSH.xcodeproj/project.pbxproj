@@ -346,6 +346,7 @@
 		1A1100000000000000000001 /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1200000000000000000001; };
 		1A1100000000000000000002 /* ManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1200000000000000000002; };
 		1A11000000000000000000A3 /* SetupWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A12000000000000000000A3; };
+		1A1100000000000000000F01 /* GameEmulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1200000000000000000F01; };
 		1A1100000000000000000003 /* RuntimeBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A1200000000000000000003; };
 		1A1100000000000000000004 /* FileTransfer.c in Sources */ = {isa = PBXBuildFile; fileRef = 1A1200000000000000000004; };
 		1A1300000000000000000001 /* LinuxRunnerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A1400000000000000000001; };
@@ -899,6 +900,7 @@
 		1A1200000000000000000001 /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = app/LinuxRunner/Environment.swift; sourceTree = SOURCE_ROOT; };
 		1A1200000000000000000002 /* ManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = app/LinuxRunner/ManagerView.swift; sourceTree = SOURCE_ROOT; };
 		1A12000000000000000000A3 /* SetupWizard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = app/LinuxRunner/SetupWizard.swift; sourceTree = SOURCE_ROOT; };
+		1A1200000000000000000F01 /* GameEmulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = app/LinuxRunner/GameEmulator.swift; sourceTree = SOURCE_ROOT; };
 		1A1200000000000000000003 /* RuntimeBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = app/LinuxRunner/RuntimeBridge.m; sourceTree = SOURCE_ROOT; };
 		1A1200000000000000000004 /* FileTransfer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = app/LinuxRunner/FileTransfer.c; sourceTree = SOURCE_ROOT; };
 		1A1400000000000000000001 /* LinuxRunnerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = app/UITests/LinuxRunnerUITests.m; sourceTree = SOURCE_ROOT; };
@@ -1209,6 +1211,7 @@
 				1D1200000000000000000854 /* shader_compiler.cpp */,
 				1A1200000000000000000002 /* ManagerView.swift */,
 				1A12000000000000000000A3 /* SetupWizard.swift */,
+				1A1200000000000000000F01 /* GameEmulator.swift */,
 				1A1200000000000000000001 /* Environment.swift */,
                 1C1200000000000000000001 /* Diagnostics.swift */,
 				1C1200000000000000000004 /* DebianSupport.bundle */,
@@ -2592,6 +2595,7 @@
 				1A1100000000000000000003 /* RuntimeBridge.m in Sources */,
 				1A1100000000000000000002 /* ManagerView.swift in Sources */,
 				1A11000000000000000000A3 /* SetupWizard.swift in Sources */,
+				1A1100000000000000000F01 /* GameEmulator.swift in Sources */,
 				1A1100000000000000000001 /* Environment.swift in Sources */,
                 1C1100000000000000000001 /* Diagnostics.swift in Sources */,
 				1C1100000000000000000003 /* DebianInstaller.swift */,

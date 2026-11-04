@@ -1,0 +1,392 @@
+import SwiftUI
+import UIKit
+
+// MARK: - FMLAB Game Emulator
+// Non fa parte di LinuxRunner e non usa Linux: i core libretro (dal progetto fmlab-retro) sono
+// dentro l'app e girano nativi sull'iPhone, senza JIT. I giochi li mette l'utente nella cartella
+// Giochi (app File › FMLAB Linux › Giochi) o con Importa. Nessun gioco incluso.
+
+struct FMLABGioco: Identifiable, Hashable {
+    var id: String { url.path }
+    let url: URL
+    let core: FMLABCore
+    var nome: String { url.deletingPathExtension().lastPathComponent }
+    static func == (a: Self, b: Self) -> Bool { a.url == b.url }
+    func hash(into h: inout Hasher) { h.combine(url) }
+}
+
+/// Riga della sezione "Game Emulator" in Distribuzioni.
+struct GameEmulatorRow: View {
+    var body: some View {
+        NavigationLink(destination: GameEmulatorView()) {
+            HStack(spacing: 14) {
+                Image(systemName: "gamecontroller.fill").font(.title2).foregroundColor(.accentColor)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Game Emulator").font(.headline)
+                    Text(FMLABEmulatore.core().isEmpty ? LF("Emulators not included in this build") : FMLABEmulatore.core().map(\.console).joined(separator: " · "))
+                        .font(.caption).foregroundColor(.secondary).lineLimit(2)
+                }
+            }.padding(.vertical, 6)
+        }.accessibilityIdentifier("game-emulator")
+    }
+}
+
+struct GameEmulatorView: View {
+    @State private var giochi: [FMLABGioco] = []
+    @State private var importa = false
+    @State private var inGioco: FMLABGioco?
+    @State private var daTogliere: FMLABGioco?
+    @State private var errore: String?
+
+    private var perConsole: [(String, [FMLABGioco])] {
+        Dictionary(grouping: giochi, by: { $0.core.console }).sorted { $0.key < $1.key }.map { ($0.key, $0.value.sorted { $0.nome.localizedStandardCompare($1.nome) == .orderedAscending }) }
+    }
+
+    var body: some View {
+        List {
+            if FMLABEmulatore.core().isEmpty {
+                Section { Text("This build of FMLAB Linux has no emulators inside. Update the app from the latest release.").foregroundColor(.orange) }
+            }
+            if giochi.isEmpty {
+                Section {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("No games yet", systemImage: "gamecontroller").font(.headline)
+                        Text("Put your own game files in the Files app › On My iPhone › FMLAB Linux › Giochi, or tap Import. Zipped games must be unzipped first (tap the zip in Files).").font(.callout).foregroundColor(.secondary)
+                        Text("No games are included or downloaded by FMLAB: only use files you own or free homebrew.").font(.footnote).foregroundColor(.secondary)
+                    }.padding(.vertical, 6)
+                    Button { importa = true } label: { Label("Import Games…", systemImage: "square.and.arrow.down") }
+                }
+            }
+            ForEach(perConsole, id: \.0) { console, lista in
+                Section(LF(console)) {
+                    ForEach(lista) { gioco in
+                        Button { inGioco = gioco } label: {
+                            HStack { Image(systemName: "play.circle.fill").foregroundColor(.accentColor).font(.title3)
+                                Text(gioco.nome).foregroundColor(.primary).lineLimit(2); Spacer()
+                                Text(gioco.url.pathExtension.uppercased()).font(.caption2).foregroundColor(.secondary) }
+                        }
+                        .swipeActions { Button(role: .destructive) { daTogliere = gioco } label: { Label("Delete", systemImage: "trash") } }
+                    }
+                }
+            }
+            Section {
+                ForEach(FMLABEmulatore.core(), id: \.nome) { c in
+                    HStack { Text(LF(c.console)); Spacer(); Text(c.estensioni.map { "." + $0 }.joined(separator: " ")).font(.caption).foregroundColor(.secondary) }
+                }
+            } header: { Text("Consoles") } footer: {
+                Text("Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers work too.")
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Game Emulator")
+        .toolbar { Button { importa = true } label: { Image(systemName: "plus") }.accessibilityLabel(LF("Import Games…")) }
+        .onAppear(perform: aggiorna)
+        .refreshable { aggiorna() }
+        .fileImporter(isPresented: $importa, allowedContentTypes: [.data], allowsMultipleSelection: true) { risultato in
+            guard case .success(let urls) = risultato else { return }
+            var scartati: [String] = []
+            for u in urls {
+                let accesso = u.startAccessingSecurityScopedResource(); defer { if accesso { u.stopAccessingSecurityScopedResource() } }
+                guard FMLABEmulatore.core(per: u.lastPathComponent) != nil else { scartati.append(u.lastPathComponent); continue }
+                let dest = FMLABEmulatore.cartellaGiochi().appendingPathComponent(u.lastPathComponent)
+                try? FileManager.default.removeItem(at: dest)
+                do { try FileManager.default.copyItem(at: u, to: dest) } catch { errore = error.localizedDescription }
+            }
+            if !scartati.isEmpty { errore = String(format: LF("Not a supported game file (unzip it first): %@"), scartati.joined(separator: ", ")) }
+            aggiorna()
+        }
+        .fullScreenCover(item: $inGioco) { gioco in FMLABGiocoSchermo(gioco: gioco).ignoresSafeArea() }
+        .alert(String(format: LF("Delete %@?"), daTogliere?.nome ?? ""), isPresented: Binding(get: { daTogliere != nil }, set: { if !$0 { daTogliere = nil } })) {
+            Button("Delete", role: .destructive) { if let g = daTogliere { try? FileManager.default.removeItem(at: g.url) }; daTogliere = nil; aggiorna() }
+            Button("Cancel", role: .cancel) { daTogliere = nil }
+        } message: { Text("The game file is deleted. Its saves in Giochi/Salvataggi are kept.") }
+        .alert("Game Emulator", isPresented: Binding(get: { errore != nil }, set: { if !$0 { errore = nil } })) { Button("OK") { errore = nil } } message: { Text(errore ?? "") }
+    }
+
+    private func aggiorna() {
+        let base = FMLABEmulatore.cartellaGiochi()
+        _ = FMLABEmulatore.cartellaBIOS(); _ = FMLABEmulatore.cartellaSalvataggi()
+        var trovati: [FMLABGioco] = []
+        let salta: Set<String> = ["BIOS", "Salvataggi"]
+        if let e = FileManager.default.enumerator(at: base, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles]) {
+            for case let u as URL in e {
+                if salta.contains(u.lastPathComponent), u.deletingLastPathComponent() == base { e.skipDescendants(); continue }
+                guard (try? u.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true, let c = FMLABEmulatore.core(per: u.lastPathComponent) else { continue }
+                // le tracce .bin di un disco con .cue non sono giochi a sé
+                if u.pathExtension.lowercased() == "bin", FileManager.default.fileExists(atPath: u.deletingPathExtension().appendingPathExtension("cue").path) { continue }
+                if u.pathExtension.lowercased() == "bin", (try? FileManager.default.contentsOfDirectory(atPath: u.deletingLastPathComponent().path))?.contains(where: { $0.lowercased().hasSuffix(".cue") }) == true { continue }
+                trovati.append(FMLABGioco(url: u, core: c))
+            }
+        }
+        giochi = trovati
+    }
+}
+
+struct FMLABGiocoSchermo: UIViewControllerRepresentable {
+    let gioco: FMLABGioco
+    @Environment(\.dismiss) private var dismiss
+    func makeUIViewController(context: Context) -> FMLABGiocoController { FMLABGiocoController(gioco: gioco) { dismiss() } }
+    func updateUIViewController(_ c: FMLABGiocoController, context: Context) {}
+}
+
+// MARK: - Schermo di gioco: immagine + comandi che si adattano alla rotazione
+
+final class FMLABGiocoController: UIViewController {
+    private let gioco: FMLABGioco
+    private let chiudi: () -> Void
+    private var emulatore: FMLABEmulatore?
+    private let pad = FMLABPad()
+    private let avviso = UILabel()
+
+    init(gioco: FMLABGioco, chiudi: @escaping () -> Void) { self.gioco = gioco; self.chiudi = chiudi; super.init(nibName: nil, bundle: nil); modalPresentationStyle = .fullScreen }
+    required init?(coder: NSCoder) { fatalError() }
+
+    override var prefersStatusBarHidden: Bool { true }
+    override var prefersHomeIndicatorAutoHidden: Bool { true }
+    override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge { .all }
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .all }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .black
+        do {
+            let e = try FMLABEmulatore(conCore: gioco.core, gioco: gioco.url.path)
+            emulatore = e
+            view.addSubview(e.vista)
+            pad.disposizione = e.disposizione
+            pad.tasto = { [weak e] t, giu in e?.tasto(t, premuto: giu) }
+        } catch {
+            avviso.text = error.localizedDescription
+        }
+        pad.menu = { [weak self] in self?.apriMenu() }
+        view.addSubview(pad)
+        avviso.textColor = .white; avviso.numberOfLines = 0; avviso.textAlignment = .center; avviso.font = .preferredFont(forTextStyle: .body)
+        view.addSubview(avviso)
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let e = emulatore { e.avvia() } else { apriMenu() }
+    }
+    override func viewWillDisappear(_ animated: Bool) { super.viewWillDisappear(animated); emulatore?.ferma() }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        let b = view.bounds, s = view.safeAreaLayoutGuide.layoutFrame
+        let r = max(0.3, emulatore?.rapporto ?? 4.0 / 3.0)
+        avviso.frame = s.insetBy(dx: 24, dy: 80)
+        if b.height >= b.width {
+            // verticale: gioco in alto, comandi sotto (come una console portatile)
+            var w = s.width, h = w / r
+            let massimo = s.height * (r < 1 ? 0.62 : 0.5)
+            if h > massimo { h = massimo; w = h * r }
+            let gioco = CGRect(x: s.midX - w / 2, y: s.minY + 8, width: w, height: h).integral
+            emulatore?.vista.frame = gioco
+            pad.modo = .verticale
+            pad.frame = CGRect(x: 0, y: gioco.maxY, width: b.width, height: b.maxY - gioco.maxY)
+            pad.areaSicura = UIEdgeInsets(top: 0, left: s.minX, bottom: b.maxY - s.maxY, right: b.maxX - s.maxX)
+        } else {
+            // orizzontale: gioco al centro a tutta altezza, comandi ai lati (sopra il gioco se lo spazio è poco)
+            var h = s.height, w = h * r
+            if w > s.width { w = s.width; h = w / r }
+            emulatore?.vista.frame = CGRect(x: s.midX - w / 2, y: s.midY - h / 2, width: w, height: h).integral
+            pad.modo = .orizzontale
+            pad.frame = b
+            pad.areaSicura = UIEdgeInsets(top: s.minY, left: s.minX, bottom: b.maxY - s.maxY, right: b.maxX - s.maxX)
+            pad.spazioLato = (s.width - w) / 2
+        }
+        pad.setNeedsLayout()
+    }
+
+    private func apriMenu() {
+        let e = emulatore
+        e?.inPausa = true
+        let m = UIAlertController(title: gioco.nome, message: e == nil ? avviso.text : nil, preferredStyle: .actionSheet)
+        if let e {
+            m.addAction(UIAlertAction(title: LF("Resume"), style: .default) { _ in e.inPausa = false })
+            m.addAction(UIAlertAction(title: LF("Save State"), style: .default) { [weak self] _ in
+                e.inPausa = false
+                e.salvaStato { err in self?.mostra(err?.localizedDescription ?? LF("State saved")) }
+            })
+            let carica = UIAlertAction(title: LF("Load State"), style: .default) { [weak self] _ in
+                e.inPausa = false
+                e.caricaStato { err in self?.mostra(err?.localizedDescription ?? LF("State loaded")) }
+            }
+            carica.isEnabled = e.statoEsiste
+            m.addAction(carica)
+        }
+        m.addAction(UIAlertAction(title: LF("Quit Game"), style: .destructive) { [weak self] _ in self?.emulatore?.ferma(); self?.chiudi() })
+        if e != nil { m.addAction(UIAlertAction(title: LF("Cancel"), style: .cancel) { _ in e?.inPausa = false }) }
+        m.popoverPresentationController?.sourceView = pad
+        m.popoverPresentationController?.sourceRect = CGRect(x: pad.bounds.midX, y: pad.bounds.midY, width: 1, height: 1)
+        present(m, animated: true)
+    }
+    private func mostra(_ testo: String) {
+        let l = UILabel(); l.text = "  " + testo + "  "; l.textColor = .white; l.backgroundColor = UIColor.black.withAlphaComponent(0.75)
+        l.font = .preferredFont(forTextStyle: .callout); l.layer.cornerRadius = 10; l.clipsToBounds = true; l.sizeToFit()
+        l.center = CGPoint(x: view.bounds.midX, y: view.safeAreaLayoutGuide.layoutFrame.minY + 30)
+        view.addSubview(l)
+        UIView.animate(withDuration: 0.3, delay: 1.6, options: []) { l.alpha = 0 } completion: { _ in l.removeFromSuperview() }
+    }
+}
+
+// MARK: - Comandi a schermo (multi-tocco, croce a 8 direzioni)
+
+final class FMLABPad: UIView {
+    enum Modo { case verticale, orizzontale }
+    var modo: Modo = .verticale { didSet { if modo != oldValue { setNeedsLayout() } } }
+    var disposizione = 0 { didSet { costruisci() } }
+    var areaSicura = UIEdgeInsets.zero
+    var spazioLato: CGFloat = 0
+    var tasto: ((FMLABTasto, Bool) -> Void)?
+    var menu: (() -> Void)?
+
+    private struct Pulsante { let tasto: FMLABTasto?; let vista: UILabel }
+    private var pulsanti: [Pulsante] = []
+    private let croce = UIView()
+    private let frecce = (0..<4).map { _ in UIImageView() }
+    private let bottoneMenu = UIButton(type: .system)
+    private var premuti = Set<Int>()        // FMLABTasto.rawValue
+    private let vibra = UIImpactFeedbackGenerator(style: .light)
+    private let rosso = UIColor(red: 0.85, green: 0.27, blue: 0.27, alpha: 1)
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isMultipleTouchEnabled = true
+        backgroundColor = .clear
+        croce.isUserInteractionEnabled = false
+        croce.layer.cornerRadius = 18
+        addSubview(croce)
+        for (i, nome) in ["chevron.up", "chevron.down", "chevron.left", "chevron.right"].enumerated() {
+            frecce[i].image = UIImage(systemName: nome, withConfiguration: UIImage.SymbolConfiguration(weight: .bold)); frecce[i].tintColor = .white; frecce[i].contentMode = .scaleAspectFit
+            croce.addSubview(frecce[i])
+        }
+        bottoneMenu.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
+        bottoneMenu.tintColor = .white
+        bottoneMenu.backgroundColor = UIColor(white: 0.2, alpha: 0.8)
+        bottoneMenu.accessibilityLabel = LF("Menu")
+        bottoneMenu.addAction(UIAction { [weak self] _ in self?.menu?() }, for: .touchUpInside)
+        addSubview(bottoneMenu)
+        costruisci()
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    private func costruisci() {
+        pulsanti.forEach { $0.vista.removeFromSuperview() }
+        var lista: [(FMLABTasto, String)] = [(.a, "A"), (.b, "B")]
+        if disposizione >= 2 { lista += [(.x, "X"), (.y, "Y")] }
+        if disposizione >= 1 { lista += [(.l, "L"), (.r, "R")] }
+        lista += [(.select, "SELECT"), (.start, "START")]
+        pulsanti = lista.map { t, testo in
+            let l = UILabel(); l.text = testo; l.textAlignment = .center; l.textColor = .white
+            l.font = .systemFont(ofSize: testo.count > 1 ? 11 : 22, weight: .bold)
+            l.clipsToBounds = true; addSubview(l)
+            return Pulsante(tasto: t, vista: l)
+        }
+        setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let w = bounds.width, h = bounds.height
+        let alfa: CGFloat = modo == .orizzontale && spazioLato < 150 ? 0.45 : 0.9
+        let fondo = UIColor(white: 0.22, alpha: alfa)
+        var centroCroce: CGPoint, centroTasti: CGPoint, lato: CGFloat
+        if modo == .verticale {
+            let utile = CGRect(x: areaSicura.left, y: 0, width: w - areaSicura.left - areaSicura.right, height: h - areaSicura.bottom)
+            lato = min(utile.width * 0.36, utile.height * 0.5, 170)
+            centroCroce = CGPoint(x: utile.minX + utile.width * 0.25, y: utile.minY + utile.height * 0.48)
+            centroTasti = CGPoint(x: utile.minX + utile.width * 0.75, y: centroCroce.y)
+            let piccolo = CGSize(width: 72, height: 26)
+            posa(.select, CGRect(x: utile.midX - piccolo.width - 8, y: utile.maxY - piccolo.height - 14, width: piccolo.width, height: piccolo.height), fondo)
+            posa(.start, CGRect(x: utile.midX + 8, y: utile.maxY - piccolo.height - 14, width: piccolo.width, height: piccolo.height), fondo)
+            posa(.l, CGRect(x: utile.minX + 12, y: 10, width: 76, height: 30), fondo)
+            posa(.r, CGRect(x: utile.maxX - 88, y: 10, width: 76, height: 30), fondo)
+            bottoneMenu.frame = CGRect(x: utile.midX - 22, y: 10, width: 44, height: 30)
+        } else {
+            let sinistra = areaSicura.left, destra = w - areaSicura.right
+            lato = min(max(spazioLato - 20, 120), h * 0.42, 170)
+            let margine = max(spazioLato / 2, lato / 2 + 12)
+            centroCroce = CGPoint(x: sinistra + margine, y: h * 0.62)
+            centroTasti = CGPoint(x: destra - margine, y: h * 0.62)
+            posa(.l, CGRect(x: sinistra + 12, y: areaSicura.top + 12, width: 76, height: 30), fondo)
+            posa(.r, CGRect(x: destra - 88, y: areaSicura.top + 12, width: 76, height: 30), fondo)
+            posa(.select, CGRect(x: centroCroce.x - 36, y: h - areaSicura.bottom - 34, width: 72, height: 26), fondo)
+            posa(.start, CGRect(x: centroTasti.x - 36, y: h - areaSicura.bottom - 34, width: 72, height: 26), fondo)
+            bottoneMenu.frame = CGRect(x: centroTasti.x - 22, y: areaSicura.top + 12, width: 44, height: 30)
+            if disposizione >= 1 { bottoneMenu.frame.origin.x = destra - 88 - 54 }
+        }
+        bottoneMenu.layer.cornerRadius = 10; bottoneMenu.alpha = alfa < 0.5 ? 0.6 : 1
+        // croce
+        croce.frame = CGRect(x: centroCroce.x - lato / 2, y: centroCroce.y - lato / 2, width: lato, height: lato)
+        croce.backgroundColor = fondo
+        let f = lato / 3
+        frecce[0].frame = CGRect(x: f, y: 4, width: f, height: f - 8); frecce[1].frame = CGRect(x: f, y: lato - f + 4, width: f, height: f - 8)
+        frecce[2].frame = CGRect(x: 4, y: f, width: f - 8, height: f); frecce[3].frame = CGRect(x: lato - f + 4, y: f, width: f - 8, height: f)
+        // A B (X Y): a rombo come le console Nintendo
+        let d = min(lato * 0.42, 74), passo = lato * 0.34
+        if disposizione >= 2 {
+            posaTondo(.x, CGPoint(x: centroTasti.x, y: centroTasti.y - passo), d, fondo)
+            posaTondo(.a, CGPoint(x: centroTasti.x + passo, y: centroTasti.y), d, fondo)
+            posaTondo(.b, CGPoint(x: centroTasti.x, y: centroTasti.y + passo), d, fondo)
+            posaTondo(.y, CGPoint(x: centroTasti.x - passo, y: centroTasti.y), d, fondo)
+        } else {
+            posaTondo(.a, CGPoint(x: centroTasti.x + passo * 0.75, y: centroTasti.y - passo * 0.45), d * 1.1, fondo)
+            posaTondo(.b, CGPoint(x: centroTasti.x - passo * 0.75, y: centroTasti.y + passo * 0.45), d * 1.1, fondo)
+        }
+        colora()
+    }
+    private func vista(_ t: FMLABTasto) -> UILabel? { pulsanti.first { $0.tasto == t }?.vista }
+    private func posa(_ t: FMLABTasto, _ r: CGRect, _ fondo: UIColor) { guard let v = vista(t) else { return }; v.frame = r; v.layer.cornerRadius = r.height / 2; v.backgroundColor = fondo }
+    private func posaTondo(_ t: FMLABTasto, _ c: CGPoint, _ d: CGFloat, _ fondo: UIColor) { posa(t, CGRect(x: c.x - d / 2, y: c.y - d / 2, width: d, height: d), fondo) }
+
+    private func colora() {
+        for p in pulsanti { guard let t = p.tasto else { continue }
+            p.vista.layer.borderWidth = premuti.contains(t.rawValue) ? 0 : 1
+            p.vista.layer.borderColor = UIColor(white: 1, alpha: 0.15).cgColor
+            if premuti.contains(t.rawValue) { p.vista.backgroundColor = rosso } else if p.vista.backgroundColor == rosso { setNeedsLayout() }
+        }
+        for (i, t) in [FMLABTasto.su, .giu, .sinistra, .destra].enumerated() { frecce[i].tintColor = premuti.contains(t.rawValue) ? rosso : .white }
+    }
+
+    // Quali tasti tiene premuti un dito in quel punto (la croce dà fino a due direzioni: diagonali)
+    private func tasti(in p: CGPoint) -> Set<Int> {
+        let c = croce.frame
+        if c.insetBy(dx: -c.width * 0.25, dy: -c.height * 0.25).contains(p) {
+            let dx = p.x - c.midX, dy = p.y - c.midY
+            if hypot(dx, dy) < c.width * 0.12 { return [] }
+            let a = atan2(-dy, dx) * 180 / .pi   // 0 = destra, 90 = su
+            var s = Set<Int>()
+            if a > 22.5 && a < 157.5 { s.insert(FMLABTasto.su.rawValue) }
+            if a < -22.5 && a > -157.5 { s.insert(FMLABTasto.giu.rawValue) }
+            if abs(a) > 112.5 { s.insert(FMLABTasto.sinistra.rawValue) }
+            if abs(a) < 67.5 { s.insert(FMLABTasto.destra.rawValue) }
+            return s
+        }
+        var migliore: (Int, CGFloat)?
+        for b in pulsanti { guard let t = b.tasto else { continue }
+            let r = b.vista.frame.insetBy(dx: -12, dy: -12)
+            if r.contains(p) { let dist = hypot(p.x - r.midX, p.y - r.midY); if migliore == nil || dist < migliore!.1 { migliore = (t.rawValue, dist) } }
+        }
+        return migliore.map { [$0.0] } ?? []
+    }
+    private var tocchi: [ObjectIdentifier: Set<Int>] = [:]
+    private func aggiornaTocchi(_ eventi: UIEvent?) {
+        var nuovi = Set<Int>()
+        for s in tocchi.values { nuovi.formUnion(s) }
+        let giu = nuovi.subtracting(premuti), su = premuti.subtracting(nuovi)
+        for t in giu { if let k = FMLABTasto(rawValue: t) { tasto?(k, true) } }
+        for t in su { if let k = FMLABTasto(rawValue: t) { tasto?(k, false) } }
+        if !giu.isEmpty { vibra.impactOccurred() }
+        premuti = nuovi
+        if !giu.isEmpty || !su.isEmpty { colora() }
+    }
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        // in orizzontale il pad è grande quanto lo schermo: i tocchi fuori dai comandi vanno al gioco (DS)
+        if bottoneMenu.frame.contains(point) { return true }
+        return !tasti(in: point).isEmpty || croce.frame.insetBy(dx: -30, dy: -30).contains(point)
+    }
+    override func touchesBegan(_ t: Set<UITouch>, with e: UIEvent?) { for x in t { tocchi[ObjectIdentifier(x)] = tasti(in: x.location(in: self)) }; aggiornaTocchi(e) }
+    override func touchesMoved(_ t: Set<UITouch>, with e: UIEvent?) { for x in t { tocchi[ObjectIdentifier(x)] = tasti(in: x.location(in: self)) }; aggiornaTocchi(e) }
+    override func touchesEnded(_ t: Set<UITouch>, with e: UIEvent?) { for x in t { tocchi[ObjectIdentifier(x)] = nil }; aggiornaTocchi(e) }
+    override func touchesCancelled(_ t: Set<UITouch>, with e: UIEvent?) { for x in t { tocchi[ObjectIdentifier(x)] = nil }; aggiornaTocchi(e) }
+}

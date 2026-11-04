@@ -11,6 +11,7 @@
 #ifdef LINUXRUNNER
 #import "LinuxRunner/BootLog.h"
 #include "FMLAB/FMLABLingua.inc.m"   // FMLAB: traduzione italiana della parte Objective-C
+#include "FMLAB/Emulatore/FMLABEmulatore.m"   // FMLAB: Game Emulator nativo (core libretro)
 static void LRUncaughtException(NSException *exception) {
     LRBootEvent("uncaught Objective-C exception; retaining upstream termination behavior");
     iSHExceptionHandler(exception);

@@ -338,8 +338,6 @@ struct ManagerView: View {
     @StateObject private var fmlabAggiornamenti = FMLABAggiornamenti()
     @StateObject private var fmlabImporta = FMLABImporta()
     @State private var fmlabDaEliminare: LinuxEnvironment?
-    @State private var fmlabRetroLavoro: String?
-    @State private var fmlabRetroPronto = false
     @State private var fmlabScelta: LinuxEnvironment?      // Home: distribuzione toccata, da confermare
     @State private var fmlabSceltaFatta: String?           // Home: nome scelto, avviso "chiudi e riapri"
     private let sessionTimer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
@@ -554,7 +552,7 @@ struct ManagerView: View {
                 let prossima = LRRuntimeBridge.nextRootName() == environment.rootfsName
                 let cambio = manager.environments.contains { manager.active($0) && LRRuntimeBridge.nextRootName() != $0.rootfsName }
                 Button { if !prossima { fmlabScelta = environment } } label: {
-                    HStack { Image(systemName: FMLABRetro.is(environment) ? "gamecontroller" : "shippingbox").foregroundColor(.accentColor)
+                    HStack { Image(systemName: "shippingbox").foregroundColor(.accentColor)
                         VStack(alignment: .leading, spacing: 4) { Text(environment.name).foregroundColor(.primary); Text(manager.size(environment)).font(.caption).foregroundColor(.secondary) }
                         Spacer()
                         if attiva { Text(LF(cambio ? "Running · until relaunch" : "Running")).font(.caption).foregroundColor(.green) }
@@ -585,7 +583,7 @@ struct ManagerView: View {
         List {
             Section("Installed") { ForEach(manager.environments) { environment in
                 NavigationLink(destination: environmentDetail(environment)) {
-                    HStack(spacing: 14) { Image(systemName: FMLABRetro.is(environment) ? "gamecontroller.fill" : "shippingbox.fill").font(.title2).foregroundColor(.accentColor)
+                    HStack(spacing: 14) { Image(systemName: "shippingbox.fill").font(.title2).foregroundColor(.accentColor)
                         VStack(alignment: .leading, spacing: 5) { Text(environment.name).font(.headline); Text("ARM64 · " + manager.size(environment)).font(.caption).foregroundColor(.secondary)
                             if LRRuntimeBridge.nextRootName() == environment.rootfsName && !manager.active(environment) { Text("Selected for next launch").font(.caption).foregroundColor(.accentColor) }
                         }; Spacer(); if manager.active(environment) { Image(systemName: "circle.fill").font(.system(size: 7)).foregroundColor(.green) }
@@ -597,6 +595,10 @@ struct ManagerView: View {
                 if manager.busy { ProgressView("Preparing environment…") }
             }
             Section { Text("Each distribution retains its own packages and files. One runtime is active at a time; switching takes effect after relaunch.").font(.footnote).foregroundColor(.secondary) }
+            // FMLAB: non è una distribuzione Linux e non fa parte di LinuxRunner, per questo sta qui sotto
+            Section { GameEmulatorRow() } header: { Text("Game Emulator · FMLAB") } footer: {
+                Text("Native emulators inside the app: no Linux, no JIT, nothing to install. You add your own games.")
+            }
         }.listStyle(.insetGrouped).navigationTitle("Distributions")
             .toolbar { Button { manager.refresh() } label: { Image(systemName: "arrow.clockwise") }.accessibilityLabel("Refresh Distributions") }
     }
@@ -692,22 +694,6 @@ struct ManagerView: View {
     }
     private func environmentDetail(_ environment: LinuxEnvironment) -> some View {
         List {
-            if FMLABRetro.is(environment) {
-                Section(header: Text("FMLAB Retro"), footer: Text("Updates: in the terminal, sudo apt update && sudo apt upgrade (Debian and FMLAB together). Put your games in Files › FMLAB Linux › Shared › Giochi, then run rk-giochi importa.")) {
-                    if !manager.active(environment) { Text("Use it on next launch to install or open FMLAB Retro.").font(.footnote).foregroundColor(.secondary) }
-                    else if fmlabRetroPronto || LRRuntimeBridge.fmlabRetroInstalled() { Label("FMLAB Retro installed", systemImage: "gamecontroller.fill") }
-                    else if let lavoro = fmlabRetroLavoro { HStack(spacing: 12) { ProgressView(); Text(LF(lavoro)) } }
-                    else {
-                        Button { fmlabRetroLavoro = "Starting"
-                            LRRuntimeBridge.installFMLABRetro({ fmlabRetroLavoro = $0 }) { error in
-                                fmlabRetroLavoro = nil
-                                if let error { manager.error = error.localizedDescription } else { fmlabRetroPronto = true }
-                            }
-                        } label: { Label("Install FMLAB Retro", systemImage: "gamecontroller") }
-                        Text("Needs the desktop components (Setup or Open Desktop) and the network.").font(.footnote).foregroundColor(.secondary)
-                    }
-                }
-            }
             Section("Environment") {
                 Text("\(environment.distribution) \(environment.rootfsVersion) · ARM64")
                 Text(manager.size(environment))

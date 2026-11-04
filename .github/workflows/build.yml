@@ -46,6 +46,14 @@ jobs:
         run: python3 strumenti/genera_lingue.py --controlla
       - name: Controllo prerequisiti
         run: scripts/bootstrap-macos.sh
+      - name: Disco emulatore (core nativi da fmlab-retro, impronta fissata in app/FMLAB/Emulatore/DISCO)
+        run: |
+          if [ ! -s app/FMLAB/Emulatore/DISCO ]; then echo "::warning::niente disco emulatore: il Game Emulator resta vuoto"; exit 0; fi
+          read -r tag sha < app/FMLAB/Emulatore/DISCO
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/FMLAB-Core.zip" "https://github.com/cipherdesk007-max/fmlab-retro/releases/download/$tag/FMLAB-Core.zip"
+          echo "$sha  $RUNNER_TEMP/FMLAB-Core.zip" | shasum -a 256 -c -
+          rm -rf build/FMLAB-Core && mkdir -p build && ditto -x -k "$RUNNER_TEMP/FMLAB-Core.zip" build/
+          ls build/FMLAB-Core
       - name: "Compila, senza firma (la mettono LiveContainer o SideStore)"
         env:
           BUNDLE_ID: dev.fmlab.linux
@@ -71,6 +79,7 @@ jobs:
           plutil -p /tmp/Info.plist | grep -q '"CFBundleIdentifier" => "dev.fmlab.linux"'
           plutil -p /tmp/Info.plist | grep -q '"CFBundleDisplayName" => "FMLAB Linux"'
           unzip -l build/releases/FMLAB-Linux.ipa | grep -q "LinuxRunner.app/it.lproj/Localizable.strings"
+          if [ -d build/FMLAB-Core ]; then unzip -l build/releases/FMLAB-Linux.ipa | grep "Frameworks/FMLAB.*framework/Info.plist"; fi
           unzip -p build/releases/FMLAB-Linux.ipa Payload/LinuxRunner.app/it.lproj/Localizable.strings | plutil -lint -
           ls -la build/releases/FMLAB-Linux.ipa
       - uses: actions/upload-artifact@v4
@@ -78,6 +87,7 @@ jobs:
           name: FMLAB-Linux
           path: build/releases/FMLAB-Linux.ipa
       - name: Pubblica (versione numerata + "ultima")
+        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

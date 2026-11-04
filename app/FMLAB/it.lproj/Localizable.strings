@@ -315,6 +315,7 @@
 "Connect to the same Wi-Fi as an AirPlay-compatible TV, Apple TV or Mac. Open iOS Control Center → Screen Mirroring and choose it. Then open the Linux desktop. A separate display uses External Desktop Output; otherwise choose Desktop → Wireless Display → Use Full-Screen Desktop. Receiver compatibility varies. Miracast-only receivers are not supported." = "Collegati alla stessa Wi-Fi di una TV compatibile AirPlay, di una Apple TV o di un Mac. Apri il Centro di Controllo → Duplica schermo e sceglilo. Poi apri il desktop Linux. Uno schermo separato usa Desktop su schermo esterno; altrimenti scegli Desktop → Schermo senza fili → Desktop a tutto schermo. La compatibilità dipende dal ricevitore. I ricevitori solo Miracast non sono supportati.";
 "Connected" = "Collegato";
 "Connection" = "Connessione";
+"Consoles" = "Console";
 "Continue" = "Continua";
 "Continue in Linux Terminal" = "Continua nel terminale Linux";
 "Control" = "Control";
@@ -447,6 +448,7 @@
 "Elapsed %@ seconds" = "Passati %@ secondi";
 "Elapsed %lf seconds" = "Passati %lf secondi";
 "Elapsed %lld seconds" = "Passati %lld secondi";
+"Emulators not included in this build" = "Emulatori non inclusi in questa versione";
 "Enables external output and opens trackpad controls when a separate display and desktop frame are available." = "Attiva l'uscita esterna e apre i comandi touchpad quando ci sono uno schermo separato e l'immagine del desktop.";
 "End %@?" = "Chiudere %@?";
 "End %lf?" = "Chiudere %lf?";
@@ -561,6 +563,8 @@
 "GUI: %@" = "Grafica: %@";
 "GUI: %lf" = "Grafica: %lf";
 "GUI: %lld" = "Grafica: %lld";
+"Game Emulator" = "Game Emulator";
+"Game Emulator · FMLAB" = "Game Emulator · FMLAB";
 "General" = "Generali";
 "Graphics" = "Grafica";
 "Guest Graphics Backend" = "Motore grafico di Linux";
@@ -598,6 +602,7 @@
 "Import File" = "Importa file";
 "Import File Here" = "Importa file qui";
 "Import Files" = "Importa file";
+"Import Games…" = "Importa giochi…";
 "Import failed. Only regular files up to 512 MiB are supported." = "Importazione non riuscita. Solo file normali fino a 512 MiB.";
 "Import failed. Use a regular file up to 512 MiB; existing items and symbolic links are not replaced." = "Importazione non riuscita. Usa un file normale fino a 512 MiB; elementi esistenti e collegamenti simbolici non vengono sostituiti.";
 "Imported. Select Arch Linux ARM for the next launch; initialization runs automatically." = "Importata. Scegli Arch Linux ARM per il prossimo avvio; la preparazione parte da sola.";
@@ -766,6 +771,7 @@
 "LinuxRunner waits for it and does not interrupt it. Tap Retry to keep waiting." = "FMLAB Linux la aspetta senza interromperla. Tocca Riprova per continuare ad aspettare.";
 "Live input sources of the open desktop. Open the desktop, use the mouse, return here (or export the Open Desktop report) to see which events iOS delivered." = "Comandi in arrivo al desktop aperto. Apri il desktop, usa il mouse e torna qui (o esporta il rapporto di apertura del desktop) per vedere quali eventi ha passato iOS.";
 "Live logs" = "Registro dal vivo";
+"Load State" = "Carica stato";
 "Local Linux ARM64 userspace for iPhone." = "Linux ARM64 locale per iPhone.";
 "Log test keystrokes (includes typed text)" = "Registra i tasti di prova (anche il testo scritto)";
 "Logging" = "Registro";
@@ -779,6 +785,7 @@
 "Match System" = "Come il sistema";
 "Memory" = "Memoria";
 "Memory Dispatch Fusion" = "Fusione accessi memoria";
+"Menu" = "Menu";
 "Metal GPU (virgl) · Experimental" = "GPU Metal (virgl) · Sperimentale";
 "Metal GPU did not start: %@" = "La GPU Metal non è partita: %@";
 "Metal GPU did not start: %lf" = "La GPU Metal non è partita: %lf";
@@ -810,6 +817,8 @@
 "Name" = "Nome";
 "Native Terminal" = "Terminale dell'app";
 "Native Theme" = "Tema dell'app";
+"Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers work too." = "Emulatori nativi (core libretro), senza bisogno del JIT. I salvataggi vanno in Giochi/Salvataggi; i BIOS, se una console li vuole, in Giochi/BIOS. I comandi a schermo seguono la rotazione; funzionano anche i controller.";
+"Native emulators inside the app: no Linux, no JIT, nothing to install. You add your own games." = "Emulatori nativi dentro l'app: niente Linux, niente JIT, niente da installare. I giochi li metti tu.";
 "Navigating away retains windows. iOS may suspend or terminate the app; saved files remain persistent." = "Uscendo, le finestre restano. iOS può sospendere o chiudere l'app; i file salvati restano.";
 "Nearby Wi-Fi scanning and raw interface control are unavailable through ordinary public iOS APIs. This screen does not request location access or a Wi-Fi entitlement." = "Cercare reti Wi-Fi vicine e controllare direttamente le interfacce non si può con le normali funzioni di iOS. Questa schermata non chiede la posizione né permessi Wi-Fi.";
 "Needs the desktop components (Setup or Open Desktop) and the network." = "Servono i componenti del desktop (Configura o Apri desktop) e la rete.";
@@ -829,6 +838,8 @@
 "No files in the shared folder." = "Nessun file nella cartella condivisa.";
 "No folders shared yet." = "Nessuna cartella condivisa.";
 "No frames received" = "Nessuna immagine ricevuta";
+"No games are included or downloaded by FMLAB: only use files you own or free homebrew." = "FMLAB non include e non scarica giochi: usa solo file che possiedi o homebrew liberi.";
+"No games yet" = "Ancora nessun gioco";
 "No graphical desktop entries found. Install an application through App Manager or create an advanced launcher." = "Nessuna applicazione grafica trovata. Installane una da Gestione app o crea un avvio avanzato.";
 "No guest application failures recorded." = "Nessun arresto delle applicazioni Linux registrato.";
 "No matching diagnostic records. Start the desktop or refresh after a failure." = "Nessun dato diagnostico corrispondente. Avvia il desktop o aggiorna dopo un errore.";
@@ -839,6 +850,9 @@
 "No usable JIT path" = "Nessun modo utilizzabile per il JIT";
 "No visible files in this folder." = "Nessun file visibile in questa cartella.";
 "Nominal" = "Normale";
+"Not a supported game file (unzip it first): %@" = "File di gioco non supportato (prima decomprimilo): %@";
+"Not a supported game file (unzip it first): %lf" = "File di gioco non supportato (prima decomprimilo): %lf";
+"Not a supported game file (unzip it first): %lld" = "File di gioco non supportato (prima decomprimilo): %lld";
 "Not available" = "Non disponibile";
 "Not available on Debian" = "Non disponibile su Debian";
 "Not available yet: Linux programs cannot record from the iPhone microphone in this version." = "Non ancora disponibile: in questa versione i programmi Linux non possono registrare dal microfono dell'iPhone.";
@@ -932,6 +946,8 @@
 "Profile name (optional)" = "Nome del profilo (facoltativo)";
 "Profile: " = "Profilo: ";
 "Profiles" = "Profili";
+"Put your own game files in the Files app › On My iPhone › FMLAB Linux › Giochi, or tap Import. Zipped games must be unzipped first (tap the zip in Files)." = "Metti i tuoi file di gioco nell'app File › Sul mio iPhone › FMLAB Linux › Giochi, oppure tocca Importa. I giochi zippati vanno prima decompressi (tocca lo zip in File).";
+"Quit Game" = "Esci dal gioco";
 "Reading bounded diagnostic tails…" = "Lettura delle ultime righe della diagnostica…";
 "Reading the Arch Linux ARM package index" = "Lettura dell'elenco dei pacchetti di Arch Linux ARM";
 "Ready" = "Pronto";
@@ -972,6 +988,7 @@
 "Resources" = "Risorse";
 "Restart Desktop" = "Riavvia desktop";
 "Restart Desktop?" = "Riavviare il desktop?";
+"Resume" = "Riprendi";
 "Resume Desktop" = "Riprendi desktop";
 "Retry" = "Riprova";
 "Review Package Upgrade" = "Controlla aggiornamento pacchetti";
@@ -1011,6 +1028,7 @@
 "Runtime running" = "Linux in funzione";
 "Save" = "Salva";
 "Save Launcher" = "Salva avviatore";
+"Save State" = "Salva stato";
 "Save documents first. This closes applications in this desktop. Linux files and other terminal sessions are retained." = "Salva prima i documenti. Si chiudono le applicazioni di questo desktop. I file di Linux e le altre sessioni del terminale restano.";
 "Save documents first. This closes applications owned by the desktop; persistent files and the terminal environment remain." = "Salva prima i documenti. Si chiudono le applicazioni del desktop; i file salvati e l'ambiente del terminale restano.";
 "Save to Files…" = "Salva in File…";
@@ -1088,6 +1106,8 @@
 "Starting the display" = "Avvio dello schermo";
 "Starting the display and window manager." = "Avvio dello schermo e del gestore finestre.";
 "State" = "Stato";
+"State loaded" = "Stato caricato";
+"State saved" = "Stato salvato";
 "Status" = "Stato";
 "StikDebug attaches and detaches; return here and LinuxRunner checks whether iOS now allows its code region." = "StikDebug si collega e si stacca; torna qui e FMLAB Linux controlla se iOS ora permette la sua zona di codice.";
 "StikDebug could not be opened." = "Non è stato possibile aprire StikDebug.";
@@ -1151,9 +1171,13 @@
 "The display did not appear" = "Lo schermo non è comparso";
 "The distribution updates its account databases. Home directories and files remain, with their existing numeric ownership. Close this user's sessions first. No forced deletion is used." = "La distribuzione aggiorna i suoi archivi degli account. Le cartelle Home e i file restano, con la proprietà numerica di prima. Chiudi prima le sessioni di questo utente. Non si cancella niente con la forza.";
 "The distribution's account-removal tool is missing. Install it using Package Center." = "Manca lo strumento della distribuzione per togliere gli account. Installalo dal Centro pacchetti.";
+"The emulator could not be loaded: %s" = "Non è stato possibile caricare l'emulatore: %s";
+"The emulator could not open this game. Check that the file is complete and not zipped; some consoles need their BIOS in Giochi/BIOS." = "L'emulatore non riesce ad aprire questo gioco. Controlla che il file sia completo e non zippato; alcune console vogliono il BIOS in Giochi/BIOS.";
 "The executable cannot be read or executed. Check guest permissions." = "Il programma non si può leggere o avviare. Controlla i permessi in Linux.";
 "The executable or its required ELF interpreter is missing. Check the command and installed packages." = "Manca il programma o il suo interprete ELF. Controlla il comando e i pacchetti installati.";
 "The first-start configuration has made no progress for 15 minutes. Details shows the package and process; keep LinuxRunner open and tap Retry." = "La configurazione del primo avvio è ferma da 15 minuti. Dettagli mostra pacchetto e processo; tieni aperta FMLAB Linux e tocca Riprova.";
+"The game file could not be read." = "Non è stato possibile leggere il file del gioco.";
+"The game file is deleted. Its saves in Giochi/Salvataggi are kept." = "Il file del gioco viene eliminato. I suoi salvataggi in Giochi/Salvataggi restano.";
 "The guest passwd program is not installed." = "Il programma passwd non è installato in Linux.";
 "The installation did not finish within an hour. Restart LinuxRunner and try again." = "L'installazione non è finita in un'ora. Riavvia FMLAB Linux e riprova.";
 "The installation failed at “%@”. Export the Open Desktop Report and try again." = "L'installazione si è fermata a “%@”. Esporta il rapporto di apertura del desktop e riprova.";
@@ -1173,6 +1197,7 @@
 "The process is asked to quit and may save its state." = "Al processo viene chiesto di chiudersi e può salvare il suo stato.";
 "The process stops immediately without saving." = "Il processo si ferma subito senza salvare.";
 "The runtime could not allocate enough memory." = "Linux non ha trovato abbastanza memoria.";
+"The saved state could not be loaded." = "Non è stato possibile caricare lo stato salvato.";
 "The selected Linux account no longer exists or does not have a login shell." = "L'account Linux scelto non esiste più o non ha una shell di accesso.";
 "The selected Linux user also gets ~/Shared when that name is free. In iOS Files: On My iPhone/iPad → LinuxRunner → Shared → %@. Each environment has its own folder." = "Anche l'utente Linux scelto ha ~/Shared, se quel nome è libero. In File di iOS: Sul mio iPhone/iPad → FMLAB Linux → Shared → %@. Ogni ambiente ha la sua cartella.";
 "The selected Linux user also gets ~/Shared when that name is free. In iOS Files: On My iPhone/iPad → LinuxRunner → Shared → %lf. Each environment has its own folder." = "Anche l'utente Linux scelto ha ~/Shared, se quel nome è libero. In File di iOS: Sul mio iPhone/iPad → FMLAB Linux → Shared → %lf. Ogni ambiente ha la sua cartella.";
@@ -1191,6 +1216,7 @@
 "This build is interpreter-only" = "Questa versione ha solo l'interprete";
 "This build is interpreter-only. The JIT-capable LinuxRunner build adds the JIT option here; the interpreter remains the default there too." = "Questa build ha solo l'interprete. La build con JIT aggiunge qui l'opzione JIT; anche lì l'interprete resta quello di base.";
 "This build is interpreter-only; install the JIT build to use the JIT." = "Questa versione ha solo l'interprete; installa quella con il JIT per usarlo.";
+"This build of FMLAB Linux has no emulators inside. Update the app from the latest release." = "Questa versione di FMLAB Linux non contiene gli emulatori. Aggiorna l'app dall'ultima versione.";
 "This desktop belongs to %@, but the selected login is %@. Save your work, stop the old desktop from Sessions, then open a new desktop. The application was not launched under the old identity." = "Questo desktop è di %@, ma l'utente scelto è %@. Salva il lavoro, ferma il vecchio desktop da Sessioni e apri un nuovo desktop. L'applicazione non è stata avviata con il vecchio utente.";
 "This desktop belongs to %@, but the selected login is %lf. Save your work, stop the old desktop from Sessions, then open a new desktop. The application was not launched under the old identity." = "Questo desktop è di %@, ma l'utente scelto è %lf. Salva il lavoro, ferma il vecchio desktop da Sessioni e apri un nuovo desktop. L'applicazione non è stata avviata con il vecchio utente.";
 "This desktop belongs to %@, but the selected login is %lld. Save your work, stop the old desktop from Sessions, then open a new desktop. The application was not launched under the old identity." = "Questo desktop è di %@, ma l'utente scelto è %lld. Salva il lavoro, ferma il vecchio desktop da Sessioni e apri un nuovo desktop. L'applicazione non è stata avviata con il vecchio utente.";
@@ -1200,7 +1226,9 @@
 "This desktop belongs to %lld, but the selected login is %@. Save your work, stop the old desktop from Sessions, then open a new desktop. The application was not launched under the old identity." = "Questo desktop è di %lld, ma l'utente scelto è %@. Salva il lavoro, ferma il vecchio desktop da Sessioni e apri un nuovo desktop. L'applicazione non è stata avviata con il vecchio utente.";
 "This desktop belongs to %lld, but the selected login is %lf. Save your work, stop the old desktop from Sessions, then open a new desktop. The application was not launched under the old identity." = "Questo desktop è di %lld, ma l'utente scelto è %lf. Salva il lavoro, ferma il vecchio desktop da Sessioni e apri un nuovo desktop. L'applicazione non è stata avviata con il vecchio utente.";
 "This desktop belongs to %lld, but the selected login is %lld. Save your work, stop the old desktop from Sessions, then open a new desktop. The application was not launched under the old identity." = "Questo desktop è di %lld, ma l'utente scelto è %lld. Salva il lavoro, ferma il vecchio desktop da Sessioni e apri un nuovo desktop. L'applicazione non è stata avviata con il vecchio utente.";
+"This emulator is incomplete." = "Questo emulatore è incompleto.";
 "This file is not a supported ARM64 Linux executable or script." = "Questo file non è un programma o uno script Linux ARM64 supportato.";
+"This game cannot be saved right now." = "Questo gioco ora non si può salvare.";
 "This session runs as root. Applications that require a normal user will refuse to start. Choose a Linux user in Settings, then start a new desktop." = "Questa sessione gira come root. Le applicazioni che vogliono un utente normale non partiranno. Scegli un utente Linux in Impostazioni, poi avvia un nuovo desktop.";
 "This shared folder is no longer registered." = "Questa cartella condivisa non è più registrata.";
 "Threads" = "Thread";
