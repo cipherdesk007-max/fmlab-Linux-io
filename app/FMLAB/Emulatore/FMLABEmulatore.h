@@ -20,6 +20,9 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 @end
 
 @interface FMLABEmulatore : NSObject
+/// Dati del motore (da fmlab-retro, dati/emulatore.json): per ogni core "estensioni" e "opzioni".
+/// Si possono cambiare mentre l'app gira: valgono dal prossimo gioco aperto.
++ (void)usaDati:(NSDictionary<NSString *, NSDictionary *> *)core NS_SWIFT_NAME(usaDati(_:));
 /// Core presenti nell'app (Frameworks/FMLAB*.framework).
 + (NSArray<FMLABCore *> *)core NS_SWIFT_NAME(core());
 /// Il core giusto per un file, dall'estensione (nil se nessuno).
@@ -53,6 +56,10 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 - (void)salvaStato:(void (^)(NSError * _Nullable))fatto;
 - (void)caricaStato:(void (^)(NSError * _Nullable))fatto;
 @property (readonly) BOOL statoEsiste;
+/// Salvataggio automatico all'uscita (per "riprendi da dove eri"). Di base sì.
+@property (nonatomic) BOOL salvaUscita;
+@property (readonly) BOOL statoAutomaticoEsiste;
+- (void)caricaAutomatico:(void (^)(NSError * _Nullable))fatto;
 @end
 
 NS_ASSUME_NONNULL_END

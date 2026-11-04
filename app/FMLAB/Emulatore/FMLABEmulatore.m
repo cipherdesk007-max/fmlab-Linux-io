@@ -24,13 +24,19 @@
 }
 @end
 
+// Valori di partenza: gli stessi di dati/emulatore.json di fmlab-retro; l'app li sostituisce con quelli scaricati.
+static NSDictionary<NSString *, NSArray<NSString *> *> *G_estensioni;
+static NSDictionary<NSString *, NSDictionary<NSString *, NSString *> *> *G_opzioniCore;
+static NSArray *G_tuttiCore;
 static NSDictionary<NSString *, NSArray<NSString *> *> *FMLABEstensioni(void) {
-    return @{ @"fceumm": @[@"nes", @"fds", @"unf", @"unif"], @"gambatte": @[@"gb", @"gbc", @"dmg"], @"mgba": @[@"gba"],
+    if (!G_estensioni) G_estensioni = @{ @"fceumm": @[@"nes", @"fds", @"unf", @"unif"], @"gambatte": @[@"gb", @"gbc", @"dmg"], @"mgba": @[@"gba"],
               @"bsnes": @[@"sfc", @"smc", @"bs"], @"pcsx_rearmed": @[@"cue", @"pbp", @"chd", @"m3u", @"iso", @"img", @"bin"],
               @"desmume": @[@"nds"] };
+    return G_estensioni;
 }
 // Opzioni dei core: tutto senza JIT (iOS non lo permette senza StikDebug) e regolato per l'iPhone.
-static NSDictionary<NSString *, NSString *> *FMLABOpzioniFisse(void) {
+static NSDictionary<NSString *, NSString *> *FMLABOpzioniFisse(NSString *core) {
+    if (G_opzioniCore[core]) return G_opzioniCore[core];
     return @{ @"pcsx_rearmed_drc": @"disabled", @"pcsx_rearmed_frameskip": @"0",
               @"desmume_cpu_mode": @"interpreter", @"desmume_internal_resolution": @"256x192",
               @"desmume_screens_layout": @"top/bottom", @"desmume_pointer_type": @"touch",
@@ -274,9 +280,21 @@ static __weak FMLABEmulatore *G_attivo;
     }
 }
 
++ (void)usaDati:(NSDictionary<NSString *, NSDictionary *> *)core {
+    NSMutableDictionary *est = [FMLABEstensioni() mutableCopy], *opz = [NSMutableDictionary dictionary];
+    for (NSString *n in core) {
+        NSDictionary *c = core[n]; if (![c isKindOfClass:NSDictionary.class]) continue;
+        NSArray *e = c[@"estensioni"]; if ([e isKindOfClass:NSArray.class] && e.count) est[n] = e;
+        NSDictionary *o = c[@"opzioni"]; if ([o isKindOfClass:NSDictionary.class]) opz[n] = o;
+    }
+    @synchronized (self) { G_estensioni = est; G_opzioniCore = opz; G_tuttiCore = nil; }
+}
+
 + (NSArray<FMLABCore *> *)core {
-    static NSArray *tutti; static dispatch_once_t una;
-    dispatch_once(&una, ^{
+    @synchronized (self) {
+    if (G_tuttiCore) return G_tuttiCore;
+    NSArray *tutti;
+    {
         NSMutableArray *a = [NSMutableArray array];
         NSString *fw = NSBundle.mainBundle.privateFrameworksPath;
         for (NSString *n in [[NSFileManager.defaultManager contentsOfDirectoryAtPath:fw error:nil] sortedArrayUsingSelector:@selector(compare:)]) {
@@ -294,8 +312,10 @@ static __weak FMLABEmulatore *G_attivo;
             return i < j ? NSOrderedAscending : i > j ? NSOrderedDescending : NSOrderedSame;
         }];
         tutti = a;
-    });
+    }
+    G_tuttiCore = tutti;
     return tutti;
+    }
 }
 + (FMLABCore *)corePer:(NSString *)file {
     NSString *e = file.pathExtension.lowercaseString;
@@ -325,7 +345,8 @@ static NSError *fmlabErrore(NSString *messaggio) {
 #undef S
     strlcpy(G_sistema, FMLABEmulatore.cartellaBIOS.fileSystemRepresentation, sizeof G_sistema);
     strlcpy(G_salvataggi, FMLABEmulatore.cartellaSalvataggi.fileSystemRepresentation, sizeof G_salvataggi);
-    G_opzioni = [FMLABOpzioniFisse() mutableCopy];
+    G_opzioni = [FMLABOpzioniFisse(core.nome) mutableCopy];
+    _salvaUscita = YES;
     G_formato = RETRO_PIXEL_FORMAT_0RGB1555;
     atomic_store(&G_tasti, 0); atomic_store(&G_tastiController, 0); atomic_store(&G_ptocco, 0);
     atomic_store(&G_scrivi, 0); atomic_store(&G_leggi, 0);
@@ -485,6 +506,12 @@ static uint32_t fmlabTastiera(void) {
         if (ora < prossimo) mach_wait_until(prossimo);
         else if ((ora - prossimo) * secondi > 0.25) prossimo = ora;   // troppo indietro: si riparte da adesso
     }
+    os_unfair_lock_lock(&_lockLavori); NSArray *rimasti = [_lavori copy]; [_lavori removeAllObjects]; os_unfair_lock_unlock(&_lockLavori);
+    for (dispatch_block_t b in rimasti) b();
+    if (_salvaUscita) {   // "riprendi da dove eri"
+        size_t n = F.serSize(); NSMutableData *d = [NSMutableData dataWithLength:n];
+        if (n && F.ser(d.mutableBytes, n)) [d writeToURL:[self fileSalvataggio:@"auto.state"] atomically:YES];
+    }
     [self scriviMemoria];
     F.unload(); F.deinit();
     _caricato = NO;
@@ -513,6 +540,14 @@ static uint32_t fmlabTastiera(void) {
     atomic_store(&G_ptocco, premuto ? 1 : 0);
 }
 
+- (BOOL)statoAutomaticoEsiste { return [NSFileManager.defaultManager fileExistsAtPath:[self fileSalvataggio:@"auto.state"].path]; }
+- (void)caricaAutomatico:(void (^)(NSError *))fatto {
+    [self lavoro:^{
+        NSData *d = [NSData dataWithContentsOfURL:[self fileSalvataggio:@"auto.state"]];
+        NSError *e = (!d || !F.unser(d.bytes, d.length)) ? fmlabErrore(@"The saved state could not be loaded.") : nil;
+        dispatch_async(dispatch_get_main_queue(), ^{ fatto(e); });
+    }];
+}
 - (BOOL)statoEsiste { return [NSFileManager.defaultManager fileExistsAtPath:[self fileSalvataggio:@"state"].path]; }
 - (void)salvaStato:(void (^)(NSError *))fatto {
     [self lavoro:^{

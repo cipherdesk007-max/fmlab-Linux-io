@@ -746,6 +746,22 @@ TR.update({
 "Looking for games…": "Cerco i giochi…",
 "Native emulators (libretro cores), no JIT needed. Saves go to Giochi/Salvataggi; BIOS files, if a console needs them, go to Giochi/BIOS. On-screen controls follow the rotation; game controllers and hardware keyboards work too.": "Emulatori nativi (core libretro), senza bisogno del JIT. I salvataggi vanno in Giochi/Salvataggi; i BIOS, se una console li vuole, in Giochi/BIOS. I comandi a schermo seguono la rotazione; funzionano anche controller e tastiere.",
 "Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched). DS games show their own icon; for the others put a picture with the same name next to the game (e.g. Zelda.png beside Zelda.sfc) or in Giochi/Copertine.": "Le tue cartelle restano dove sono: FMLAB le legge e basta. Scorri a sinistra per togliere una cartella dall'elenco (i file non vengono toccati). I giochi DS mostrano la loro icona; per gli altri metti un'immagine con lo stesso nome accanto al gioco (es. Zelda.png vicino a Zelda.sfc) o in Giochi/Copertine.",
+"BIOS (optional)": "BIOS (facoltativi)",
+"Continue where you left off?": "Continuare da dove eri rimasto?",
+"Controls Opacity": "Trasparenza dei comandi",
+"Controls Size": "Dimensione dei comandi",
+"Controls and Saves": "Comandi e salvataggi",
+"Engine data %@ from fmlab-retro: updated by itself, without a new app.": "Dati del motore %@ da fmlab-retro: si aggiornano da soli, senza nuova app.",
+"FMLAB.lingua": "FMLAB.lingua",
+"Large": "Grandi",
+"Normal": "Normali",
+"Small": "Piccoli",
+"Put your own BIOS files in Files › FMLAB Linux › Giochi › BIOS. A green seal means the file is the right one (checked by its fingerprint); orange means a file with that name is there but it is different.": "Metti i tuoi BIOS in File › FMLAB Linux › Giochi › BIOS. Il sigillo verde vuol dire che il file è quello giusto (controllato dall'impronta); arancione che c'è un file con quel nome ma è diverso.",
+"Recently Played": "Giocati di recente",
+"Resume Where I Left Off": "Riprendi da dove ero",
+"Start Over": "Dall'inizio",
+"Vibration": "Vibrazione",
+"When you quit a game it is saved; next time you can continue from there.": "Quando esci da un gioco si salva; la volta dopo puoi continuare da lì.",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

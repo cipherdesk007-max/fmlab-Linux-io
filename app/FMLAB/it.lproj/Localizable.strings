@@ -244,6 +244,7 @@
 "Automatic uses the mouse pointer behaviour when a mouse, trackpad or AssistiveTouch is active: a click presses the Linux button at the pointer, holding and dragging works, double-click works. Touch Gestures keeps tap = click, long press = right click." = "Automatica usa il puntatore quando c'è un mouse, un trackpad o AssistiveTouch: il clic preme il tasto in Linux dove sta il puntatore, si può tenere premuto e trascinare, il doppio clic funziona. Gesti touch tiene tocco = clic, pressione lunga = tasto destro.";
 "Available" = "Libero";
 "Available Updates" = "Aggiornamenti disponibili";
+"BIOS (optional)" = "BIOS (facoltativi)";
 "Backtick Sends Escape" = "Accento grave manda Esc";
 "Bar" = "Barra";
 "Based on LinuxRunner" = "Basata su LinuxRunner";
@@ -321,7 +322,11 @@
 "Consoles" = "Console";
 "Continue" = "Continua";
 "Continue in Linux Terminal" = "Continua nel terminale Linux";
+"Continue where you left off?" = "Continuare da dove eri rimasto?";
 "Control" = "Control";
+"Controls Opacity" = "Trasparenza dei comandi";
+"Controls Size" = "Dimensione dei comandi";
+"Controls and Saves" = "Comandi e salvataggi";
 "Copy (also stays in LinuxRunner)" = "Copia (resta anche in LinuxRunner)";
 "Copy Error" = "Copia errore";
 "Copy Filtered Logs" = "Copia registro filtrato";
@@ -460,6 +465,9 @@
 "End Process" = "Chiudi processo";
 "End Process (SIGTERM)" = "Chiudi processo (SIGTERM)";
 "Ending a desktop component (window manager, panel, compositor) can close the desktop session." = "Chiudere un pezzo del desktop (gestore finestre, pannello, compositore) può chiudere la sessione del desktop.";
+"Engine data %@ from fmlab-retro: updated by itself, without a new app." = "Dati del motore %@ da fmlab-retro: si aggiornano da soli, senza nuova app.";
+"Engine data %lf from fmlab-retro: updated by itself, without a new app." = "Dati del motore %lf da fmlab-retro: si aggiornano da soli, senza nuova app.";
+"Engine data %lld from fmlab-retro: updated by itself, without a new app." = "Dati del motore %lld da fmlab-retro: si aggiornano da soli, senza nuova app.";
 "English" = "English";
 "Enlightenment" = "Enlightenment";
 "Enlightenment (X11 session with its own software compositor: shelf, main menu on a desktop click, Terminology terminal) from the distribution's own packages. If it is not installed, Open Desktop starts the LinuxRunner Desktop." = "Enlightenment (sessione X11 con il suo compositore software: barra, menu principale toccando il desktop, terminale Terminology) dai pacchetti della distribuzione. Se non è installato, Apri desktop avvia il Desktop LinuxRunner.";
@@ -518,6 +526,7 @@
 "FMLAB Retro installed" = "FMLAB Retro installata";
 "FMLAB Retro — Debian 13 for classic consoles (FMLAB)" = "FMLAB Retro — Debian 13 per le console classiche (FMLAB)";
 "FMLAB could not keep access to this folder." = "FMLAB non riesce a tenere l'accesso a questa cartella.";
+"FMLAB.lingua" = "FMLAB.lingua";
 "FMlab - RunnerKit" = "FMlab - RunnerKit";
 "Failed" = "Non riuscito";
 "Failed: %@. Close LinuxRunner and try again." = "Non riuscito: %@. Chiudi LinuxRunner e riprova.";
@@ -725,6 +734,7 @@
 "LXQt · Enlightenment · Wayfire · Hyprland" = "LXQt · Enlightenment · Wayfire · Hyprland";
 "Landscape uses the available display while preserving aspect ratio. Pinch to zoom; two fingers pan while zoomed, or scroll while fitted. Long press provides right click." = "In orizzontale usa tutto lo schermo mantenendo le proporzioni. Pizzica per lo zoom; con due dita ti sposti quando è ingrandito, o scorri quando è adattato. La pressione lunga fa il tasto destro.";
 "Language" = "Lingua";
+"Large" = "Grandi";
 "Last boot: %@" = "Ultimo avvio: %@";
 "Last boot: %lf" = "Ultimo avvio: %lf";
 "Last boot: %lld" = "Ultimo avvio: %lld";
@@ -864,6 +874,7 @@
 "No usable JIT path" = "Nessun modo utilizzabile per il JIT";
 "No visible files in this folder." = "Nessun file visibile in questa cartella.";
 "Nominal" = "Normale";
+"Normal" = "Normali";
 "Not a supported game file (unzip it first): %@" = "File di gioco non supportato (prima decomprimilo): %@";
 "Not a supported game file (unzip it first): %lf" = "File di gioco non supportato (prima decomprimilo): %lf";
 "Not a supported game file (unzip it first): %lld" = "File di gioco non supportato (prima decomprimilo): %lld";
@@ -960,6 +971,7 @@
 "Profile name (optional)" = "Nome del profilo (facoltativo)";
 "Profile: " = "Profilo: ";
 "Profiles" = "Profili";
+"Put your own BIOS files in Files › FMLAB Linux › Giochi › BIOS. A green seal means the file is the right one (checked by its fingerprint); orange means a file with that name is there but it is different." = "Metti i tuoi BIOS in File › FMLAB Linux › Giochi › BIOS. Il sigillo verde vuol dire che il file è quello giusto (controllato dall'impronta); arancione che c'è un file con quel nome ma è diverso.";
 "Put your own game files in the Files app › On My iPhone › FMLAB Linux › Giochi, or tap Import. Zipped games must be unzipped first (tap the zip in Files)." = "Metti i tuoi file di gioco nell'app File › Sul mio iPhone › FMLAB Linux › Giochi, oppure tocca Importa. I giochi zippati vanno prima decompressi (tocca lo zip in File).";
 "Quit Game" = "Esci dal gioco";
 "Reading bounded diagnostic tails…" = "Lettura delle ultime righe della diagnostica…";
@@ -969,6 +981,7 @@
 "Real Linux on your iPhone." = "Linux vero sul tuo iPhone.";
 "Received framebuffer" = "Immagine ricevuta";
 "Recent Application Crashes" = "Arresti recenti delle applicazioni";
+"Recently Played" = "Giocati di recente";
 "Recently Used" = "Usati di recente";
 "Reconnect Viewer" = "Ricollega visualizzazione";
 "Refresh" = "Aggiorna";
@@ -1004,6 +1017,7 @@
 "Restart Desktop?" = "Riavviare il desktop?";
 "Resume" = "Riprendi";
 "Resume Desktop" = "Riprendi desktop";
+"Resume Where I Left Off" = "Riprendi da dove ero";
 "Retry" = "Riprova";
 "Review Package Upgrade" = "Controlla aggiornamento pacchetti";
 "Review Removal" = "Controlla rimozione";
@@ -1089,6 +1103,7 @@
 "Show Details" = "Mostra dettagli";
 "Shows the Linux desktop in a separate connected-display window. Keyboard, mouse and touch input stay on this device. Closing the viewer keeps output running while LinuxRunner stays in the foreground. Disconnecting returns control to this device; it does not stop Linux." = "Mostra il desktop Linux su uno schermo collegato. Tastiera, mouse e tocco restano su questo telefono. Chiudendo il visore l'uscita continua finché FMLAB Linux resta davanti. Scollegando, i comandi tornano al telefono; Linux non si ferma.";
 "Slide to move, tap to click, hold and slide to drag; two fingers scroll or tap for right click in touchpad mode. Clipboard text is sent only when requested." = "Scorri per muovere, tocca per cliccare, tieni premuto e scorri per trascinare; con due dita scorri o tocchi per il tasto destro in modalità touchpad. Il testo copiato si manda solo quando lo chiedi.";
+"Small" = "Piccoli";
 "Software" = "Software";
 "Software (Mesa)" = "Software (Mesa)";
 "Software (fallback)" = "Software (riserva)";
@@ -1107,6 +1122,7 @@
 "Start Desktop" = "Avvia desktop";
 "Start GUI support here before running X11 apps. DISPLAY is supplied by the managed session, not a global terminal variable." = "Avvia qui il supporto grafico prima delle app X11. DISPLAY lo fornisce la sessione gestita, non una variabile globale del terminale.";
 "Start Linux Runtime" = "Avvia Linux";
+"Start Over" = "Dall'inizio";
 "Start Runtime on Launch" = "Avvia Linux all'apertura";
 "Start the Linux runtime first." = "Prima avvia Linux.";
 "Start the Linux runtime to add folders." = "Avvia Linux per aggiungere cartelle.";
@@ -1328,6 +1344,7 @@
 "Version %lld (%@)" = "Versione %lld (%@)";
 "Version %lld (%lf)" = "Versione %lld (%lf)";
 "Version %lld (%lld)" = "Versione %lld (%lld)";
+"Vibration" = "Vibrazione";
 "View Crash Reports" = "Vedi i rapporti di arresto";
 "Viewer connected" = "Visualizzazione collegata";
 "Viewer detached; desktop retained" = "Visualizzazione staccata; il desktop resta acceso";
@@ -1342,6 +1359,7 @@
 "Wayfire installed" = "Wayfire installato";
 "Wayfire is available for Debian and Arch Linux ARM environments." = "Wayfire c'è per gli ambienti Debian e Arch Linux ARM.";
 "Wayland desktop from the distribution's packages (Arch: about 70 MB download); network needed once. Effects that need a GPU (cube, blur) are off. The LinuxRunner Desktop stays installed as the fallback." = "Desktop Wayland dai pacchetti della distribuzione (Arch: circa 70 MB da scaricare); la rete serve una volta. Gli effetti che vogliono la GPU (cubo, sfocatura) sono spenti. Il Desktop LinuxRunner resta installato come riserva.";
+"When you quit a game it is saved; next time you can continue from there." = "Quando esci da un gioco si salva; la volta dopo puoi continuare da lì.";
 "Wireless Display" = "Schermo senza fili";
 "Wireless Display (AirPlay)…" = "Schermo senza fili (AirPlay)…";
 "Wireless Linux Desktop" = "Desktop Linux senza fili";

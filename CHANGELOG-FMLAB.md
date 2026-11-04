@@ -2,6 +2,16 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.9.5
+- **Dati del motore da fmlab-retro, senza nuova app**: estensioni, opzioni degli emulatori, BIOS controllati e avvisi
+  arrivano da `fmlab-retro/dati/emulatore.json`. Il Game Emulator li scarica da solo (al massimo ogni 6 ore, o
+  tirando giù la lista), li controlla come le prove di GitHub e li usa dal gioco successivo. Senza rete valgono
+  l'ultima copia o quella dentro l'app. Il codice degli emulatori resta nell'app (iOS non esegue codice scaricato).
+- **Riprendi da dove eri**: uscendo da un gioco si salva da solo; la volta dopo chiede *Continua* o *Dall'inizio*.
+- **Giocati di recente** in cima all'elenco.
+- **BIOS**: elenco dei BIOS facoltativi con controllo dell'impronta (sigillo verde = file giusto).
+- **Comandi**: dimensione (piccoli, normali, grandi), trasparenza, vibrazione sì/no.
+
 ## 0.9.4
 - Game Emulator: **icone dei giochi** nell'elenco. I giochi DS mostrano l'icona che hanno dentro (letta dal file);
   per le altre console vale una copertina con lo stesso nome del gioco (.png/.jpg) accanto al file o in

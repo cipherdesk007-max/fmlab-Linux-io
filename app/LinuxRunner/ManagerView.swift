@@ -381,7 +381,7 @@ struct ManagerView: View {
         .preferredColorScheme(appearance == "system" ? nil : appearance == "light" ? .light : .dark)
         .task { fmlabImporta.cerca(); await fmlabAggiornamenti.controlla(); await fmlabAggiornamenti.controllaOriginale() }
         .onAppear {
-            FMLABEmulatore.preparaCartelle()
+            FMLABDati.carica(); FMLABEmulatore.preparaCartelle()
             desktopSummary = LRRuntimeBridge.desktopSessionSummary()
             // First launch without Linux, or setup waiting for its relaunch/account step.
             // Once per launch, so "Later" is respected.
