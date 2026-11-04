@@ -69,7 +69,7 @@ static _Atomic int G_px, G_py, G_ptocco;
 static struct retro_system_av_info G_av;
 static BOOL G_avCambiato;
 static _Atomic bool G_varNuove;   // un'opzione è cambiata mentre il gioco gira
-static retro_audio_buffer_status_t G_statoAudio;   // il core vuole sapere quanto suono c'è in coda (salto fotogrammi automatico)
+static retro_audio_buffer_status_callback_t G_statoAudio;   // il core vuole sapere quanto suono c'è in coda (salto fotogrammi automatico)
 static _Atomic uint32_t G_vibra;                    // ultima forza di vibrazione chiesta dal core (0-65535)
 
 // immagine: l'ultima schermata in BGRX 32 bit, presa dalla vista a ogni giro dello schermo
