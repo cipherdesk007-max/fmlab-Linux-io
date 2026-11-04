@@ -499,7 +499,7 @@ struct ManagerView: View {
             if fmlabAggiornamenti.nuova != nil {
                 Section { FMLABAvvisoAggiornamento(agg: fmlabAggiornamenti) }
             }
-            if !fmlabImporta.trovati.isEmpty || fmlabImporta.messaggio != nil {
+            if !fmlabImporta.trovati.isEmpty || fmlabImporta.messaggio != nil || fmlabImporta.impostazioniDisponibili {
                 Section { FMLABImportaView(imp: fmlabImporta, manager: manager) } header: { Text("Da LinuxRunner") }
             }
             if LRRuntimeBridge.isRunning(), LRRuntimeBridge.activeEnvironmentIsDebian() {
@@ -2951,7 +2951,48 @@ final class FMLABImporta: ObservableObject {
         return basi.filter { fm.fileExists(atPath: $0.appendingPathComponent("roots").path) && $0.resolvingSymlinksInPath().path != mio }
     }
 
+    // MARK: impostazioni di LinuxRunner (tema, terminale, mouse, grafica, audio, desktop…)
+    @Published var impostazioniDisponibili = false
+    static let chiaveImportate = "FMLAB.impostazioniLinuxRunnerImportate"
+
+    /// File delle impostazioni di LinuxRunner dentro LiveContainer (Library/Preferences/dev.linuxrunner.app.plist)
+    nonisolated static func fileImpostazioni() -> URL? {
+        guard let h = getenv("LC_HOME_PATH") else { return nil }
+        let fm = FileManager.default
+        let app = URL(fileURLWithPath: String(cString: h)).appendingPathComponent("Documents/Data/Application")
+        let candidati = ((try? fm.contentsOfDirectory(at: app, includingPropertiesForKeys: nil)) ?? [])
+            .map { $0.appendingPathComponent("Library/Preferences/dev.linuxrunner.app.plist") }
+            .filter { fm.fileExists(atPath: $0.path) }
+        // se ce n'è più d'uno (contenitori vecchi), il più recente
+        return candidati.max { a, b in
+            let da = (try? a.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+            let db = (try? b.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+            return da < db
+        }
+    }
+
+    /// Copia le impostazioni di LinuxRunner in FMLAB Linux. Non tocca: impostazioni di sistema, quelle FMLAB, lo stato
+    /// della procedura guidata e la distribuzione predefinita se qui non c'è. Restituisce quante ne ha prese.
+    @discardableResult
+    func importaImpostazioni() -> Int {
+        guard let f = Self.fileImpostazioni(), let d = NSDictionary(contentsOf: f) as? [String: Any] else { return 0 }
+        let escluse = ["Apple", "NS", "com.apple", "FMLAB", "LinuxRunnerSetup.", "WebKit", "LC", "lc", "PK", "MSV", "AK", "INNext"]
+        let miei = Set(LRRuntimeBridge.rootNames())
+        let ud = UserDefaults.standard
+        var n = 0
+        for (k, v) in d where !escluse.contains(where: { k.hasPrefix($0) }) {
+            if k == "Default Root" {
+                guard let r = v as? String, miei.contains(r) || FileManager.default.fileExists(atPath: LRRuntimeBridge.catalogURL().deletingLastPathComponent().appendingPathComponent("roots").appendingPathComponent(r).path) else { continue }
+            }
+            ud.set(v, forKey: k); n += 1
+        }
+        ud.set(true, forKey: Self.chiaveImportate)
+        impostazioniDisponibili = false
+        return n
+    }
+
     func cerca() {
+        impostazioniDisponibili = Self.fileImpostazioni() != nil && !UserDefaults.standard.bool(forKey: Self.chiaveImportate)
         let miei = Set(LRRuntimeBridge.rootNames())
         Task.detached(priority: .utility) {
             var out: [FMLABDistribuzioneTrovata] = []
@@ -3010,7 +3051,9 @@ final class FMLABImporta: ObservableObject {
                     manager.environments.append(amb); try? manager.persist()
                 }
                 self.trovati.removeAll { $0.id == t.id }
-                self.messaggio = "\(t.nome) è in FMLAB Linux. Chiudi FMLAB Linux dal multitasking e riaprila: poi la scegli in Distributions."
+                let n = self.importaImpostazioni()
+                self.messaggio = "\(t.nome) è in FMLAB Linux" + (n > 0 ? ", con le tue impostazioni di LinuxRunner (\(n))" : "") +
+                    ". Chiudi FMLAB Linux dal multitasking e riaprila: poi la scegli in Distributions."
             }
         }
     }
@@ -3027,6 +3070,13 @@ struct FMLABImportaView: View {
         if !imp.trovati.isEmpty && !imp.lavoro {
             Text("Hai già queste distribuzioni in LinuxRunner. Prendile qui senza reinstallare niente (chiudi prima LinuxRunner).")
                 .font(.footnote).foregroundColor(.secondary)
+        }
+        if imp.impostazioniDisponibili && !imp.lavoro {
+            Button {
+                let n = imp.importaImpostazioni()
+                imp.messaggio = n > 0 ? "Prese \(n) impostazioni da LinuxRunner (tema, terminale, mouse, grafica, desktop…). Chiudi e riapri FMLAB Linux per vederle tutte."
+                                      : "Nessuna impostazione da prendere."
+            } label: { Label("Prendi le impostazioni di LinuxRunner", systemImage: "slider.horizontal.3") }
         }
         ForEach(imp.trovati) { t in
             Button { scelta = t } label: {

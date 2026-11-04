@@ -4,7 +4,7 @@ Linux vero sull'iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), versione FMLA
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. Niente jailbreak, niente macchina virtuale:
 i programmi Linux ARM64 girano dentro l'app grazie a un interprete e a uno strato che traduce le chiamate di sistema.
 
-> **Stato: 0.3.0.** È LinuxRunner 1.1.0 (build 900) con nome, logo e colori FMLAB (rosso e nero), identificativo
+> **Stato: 0.3.1.** È LinuxRunner 1.1.0 (build 900) con nome, logo e colori FMLAB (rosso e nero), identificativo
 > proprio (`dev.fmlab.linux`, si installa **accanto** a LinuxRunner senza toccarne i dati), aggiornamenti dall'app
 > come FMLAB Cleaner e avviso quando esce un LinuxRunner originale più nuovo. Le altre migliorie arrivano una alla
 > volta, ognuna misurata contro l'originale.
@@ -23,7 +23,7 @@ LiveContainer → **+** → **Installa dall'URL** e incolla:
 | **Italiano e grafica FMLAB** (logo e colori ✅, italiano in corso) | Stessi colori e stile di [FMLAB Cleaner](https://github.com/cipherdesk007-max/FMLAB-cleaner) |
 | **Aggiornamenti dall'app** ✅ | Come FMLAB Cleaner: l'app avvisa e si reinstalla sopra senza perdere i dati |
 | **Al passo con l'originale** ✅ | Quando esce un LinuxRunner più nuovo, l'app lo dice e il repository apre da solo una segnalazione ([workflow "originale"](.github/workflows/originale.yml)) |
-| **Prendi il Debian da LinuxRunner** ✅ | Se LinuxRunner è nello stesso LiveContainer, la Home mostra le sue distribuzioni: **Sposta** (istantaneo) o **Copia** |
+| **Prendi il Debian da LinuxRunner** ✅ | Se LinuxRunner è nello stesso LiveContainer, la Home mostra le sue distribuzioni: **Sposta** (istantaneo) o **Copia**, insieme alle tue impostazioni |
 | **Backup del Debian** | Esporta/importa l'ambiente con un tocco |
 
 **Come si verifica che è davvero meglio**: gli stessi comandi cronometrati sulle due app, sullo stesso telefono
