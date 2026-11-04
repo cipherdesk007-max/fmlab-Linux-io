@@ -31,6 +31,9 @@ NSString *FMLABTr(NSString *s) {
     return s;
 }
 
+// Ogni classe ha il suo nome di metodo (fmlab_vc_, fmlab_nav_, fmlab_bar_…): con lo stesso nome in una classe
+// madre e in una figlia (UIViewController e UIAlertController) il metodo richiamava sé stesso all'infinito
+// e l'app si chiudeva aprendo il menu Desktop (0.7.0). Il titolo degli avvisi passa già da UIViewController.
 // Scambio sicuro: se la classe eredita il metodo, prima lo aggiunge a sé stessa (così non tocca la classe madre).
 static void FMLABScambia(Class c, SEL originale, SEL nuovo) {
     Method a = class_getInstanceMethod(c, originale), b = class_getInstanceMethod(c, nuovo);
@@ -48,13 +51,13 @@ static void FMLABScambia(Class c, SEL originale, SEL nuovo) {
 - (void)fmlab_setTitle:(NSString *)title forState:(UIControlState)state { [self fmlab_setTitle:FMLABTr(title) forState:state]; }
 @end
 @implementation UIViewController (FMLABLingua)
-- (void)fmlab_setTitle:(NSString *)title { [self fmlab_setTitle:FMLABTr(title)]; }
+- (void)fmlab_vc_setTitle:(NSString *)title { [self fmlab_vc_setTitle:FMLABTr(title)]; }
 @end
 @implementation UINavigationItem (FMLABLingua)
-- (void)fmlab_setTitle:(NSString *)title { [self fmlab_setTitle:FMLABTr(title)]; }
+- (void)fmlab_nav_setTitle:(NSString *)title { [self fmlab_nav_setTitle:FMLABTr(title)]; }
 @end
 @implementation UIBarButtonItem (FMLABLingua)
-- (void)fmlab_setTitle:(NSString *)title { [self fmlab_setTitle:FMLABTr(title)]; }
+- (void)fmlab_bar_setTitle:(NSString *)title { [self fmlab_bar_setTitle:FMLABTr(title)]; }
 - (instancetype)fmlab_initWithTitle:(NSString *)title style:(UIBarButtonItemStyle)style target:(id)target action:(SEL)action {
     return [self fmlab_initWithTitle:FMLABTr(title) style:style target:target action:action];
 }
@@ -65,13 +68,12 @@ static void FMLABScambia(Class c, SEL originale, SEL nuovo) {
     for (id item in items) [tradotti addObject:[item isKindOfClass:NSString.class] ? FMLABTr(item) : item];
     return [self fmlab_initWithItems:tradotti];
 }
-- (void)fmlab_setTitle:(NSString *)title forSegmentAtIndex:(NSUInteger)segment { [self fmlab_setTitle:FMLABTr(title) forSegmentAtIndex:segment]; }
+- (void)fmlab_seg_setTitle:(NSString *)title forSegmentAtIndex:(NSUInteger)segment { [self fmlab_seg_setTitle:FMLABTr(title) forSegmentAtIndex:segment]; }
 @end
 @implementation UITextField (FMLABLingua)
 - (void)fmlab_setPlaceholder:(NSString *)placeholder { [self fmlab_setPlaceholder:FMLABTr(placeholder)]; }
 @end
 @implementation UIAlertController (FMLABLingua)
-- (void)fmlab_setTitle:(NSString *)title { [self fmlab_setTitle:FMLABTr(title)]; }
 - (void)fmlab_setMessage:(NSString *)message { [self fmlab_setMessage:FMLABTr(message)]; }
 + (instancetype)fmlab_alertControllerWithTitle:(NSString *)title message:(NSString *)message preferredStyle:(UIAlertControllerStyle)style {
     return [self fmlab_alertControllerWithTitle:FMLABTr(title) message:FMLABTr(message) preferredStyle:style];
@@ -99,14 +101,13 @@ static void FMLABAttivaTraduzione(NSString *lingua) {
     FMLABItaliano = YES;
     FMLABScambia(UILabel.class, @selector(setText:), @selector(fmlab_setText:));
     FMLABScambia(UIButton.class, @selector(setTitle:forState:), @selector(fmlab_setTitle:forState:));
-    FMLABScambia(UIViewController.class, @selector(setTitle:), @selector(fmlab_setTitle:));
-    FMLABScambia(UINavigationItem.class, @selector(setTitle:), @selector(fmlab_setTitle:));
-    FMLABScambia(UIBarButtonItem.class, @selector(setTitle:), @selector(fmlab_setTitle:));
+    FMLABScambia(UIViewController.class, @selector(setTitle:), @selector(fmlab_vc_setTitle:));
+    FMLABScambia(UINavigationItem.class, @selector(setTitle:), @selector(fmlab_nav_setTitle:));
+    FMLABScambia(UIBarButtonItem.class, @selector(setTitle:), @selector(fmlab_bar_setTitle:));
     FMLABScambia(UIBarButtonItem.class, @selector(initWithTitle:style:target:action:), @selector(fmlab_initWithTitle:style:target:action:));
     FMLABScambia(UISegmentedControl.class, @selector(initWithItems:), @selector(fmlab_initWithItems:));
-    FMLABScambia(UISegmentedControl.class, @selector(setTitle:forSegmentAtIndex:), @selector(fmlab_setTitle:forSegmentAtIndex:));
+    FMLABScambia(UISegmentedControl.class, @selector(setTitle:forSegmentAtIndex:), @selector(fmlab_seg_setTitle:forSegmentAtIndex:));
     FMLABScambia(UITextField.class, @selector(setPlaceholder:), @selector(fmlab_setPlaceholder:));
-    FMLABScambia(UIAlertController.class, @selector(setTitle:), @selector(fmlab_setTitle:));
     FMLABScambia(UIAlertController.class, @selector(setMessage:), @selector(fmlab_setMessage:));
     FMLABScambia(object_getClass(UIAlertController.class), @selector(alertControllerWithTitle:message:preferredStyle:), @selector(fmlab_alertControllerWithTitle:message:preferredStyle:));
     FMLABScambia(object_getClass(UIAlertAction.class), @selector(actionWithTitle:style:handler:), @selector(fmlab_actionWithTitle:style:handler:));

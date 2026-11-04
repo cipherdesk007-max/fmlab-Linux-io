@@ -2,6 +2,11 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.7.1
+- **Corretto**: in italiano l'app si chiudeva toccando **Desktop** per vedere i comandi (e con ogni altro avviso).
+  Il traduttore dei titoli usava lo stesso nome per le schermate e per gli avvisi, e il titolo richiamava sé stesso
+  all'infinito. Ora ogni tipo ha il suo nome e il titolo degli avvisi passa da un solo punto.
+
 ## 0.7.0
 - **Desktop nitido, scelto da solo**: la risoluzione **Telefono** ora legge lo schermo e sceglie la misura più
   nitida: divide i pixel veri dello schermo per un numero intero, così ogni pixel di Linux diventa un quadrato
