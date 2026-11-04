@@ -9,6 +9,23 @@ i programmi Linux ARM64 girano dentro l'app grazie a un interprete e a uno strat
 > come FMLAB Cleaner e avviso quando esce un LinuxRunner originale più nuovo. Le altre migliorie arrivano una alla
 > volta, ognuna misurata contro l'originale.
 
+## Foto
+
+Foto vere dal telefono (iPhone 15 Pro Max). Le schermate dell'app nel simulatore iPhone, in italiano, si
+aggiornano da sole a ogni versione in [docs/screenshots/ultima-versione](docs/screenshots/ultima-versione).
+
+<p align="center">
+  <img src="docs/images/0.6.0/prima-desktop-con-bordi.png" width="100%" alt="Desktop a schermo intero">
+</p>
+<p align="center">
+  <img src="docs/images/0.6.0/prima-menu-desktop-inglese.png" width="100%" alt="Menu Desktop">
+</p>
+<p align="center">
+  <img src="docs/images/0.6.0/prima-impostazioni-desktop-inglese.png" width="32%" alt="Impostazioni del desktop">
+  <img src="docs/images/0.7.2/desktop-verticale.png" width="32%" alt="Desktop in verticale, in italiano">
+  <img src="docs/images/0.7.2/terminale-runnerkit.png" width="32%" alt="Terminale con RunnerKit">
+</p>
+
 ## Installazione
 
 LiveContainer → **+** → **Installa dall'URL** e incolla:
