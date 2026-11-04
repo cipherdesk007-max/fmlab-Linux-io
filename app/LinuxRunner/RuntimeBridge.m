@@ -689,8 +689,18 @@ static NSString *LRJITLastFailure;   // reason of the last refused or failed act
         if([key hasPrefix:@"LinuxRunnerDesktop.resolution."]&&[d integerForKey:key]==4)[d setInteger:3 forKey:key];
     [d setBool:YES forKey:@"LinuxRunnerDesktop.landscapeDefault.v1"];
 }
+// FMLAB 0.5.0: the desktop takes the whole phone screen ("Phone", 540 high with the iPhone's proportions).
+// The old 960×540 default (also when never chosen) moves to it once; other explicit choices are kept.
++ (void)fmlabMigrateDesktopToPhone {
+    NSUserDefaults *d=NSUserDefaults.standardUserDefaults;
+    if([d boolForKey:@"FMLAB.desktopPhone.v1"])return;
+    for(NSString *key in d.dictionaryRepresentation.allKeys)
+        if([key hasPrefix:@"LinuxRunnerDesktop.resolution."]&&[d integerForKey:key]==3)[d setInteger:5 forKey:key];
+    [d setBool:YES forKey:@"FMLAB.desktopPhone.v1"];
+}
 + (void)prepareExecutionBackendAtLaunch {
     [self migrateDesktopSizeToLandscape];
+    [self fmlabMigrateDesktopToPhone];
     static dispatch_once_t observe;
     dispatch_once(&observe,^{[NSNotificationCenter.defaultCenter addObserverForName:UIApplicationDidBecomeActiveNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *n){[LRRuntimeBridge retryJITWhenAuthorized];}];});
     NSUserDefaults *defaults=NSUserDefaults.standardUserDefaults;

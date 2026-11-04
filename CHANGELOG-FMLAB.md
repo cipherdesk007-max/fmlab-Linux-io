@@ -2,6 +2,16 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.5.0
+- **Uguale all'originale anche nella grafica**: GPU Metal (virglrenderer, libepoxy e ANGLE alle stesse versioni di
+  LinuxRunner) oltre al JIT. In Impostazioni → Grafica si può scegliere "GPU Metal · Sperimentale" come in LinuxRunner.
+- **Desktop a tutto schermo sul telefono**: nuova risoluzione **Telefono · tutto schermo**, alta 540 come 960×540 ma
+  larga quanto le proporzioni dello schermo (iPhone 15 Pro Max: 1168×540), quindi niente bande nere ai lati.
+  Diventa quella di base; chi aveva 960×540 passa a questa una volta (si può sempre rimettere 960×540).
+- **Pulisci file inutili** (Impostazioni → Pulizia): file temporanei di installazione, cartella temporanea e cache
+  dell'app, con lo spazio liberato. Con RunnerKit c'è anche **Pulisci anche dentro Linux** (`pulizia --sicura`).
+- Tradotte anche le scritte di stato (In funzione, Fermo, Calcolo…, Grafica…).
+
 ## 0.4.1
 - L'avviso "LinuxRunner originale è passato alla …" compare anche nella **Home**, non solo in Impostazioni.
 

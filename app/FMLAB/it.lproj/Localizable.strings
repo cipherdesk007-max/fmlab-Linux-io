@@ -58,6 +58,7 @@
 "Blinking Cursor" = "Cursore lampeggiante";
 "Block" = "Blocco";
 "CPU" = "CPU";
+"Calculating…" = "Calcolo…";
 "Cancel" = "Annulla";
 "Cancel Installation" = "Annulla installazione";
 "Cancel Transfer" = "Annulla trasferimento";
@@ -73,6 +74,11 @@
 "Choose Destination & Import" = "Scegli destinazione e importa";
 "Choose Export Full Diagnostic Bundle in diagnostics. It includes a bounded Debian installer log. DEBUG enables per-entry archive tracing." = "Nella diagnostica scegli Esporta pacchetto diagnostico completo. Include un registro limitato dell'installazione di Debian. DEBUG attiva la traccia di ogni voce dell'archivio.";
 "Clean Temporary Files" = "Pulisci file temporanei";
+"Clean Up" = "Pulisci";
+"Clean Up Inside Linux (RunnerKit)" = "Pulisci anche dentro Linux (RunnerKit)";
+"Clean Up Unneeded Files" = "Pulisci file inutili";
+"Clean up unneeded files?" = "Pulire i file inutili?";
+"Cleanup" = "Pulizia";
 "Close LinuxRunner completely and open it again to continue." = "Chiudi del tutto FMLAB Linux e riaprila per continuare.";
 "Colors" = "Colori";
 "Component" = "Componente";
@@ -188,11 +194,13 @@
 "For a connected separate display, choose Desktop → Use This Device as Touchpad. AirPlay mirroring alone shows the same screen on both devices." = "Con uno schermo separato collegato, scegli Desktop → Usa questo dispositivo come touchpad. La sola duplicazione AirPlay mostra lo stesso schermo su tutti e due.";
 "Force Kill (SIGKILL)" = "Forza chiusura (SIGKILL)";
 "Framebuffer Presentation" = "Visualizzazione dell'immagine";
+"Freed %@." = "Liberati %@.";
 "From LinuxRunner" = "Da LinuxRunner";
 "Full Report" = "Rapporto completo";
 "Full Screen" = "Schermo intero";
 "GPU" = "GPU";
 "GPU utilisation is not measurable through public iOS APIs and is not shown." = "L'uso della GPU non si può misurare con le funzioni di iOS e non viene mostrato.";
+"GPU-Resident Metal" = "Metal sulla GPU";
 "GPU-Resident Metal · Experimental" = "Metal sulla GPU · Sperimentale";
 "General" = "Generali";
 "Graphics" = "Grafica";
@@ -292,6 +300,7 @@
 "Metal GPU gives Linux a virtual GPU: Mesa's own virgl driver renders on the iPhone GPU through Metal (ANGLE). Today Hyprland composites on it; other desktops keep software rendering. If the GPU does not start, LinuxRunner falls back to software and shows why. Automatic uses software rendering until Metal is validated on iPhone." = "GPU Metal dà a Linux una GPU virtuale: il driver virgl di Mesa disegna sulla GPU dell'iPhone tramite Metal (ANGLE). Oggi la usa Hyprland; gli altri desktop restano in software. Se la GPU non parte, FMLAB Linux torna al software e dice perché. Automatica usa il software finché Metal non è verificato su iPhone.";
 "Metal GPU · Experimental" = "GPU Metal · Sperimentale";
 "Metal Presentation · Experimental" = "Visualizzazione Metal · Sperimentale";
+"Metal Verification" = "Verifica Metal";
 "Metal Verification · Diagnostics" = "Verifica Metal · Diagnostica";
 "Metal draws are guest OpenGL draws executed by the GPU. Mesa draws were rasterised in software. Presenting the desktop through Metal is not counted as acceleration." = "I disegni Metal sono disegni OpenGL di Linux fatti dalla GPU. I disegni Mesa sono fatti in software. Mostrare il desktop tramite Metal non conta come accelerazione.";
 "Microphone" = "Microfono";
@@ -323,6 +332,7 @@
 "No visible files in this folder." = "Nessun file visibile in questa cartella.";
 "Not available on Debian" = "Non disponibile su Debian";
 "Not available yet: Linux programs cannot record from the iPhone microphone in this version." = "Non ancora disponibile: in questa versione i programmi Linux non possono registrare dal microfono dell'iPhone.";
+"Not started" = "Non avviato";
 "Notices & Credits" = "Note e riconoscimenti";
 "OK" = "OK";
 "Official Debian packages, checked against Debian's signed index. The desktop, sound and account tools are added in the next steps." = "Pacchetti ufficiali Debian, controllati con l'indice firmato di Debian. Desktop, audio e strumenti per gli account si aggiungono nei passi successivi.";
@@ -352,6 +362,7 @@
 "Path availability is not a test of a particular server or of local-network permission. Changes are reported by iOS while this screen is open." = "Se la rete è disponibile non vuol dire che un certo server risponda o che ci sia il permesso per la rete locale. iOS segnala i cambi mentre questa schermata è aperta.";
 "Performance" = "Prestazioni";
 "Persistent storage" = "Spazio permanente";
+"Phone · Full Screen" = "Telefono · tutto schermo";
 "Plays sound from Linux programs (browsers, media players, games) through the iPhone, mixed with other apps. Applies to the next desktop or app session. Sound stops while LinuxRunner is in the background." = "Fa sentire l'audio dei programmi Linux (browser, lettori, giochi) dall'iPhone, insieme alle altre app. Vale dalla prossima sessione del desktop o dell'app. L'audio si ferma quando FMLAB Linux è in sottofondo.";
 "Please keep LinuxRunner open." = "Tieni FMLAB Linux aperta.";
 "Prevents automatic screen locking while LinuxRunner installs Linux, desktop components, account tools or packages, and while a terminal command runs. iOS pauses apps in the background, so keep LinuxRunner open in the foreground during long operations." = "Evita il blocco automatico dello schermo mentre FMLAB Linux installa Linux, componenti del desktop, strumenti per gli account o pacchetti, e mentre gira un comando nel terminale. iOS mette in pausa le app in sottofondo: durante le operazioni lunghe tieni FMLAB Linux aperta davanti.";
@@ -359,6 +370,7 @@
 "Process" = "Processo";
 "Processes" = "Processi";
 "Profile: " = "Profilo: ";
+"Ready" = "Pronto";
 "Real Linux on your iPhone." = "Linux vero sul tuo iPhone.";
 "Recent Application Crashes" = "Arresti recenti delle applicazioni";
 "Recently Used" = "Usati di recente";
@@ -372,6 +384,7 @@
 "Remove Account — Keep Home…" = "Rimuovi account, tieni la cartella Home…";
 "Remove RunnerKit" = "Togli RunnerKit";
 "Removes only LinuxRunner's inactive installation staging files. User files, environments, packages and browser profiles are preserved." = "Toglie solo i file temporanei di installazione non più usati. File dell'utente, ambienti, pacchetti e profili dei browser restano.";
+"Removes temporary installation files, the app's temporary folder and caches that rebuild themselves. Linux, your files, accounts and packages are never touched. Inside Linux, RunnerKit cleans apt caches, old logs and temporary files, never personal files." = "Toglie i file temporanei di installazione, la cartella temporanea dell'app e le cache che si ricreano da sole. Linux, i tuoi file, gli account e i pacchetti non vengono mai toccati. Dentro Linux, RunnerKit pulisce cache di apt, registri vecchi e file temporanei, mai i file personali.";
 "Rendered on the CPU (no GPU acceleration yet); blur is off. Network needed once. The LinuxRunner Desktop stays installed as the fallback." = "Disegnato dal processore (ancora senza GPU); sfocatura spenta. La rete serve una volta. Il Desktop LinuxRunner resta installato come riserva.";
 "Renderer" = "Motore grafico";
 "Repair Center" = "Centro riparazioni";
@@ -387,6 +400,7 @@
 "Run" = "Avvia";
 "RunnerKit (TouchPad, Center, Cleanup, RunnerBoost, rk command) installs itself the first time: it takes a minute and needs a connection." = "RunnerKit (TouchPad, Centro, Pulizia, RunnerBoost, comando rk) si installa da solo la prima volta: serve un minuto e la connessione.";
 "RunnerKit installed: TouchPad, Center, Cleanup and the rk command" = "RunnerKit installato: TouchPad, Centro, Pulizia e il comando rk";
+"Running" = "In funzione";
 "Runtime" = "Linux";
 "Runtime Diagnostics" = "Diagnostica di Linux";
 "Runtime health" = "Salute di Linux";
@@ -414,6 +428,7 @@
 "Shared folder: /home/mobile/Downloads" = "Cartella condivisa: /home/mobile/Downloads";
 "Shows the Linux desktop in a separate connected-display window. Keyboard, mouse and touch input stay on this device. Closing the viewer keeps output running while LinuxRunner stays in the foreground. Disconnecting returns control to this device; it does not stop Linux." = "Mostra il desktop Linux su uno schermo collegato. Tastiera, mouse e tocco restano su questo telefono. Chiudendo il visore l'uscita continua finché FMLAB Linux resta davanti. Scollegando, i comandi tornano al telefono; Linux non si ferma.";
 "Slide to move, tap to click, hold and slide to drag; two fingers scroll or tap for right click in touchpad mode. Clipboard text is sent only when requested." = "Scorri per muovere, tocca per cliccare, tieni premuto e scorri per trascinare; con due dita scorri o tocchi per il tasto destro in modalità touchpad. Il testo copiato si manda solo quando lo chiedi.";
+"Software" = "Software";
 "Software (Mesa)" = "Software (Mesa)";
 "Software Rendering" = "Disegno software";
 "Sort" = "Ordina";
@@ -427,6 +442,8 @@
 "Status" = "Stato";
 "Stop" = "Ferma";
 "Stop Desktop" = "Ferma desktop";
+"Stopped" = "Fermo";
+"Stopped — relaunch required" = "Fermo: riapri l'app";
 "Storage" = "Spazio";
 "Storage Management" = "Gestione spazio";
 "System" = "Sistema";

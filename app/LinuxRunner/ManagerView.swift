@@ -150,7 +150,7 @@ import Darwin
         environment.rootfsName == LRRuntimeBridge.activeRootName() && LRRuntimeBridge.isRunning()
     }
     func size(_ environment: LinuxEnvironment) -> String {
-        storage[environment.id].map { ByteCountFormatter.string(fromByteCount: $0, countStyle: .file) } ?? "Calculating…"
+        storage[environment.id].map { ByteCountFormatter.string(fromByteCount: $0, countStyle: .file) } ?? LF("Calculating…")
     }
 }
 
@@ -430,7 +430,7 @@ struct ManagerView: View {
         return routing.contains("active=mesa ") || routing.hasSuffix("active=mesa") ? "Software" : requested + " · active"
     }
     private func statusRow(_ title: String, systemImage: String, value: String, color: Color) -> some View {
-        HStack { Label(title, systemImage: systemImage); Spacer(); Text(value).font(.callout).foregroundColor(color).lineLimit(1) }
+        HStack { Label(LF(title), systemImage: systemImage); Spacer(); Text(LF(value)).font(.callout).foregroundColor(color).lineLimit(1) }
     }
     private var desktopAlive: Bool { desktopSummary["alive"] as? Bool == true }
     private var recentApplications: [LinuxApplication] {
@@ -545,7 +545,7 @@ struct ManagerView: View {
                 } } }
             }
             Section("Installed Distributions") { ForEach(manager.environments) { environment in
-                HStack { Image(systemName: "shippingbox").foregroundColor(.accentColor); VStack(alignment: .leading, spacing: 4) { Text(environment.name); Text(manager.size(environment)).font(.caption).foregroundColor(.secondary) }; Spacer(); Text(manager.active(environment) ? "Running" : "Installed").font(.caption).foregroundColor(.secondary) }
+                HStack { Image(systemName: "shippingbox").foregroundColor(.accentColor); VStack(alignment: .leading, spacing: 4) { Text(environment.name); Text(manager.size(environment)).font(.caption).foregroundColor(.secondary) }; Spacer(); Text(LF(manager.active(environment) ? "Running" : "Installed")).font(.caption).foregroundColor(.secondary) }
             } }
             if !LRRuntimeBridge.isRunning() { Section { Text(LRRuntimeBridge.runtimeStatus()).foregroundColor(.orange) } }
         }.listStyle(.insetGrouped).navigationTitle("Home").navigationBarTitleDisplayMode(.inline)
@@ -573,7 +573,7 @@ struct ManagerView: View {
     private var sessions: some View {
         List {
             Section("Desktop") {
-                Label(desktopSummary["state"] as? String ?? "Stopped", systemImage: "desktopcomputer").font(.headline)
+                Label(LF(desktopSummary["state"] as? String ?? "Stopped"), systemImage: "desktopcomputer").font(.headline)
                 if desktopAlive {
                     Text("Profile: " + (activeEnvironment?.name ?? LRRuntimeBridge.activeRootName())).font(.subheadline)
                     if let user = desktopSummary["user"] as? String {
@@ -588,13 +588,14 @@ struct ManagerView: View {
                 } else { Button("Open Desktop", action: openDesktop).disabled(!LRRuntimeBridge.isRunning()) }
                 Text("Navigating away retains windows. iOS may suspend or terminate the app; saved files remain persistent.").font(.footnote).foregroundColor(.secondary)
             }
-            Section("Runtime") { Text(LRRuntimeBridge.runtimeStatus()); if let environment = activeEnvironment { Button("Open Terminal") { openTerminal(environment) } } }
+            Section("Runtime") { Text(LF(LRRuntimeBridge.runtimeStatus())); if let environment = activeEnvironment { Button("Open Terminal") { openTerminal(environment) } } }
             if developerMode { Section("Inspection") { Button("Runtime Diagnostics") { diagnostics = true }; Button("Standalone GUI Test", action: openGUITest) } }
         }.listStyle(.insetGrouped).navigationTitle("Sessions")
     }
     private var preferences: some View {
         List {
             FMLABInformazioni(agg: fmlabAggiornamenti)
+            FMLABPulizia(run: run)
             Section("Appearance") { Picker(selection: $appearance) { Text("Dark").tag("dark"); Text("Light").tag("light"); Text("System").tag("system") } label: { Label("Native Theme", systemImage: "circle.lefthalf.filled") } }
             Section {
                 Toggle(isOn: $keepScreenAwake) { Label("Keep Screen Awake During Operations", systemImage: "sun.max") }
@@ -1762,13 +1763,13 @@ private struct DesktopLogsScreen: View {
 }
 
 private struct DesktopPreferencesView: View {
-    @State private var resolution = 3
+    @State private var resolution = 5
     @AppStorage("LinuxRunnerDesktop.autoFullscreen") private var autoFullscreen = true
     @AppStorage("LinuxRunnerDesktop.metalPresentation") private var metalPresentation = false
     private var key: String { "LinuxRunnerDesktop.resolution." + LRRuntimeBridge.activeRootName() }
     var body: some View { Form {
         Section("Next Desktop Start") {
-            Picker("Resolution", selection: $resolution) { Text("640 × 480").tag(0); Text("800 × 600").tag(1); Text("1024 × 768").tag(2); Text("960 × 540 · Wide").tag(3); Text("Fit Screen").tag(4) }
+            Picker("Resolution", selection: $resolution) { Text("640 × 480").tag(0); Text("800 × 600").tag(1); Text("1024 × 768").tag(2); Text("960 × 540 · Wide").tag(3); Text("Fit Screen").tag(4); Text("Phone · Full Screen").tag(5) }
             Toggle("Immersive Landscape", isOn: $autoFullscreen)
             Text("Applies after saving documents and stopping the current desktop. The existing session is not resized or interrupted.").font(.caption)
         }
@@ -1781,7 +1782,7 @@ private struct DesktopPreferencesView: View {
             Text("Applies when reopening the viewer. Presents the received framebuffer through Metal, with Core Graphics fallback. Linux applications still use software rendering and the ARM64 interpreter. Physical-device performance has not yet been verified.").font(.caption)
         }
         Section("Execution") { Text("ARM64 interpreter; JIT is not required. The renderer for Linux applications is chosen in Settings › Graphics.").font(.caption) }
-    }.navigationTitle("Display & Gestures").onAppear { resolution = UserDefaults.standard.object(forKey: key) == nil ? 3 : min(4, max(0, UserDefaults.standard.integer(forKey: key))) }.onChange(of: resolution) { UserDefaults.standard.set($0, forKey: key) } }
+    }.navigationTitle("Display & Gestures").onAppear { resolution = UserDefaults.standard.object(forKey: key) == nil ? 5 : min(5, max(0, UserDefaults.standard.integer(forKey: key))) }.onChange(of: resolution) { UserDefaults.standard.set($0, forKey: key) } }
 }
 /// Graphics renderer for Linux applications, plus live evidence of what actually ran on the GPU.
 // Folders the user picks in Files (iPhone, iCloud Drive, other providers or an
@@ -3163,5 +3164,55 @@ extension EnvironmentManager {
         try persist()
         error = String(format: LF("%@ deleted. Space is freed; it disappears from the list for good after reopening the app."), e.name)
         refresh()
+    }
+}
+
+
+// MARK: - FMLAB: pulizia dei file inutili
+// Fuori da Linux: file temporanei di installazione non più in uso, cartella temporanea e cache dell'app (si ricreano
+// da sole). Dentro Linux (Debian con RunnerKit): `pulizia --sicura`, che non tocca mai i file personali.
+struct FMLABPulizia: View {
+    var run: (LinuxApplication) -> Void
+    @State private var conferma = false
+    @State private var esito: String?
+    @State private var lavoro = false
+
+    var body: some View {
+        Section {
+            Button { conferma = true } label: { Label("Clean Up Unneeded Files", systemImage: "sparkles") }.disabled(lavoro)
+            if LRRuntimeBridge.isRunning(), LRRuntimeBridge.activeEnvironmentIsDebian(), FMLABRunnerKit.installato() {
+                Button { run(FMLABRunnerKit.programma("pulizia --sicura; echo; pulizia | head -40; echo; echo 'Done. You can close this window.'; exec sh")) } label: {
+                    Label("Clean Up Inside Linux (RunnerKit)", systemImage: "trash.circle")
+                }
+            }
+            if lavoro { ProgressView() }
+            if let e = esito { Text(e).font(.footnote).foregroundColor(.green) }
+        } header: { Text("Cleanup") } footer: {
+            Text("Removes temporary installation files, the app's temporary folder and caches that rebuild themselves. Linux, your files, accounts and packages are never touched. Inside Linux, RunnerKit cleans apt caches, old logs and temporary files, never personal files.")
+        }
+        .confirmationDialog("Clean up unneeded files?", isPresented: $conferma, titleVisibility: .visible) {
+            Button("Clean Up") { pulisci() }
+        }
+    }
+
+    private func pulisci() {
+        lavoro = true
+        let staging = LRRuntimeBridge.managedStorageURL().appendingPathComponent("installer-temporary")
+        let installa = UserDefaults.standard.bool(forKey: "InstallerActive")
+        Task.detached(priority: .userInitiated) {
+            let fm = FileManager.default
+            var cartelle = [URL(fileURLWithPath: NSTemporaryDirectory())]
+            if let c = fm.urls(for: .cachesDirectory, in: .userDomainMask).first { cartelle.append(c) }
+            var liberati: Int64 = 0
+            if !installa, fm.fileExists(atPath: staging.path) { liberati += FMLABImporta.peso(staging); try? fm.removeItem(at: staging) }
+            for c in cartelle {
+                for f in (try? fm.contentsOfDirectory(at: c, includingPropertiesForKeys: nil)) ?? [] {
+                    let p = FMLABImporta.peso(f) + Int64((try? f.resourceValues(forKeys: [.totalFileAllocatedSizeKey]).totalFileAllocatedSize) ?? 0)
+                    if (try? fm.removeItem(at: f)) != nil { liberati += p }
+                }
+            }
+            let testo = String(format: LF("Freed %@."), ByteCountFormatter.string(fromByteCount: liberati, countStyle: .file))
+            await MainActor.run { esito = testo; lavoro = false }
+        }
     }
 }
