@@ -2,6 +2,18 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.9.9
+- **Codice FMLAB separato anche nella parte Objective-C**: misura "Telefono", rotazione del desktop, lato della
+  fotocamera e margini per RunnerKit in `app/FMLAB/GUIViewController+FMLAB.inc.m`; eliminazione sicura dei file
+  condivisi in `app/FMLAB/RuntimeBridge+FMLAB.inc.m`. Nei file di LinuxRunner resta solo una riga che li include.
+  Il controllo delle traduzioni guarda anche questi file.
+- Game Emulator, **Copia rapporto** quando un gioco non parte (versione, console, core, tipo di file, dati del
+  motore, errore; niente percorsi personali) da incollare in un messaggio.
+- Game Emulator, **copia di sicurezza**: *Esporta copia…* salva in File/iCloud una cartella con salvataggi, stati,
+  BIOS, copertine e impostazioni (i giochi no); *Rimetti una copia…* la ripristina, anche su un altro iPhone.
+- Su fmlab-retro: **prove automatiche dei core** (stessi commit, compilati per Linux) con giochi di prova liberi e
+  controllo che ogni opzione dei dati esista davvero nel core.
+
 ## 0.9.8
 - **Nintendo DS più grande**: in verticale gli schermi usano fino al 70% dell'altezza (quasi tutta la larghezza);
   in orizzontale si mettono **affiancati** (circa un quarto più grandi), con lo spazio giusto ai lati per croce e

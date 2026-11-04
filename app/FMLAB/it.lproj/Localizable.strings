@@ -161,6 +161,7 @@
 "A debugger is attached: choose Automatic or JIT to use it" = "Un debugger è collegato: scegli Automatico o JIT per usarlo";
 "A display session is already running. Close it first." = "C'è già una sessione grafica aperta. Chiudila prima.";
 "A file with that name already exists. Rename the source before importing." = "Esiste già un file con quel nome. Rinomina l'originale prima di importarlo.";
+"A folder with your game saves, states, BIOS, covers and Game Emulator settings, to keep in Files or iCloud or to move to another iPhone. Games are not included." = "Una cartella con i salvataggi dei giochi, gli stati, i BIOS, le copertine e le impostazioni del Game Emulator, da tenere in File o iCloud o da portare su un altro iPhone. I giochi non ci sono.";
 "A large download (mostly Enlightenment's themes and wallpapers); network needed once. The LinuxRunner Desktop stays installed as the fallback." = "Download grande (soprattutto temi e sfondi di Enlightenment); la rete serve una volta. Il Desktop LinuxRunner resta installato come riserva.";
 "A previous activation (%@) ended LinuxRunner; that method is disabled. Interpreter fallback active." = "Un'attivazione precedente (%@) ha chiuso l'app; quel metodo è disattivato. Attivo l'interprete di riserva.";
 "A previous activation (%lf) ended LinuxRunner; that method is disabled. Interpreter fallback active." = "Un'attivazione precedente (%lf) ha chiuso l'app; quel metodo è disattivato. Attivo l'interprete di riserva.";
@@ -249,6 +250,8 @@
 "Available Updates" = "Aggiornamenti disponibili";
 "BIOS (optional)" = "BIOS (facoltativi)";
 "Backtick Sends Escape" = "Accento grave manda Esc";
+"Backup" = "Copia di sicurezza";
+"Backup restored: %ld files." = "Copia rimessa: %ld file.";
 "Bar" = "Barra";
 "Based on LinuxRunner" = "Basata su LinuxRunner";
 "Blinking Cursor" = "Cursore lampeggiante";
@@ -337,6 +340,7 @@
 "Copy Filtered Logs" = "Copia registro filtrato";
 "Copy Full Report" = "Copia rapporto completo";
 "Copy Install Link" = "Copia link di installazione";
+"Copy Report" = "Copia rapporto";
 "Copy files here in Linux to export them. Import supports regular files up to 512 MiB and preserves existing names." = "Copia qui i file in Linux per esportarli. Si importano file normali fino a 512 MiB e i nomi esistenti restano.";
 "Copying %@… (may take a few minutes)" = "Copio %@… (può volerci qualche minuto)";
 "Copying %lf… (may take a few minutes)" = "Copio %lf… (può volerci qualche minuto)";
@@ -505,6 +509,7 @@
 "Exit status: %d" = "Codice di uscita: %d";
 "Experimental · install later in Settings › Desktop Environment" = "Sperimentale · installalo dopo in Impostazioni › Ambiente desktop";
 "Experimental. Downloads official Arch Linux ARM packages; each must match its SHA-256 and carry a valid signature by the Arch Linux ARM Build System key. Use Set Up Linux to configure an account and install X11 desktop components. Wayland is not supported. Requires 1.5 GB free space. Existing environments are kept." = "Sperimentale. Scarica i pacchetti ufficiali di Arch Linux ARM; ognuno deve corrispondere al suo SHA-256 e avere una firma valida della chiave Arch Linux ARM Build System. Usa Configura Linux per creare un account e installare i componenti del desktop X11. Wayland non è supportato. Servono 1,5 GB liberi. Gli ambienti esistenti restano.";
+"Export Backup…" = "Esporta copia…";
 "Export Diagnostic Bundle" = "Esporta pacchetto diagnostico";
 "Export Diagnostic Report" = "Esporta rapporto diagnostico";
 "Export Diagnostics" = "Esporta diagnostica";
@@ -530,18 +535,21 @@
 "External output is enabled. Starting or reconnecting your desktop; trackpad controls will open when its first frame arrives." = "L'uscita esterna è accesa. Avvio o ricollegamento del desktop; i comandi del trackpad si aprono al primo fotogramma.";
 "External scene" = "Schermo esterno";
 "FMLAB" = "FMLAB";
+"FMLAB Emulatore" = "FMLAB Emulatore";
 "FMLAB Linux" = "FMLAB Linux";
 "FMLAB Linux %@ available" = "FMLAB Linux %@ disponibile";
 "FMLAB Linux %lf available" = "FMLAB Linux %lf disponibile";
 "FMLAB Linux %lld available" = "FMLAB Linux %lld disponibile";
 "FMLAB Linux is based on LinuxRunner by Leminos, derived from iSH and ios-linuxkit. GPL-3.0 license." = "FMLAB Linux è basata su LinuxRunner di Leminos, che deriva da iSH e ios-linuxkit. Licenza GPL-3.0.";
 "FMLAB Linux opens straight into the Game Emulator. The Linux button brings back everything else." = "FMLAB Linux si apre direttamente nel Game Emulator. Il tasto Linux riporta tutto il resto.";
+"FMLAB Linux · Game Emulator\n\n" = "FMLAB Linux · Game Emulator\n\n";
 "FMLAB Linux › Giochi" = "FMLAB Linux › Giochi";
 "FMLAB Retro" = "FMLAB Retro";
 "FMLAB Retro installed" = "FMLAB Retro installata";
 "FMLAB Retro — Debian 13 for classic consoles (FMLAB)" = "FMLAB Retro — Debian 13 per le console classiche (FMLAB)";
 "FMLAB could not keep access to this folder." = "FMLAB non riesce a tenere l'accesso a questa cartella.";
 "FMLAB.lingua" = "FMLAB.lingua";
+"FMLABEmulatore" = "FMLABEmulatore";
 "FMlab - RunnerKit" = "FMlab - RunnerKit";
 "Failed" = "Non riuscito";
 "Failed: %@. Close LinuxRunner and try again." = "Non riuscito: %@. Chiudi LinuxRunner e riprova.";
@@ -1027,6 +1035,7 @@
 "Renderer" = "Motore grafico";
 "Repair Center" = "Centro riparazioni";
 "Repair runs native maintainer scripts and keeps a package-database metadata checkpoint inside Linux. It is not a full snapshot or automatic rollback. APT dependency repair asks for confirmation before changing packages. Safe diagnostic mode: use Diagnose and Check Dependencies before repair." = "La riparazione usa gli script originali dei pacchetti e salva un punto di controllo dell'archivio dei pacchetti dentro Linux. Non è una copia completa né un ripristino automatico. La riparazione delle dipendenze APT chiede conferma prima di cambiare pacchetti. Modo sicuro: usa Analizza e Controlla dipendenze prima di riparare.";
+"Report copied: paste it in a message to FMLAB" = "Rapporto copiato: incollalo in un messaggio a FMLAB";
 "Reset Font Size" = "Testo normale";
 "Reset GUI Sessions" = "Azzera le sessioni grafiche";
 "Resolution" = "Risoluzione";
@@ -1034,6 +1043,7 @@
 "Resources" = "Risorse";
 "Restart Desktop" = "Riavvia desktop";
 "Restart Desktop?" = "Riavviare il desktop?";
+"Restore Backup…" = "Rimetti una copia…";
 "Resume" = "Riprendi";
 "Resume Desktop" = "Riprendi desktop";
 "Resume Where I Left Off" = "Riprendi da dove ero";
@@ -1279,6 +1289,7 @@
 "This emulator is incomplete." = "Questo emulatore è incompleto.";
 "This file is not a supported ARM64 Linux executable or script." = "Questo file non è un programma o uno script Linux ARM64 supportato.";
 "This game cannot be saved right now." = "Questo gioco ora non si può salvare.";
+"This is not a Game Emulator backup folder." = "Questa non è una cartella di copia del Game Emulator.";
 "This session runs as root. Applications that require a normal user will refuse to start. Choose a Linux user in Settings, then start a new desktop." = "Questa sessione gira come root. Le applicazioni che vogliono un utente normale non partiranno. Scegli un utente Linux in Impostazioni, poi avvia un nuovo desktop.";
 "This shared folder is no longer registered." = "Questa cartella condivisa non è più registrata.";
 "Threads" = "Thread";

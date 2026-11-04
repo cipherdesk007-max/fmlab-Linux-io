@@ -16,7 +16,8 @@ from traduzioni_it import TR, TR_OBJC
 
 SWIFT = ["app/LinuxRunner/*.swift", "app/FMLAB/*.swift", "app/FMLAB/Emulatore/*.swift"]
 OBJC = ["app/LinuxRunner/GUIViewController.m", "app/LinuxRunner/RuntimeBridge.m", "app/TerminalViewController.m",
-        "app/AppDelegate.m", "app/SceneDelegate.m"]
+        "app/AppDelegate.m", "app/SceneDelegate.m", "app/FMLAB/GUIViewController+FMLAB.inc.m", "app/FMLAB/RuntimeBridge+FMLAB.inc.m",
+        "app/FMLAB/Emulatore/FMLABEmulatore.m"]
 
 def vero(s):  # testo come lo vede l'app (senza gli escape del sorgente Swift)
     return s.replace('\\"', '"').replace("\\\\", "\\")

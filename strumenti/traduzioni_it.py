@@ -782,6 +782,17 @@ TR.update({
 "New data": "Dati nuovi",
 "Valid from the next game you open. Nothing to install.": "Valgono dal prossimo gioco che apri. Niente da installare.",
 "Verifying engine data…": "Verifico i dati del motore…",
+"FMLAB Emulatore": "FMLAB Emulatore",
+"FMLAB Linux · Game Emulator\n\n": "FMLAB Linux · Game Emulator\n\n",
+"FMLABEmulatore": "FMLABEmulatore",
+"A folder with your game saves, states, BIOS, covers and Game Emulator settings, to keep in Files or iCloud or to move to another iPhone. Games are not included.": "Una cartella con i salvataggi dei giochi, gli stati, i BIOS, le copertine e le impostazioni del Game Emulator, da tenere in File o iCloud o da portare su un altro iPhone. I giochi non ci sono.",
+"Backup": "Copia di sicurezza",
+"Backup restored: %ld files.": "Copia rimessa: %ld file.",
+"Copy Report": "Copia rapporto",
+"Export Backup…": "Esporta copia…",
+"Report copied: paste it in a message to FMLAB": "Rapporto copiato: incollalo in un messaggio a FMLAB",
+"Restore Backup…": "Rimetti una copia…",
+"This is not a Game Emulator backup folder.": "Questa non è una cartella di copia del Game Emulator.",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

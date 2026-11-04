@@ -306,6 +306,51 @@ enum FMLABDati {
     }
 }
 
+/// Copia di sicurezza del Game Emulator: una cartella con Salvataggi, BIOS, Copertine e impostazioni (niente giochi).
+enum FMLABCopia {
+    static let chiavi = ["FMLAB.comandi.scala", "FMLAB.comandi.opacita", "FMLAB.comandi.vibra", "FMLAB.riprendi", "FMLAB.soloGiochi"]
+    static func esporta(_ errore: @escaping (String?) -> Void) {
+        let fm = FileManager.default, base = FMLABEmulatore.cartellaGiochi()
+        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd HH.mm"
+        let cartella = fm.temporaryDirectory.appendingPathComponent("FMLAB Game Emulator \(f.string(from: Date()))", isDirectory: true)
+        try? fm.removeItem(at: cartella)
+        do {
+            try fm.createDirectory(at: cartella, withIntermediateDirectories: true)
+            for n in ["Salvataggi", "BIOS", "Copertine"] where fm.fileExists(atPath: base.appendingPathComponent(n).path) {
+                try fm.copyItem(at: base.appendingPathComponent(n), to: cartella.appendingPathComponent(n))
+            }
+            var imp: [String: Any] = [:]; for k in chiavi { imp[k] = UserDefaults.standard.object(forKey: k) }
+            imp["FMLAB.recenti.nomi"] = FMLABRecenti.elenco.map { URL(fileURLWithPath: $0).lastPathComponent }
+            let d = try JSONSerialization.data(withJSONObject: ["schema": 1, "impostazioni": imp], options: [.prettyPrinted, .sortedKeys])
+            try d.write(to: cartella.appendingPathComponent("impostazioni.json"))
+        } catch { errore(error.localizedDescription); return }
+        let p = UIDocumentPickerViewController(forExporting: [cartella], asCopy: true)
+        guard var cima = UIApplication.shared.connectedScenes.compactMap({ ($0 as? UIWindowScene)?.keyWindow }).first?.rootViewController else { return }
+        while let sopra = cima.presentedViewController { cima = sopra }
+        cima.present(p, animated: true)
+    }
+    /// Rimette Salvataggi, BIOS e Copertine (i file con lo stesso nome vengono sostituiti) e le impostazioni.
+    static func ripristina(da u: URL) -> String {
+        let fm = FileManager.default, base = FMLABEmulatore.cartellaGiochi()
+        let accesso = u.startAccessingSecurityScopedResource(); defer { if accesso { u.stopAccessingSecurityScopedResource() } }
+        guard fm.fileExists(atPath: u.appendingPathComponent("impostazioni.json").path) else { return LF("This is not a Game Emulator backup folder.") }
+        var n = 0
+        for c in ["Salvataggi", "BIOS", "Copertine"] {
+            let da = u.appendingPathComponent(c), a = base.appendingPathComponent(c)
+            try? fm.createDirectory(at: a, withIntermediateDirectories: true)
+            for f in (try? fm.contentsOfDirectory(atPath: da.path)) ?? [] where !f.hasPrefix(".") {
+                try? fm.removeItem(at: a.appendingPathComponent(f))
+                if (try? fm.copyItem(at: da.appendingPathComponent(f), to: a.appendingPathComponent(f))) != nil { n += 1 }
+            }
+        }
+        if let d = try? Data(contentsOf: u.appendingPathComponent("impostazioni.json")),
+           let j = try? JSONSerialization.jsonObject(with: d) as? [String: Any], let imp = j["impostazioni"] as? [String: Any] {
+            for k in chiavi { if let v = imp[k] { UserDefaults.standard.set(v, forKey: k) } }
+        }
+        return String(format: LF("Backup restored: %ld files."), n)
+    }
+}
+
 /// Ultimi giochi aperti (in cima all'elenco).
 enum FMLABRecenti {
     static let chiave = "FMLAB.recenti"
@@ -443,6 +488,12 @@ struct GameEmulatorView: View {
                 } header: { Text("BIOS (optional)") } footer: {
                     Text("Put your own BIOS files in Files › FMLAB Linux › Giochi › BIOS. A green seal means the file is the right one (checked by its fingerprint); orange means a file with that name is there but it is different.")
                 }
+            }
+            Section {
+                Button { FMLABCopia.esporta { errore = $0 } } label: { Label("Export Backup…", systemImage: "square.and.arrow.up") }
+                Button { FMLABSceltaFile.apri(cartella: true) { u in if let u = u.first { errore = FMLABCopia.ripristina(da: u); aggiorna(); controllaBIOS() } } } label: { Label("Restore Backup…", systemImage: "arrow.counterclockwise") }
+            } header: { Text("Backup") } footer: {
+                Text("A folder with your game saves, states, BIOS, covers and Game Emulator settings, to keep in Files or iCloud or to move to another iPhone. Games are not included.")
             }
             Section {
                 Toggle(isOn: $modoSoloGiochi) { VStack(alignment: .leading, spacing: 3) { Text("Games Only"); Text("FMLAB Linux opens straight into the Game Emulator. The Linux button brings back everything else.").font(.caption).foregroundColor(.secondary) } }
@@ -726,12 +777,34 @@ final class FMLABGiocoController: UIViewController {
             carica.isEnabled = e.statoEsiste
             m.addAction(carica)
         }
+        if e == nil {
+            m.addAction(UIAlertAction(title: LF("Copy Report"), style: .default) { [weak self] _ in
+                guard let self else { return }
+                UIPasteboard.general.string = self.rapporto()
+                self.mostra(LF("Report copied: paste it in a message to FMLAB"))
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) { self.apriMenu() }
+            })
+        }
         m.addAction(UIAlertAction(title: LF("Quit Game"), style: .destructive) { [weak self] _ in self?.emulatore?.ferma(); self?.chiudi() })
         if e != nil { m.addAction(UIAlertAction(title: LF("Cancel"), style: .cancel) { _ in e?.inPausa = false }) }
         m.popoverPresentationController?.sourceView = pad
         m.popoverPresentationController?.sourceRect = CGRect(x: pad.bounds.midX, y: pad.bounds.midY, width: 1, height: 1)
         present(m, animated: true)
     }
+    /// Quello che serve per capire perché un gioco non parte (niente percorsi personali, solo nome ed estensione).
+    private func rapporto() -> String {
+        let info = Bundle.main.infoDictionary
+        let dim = (try? gioco.url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map { ByteCountFormatter.string(fromByteCount: Int64($0), countStyle: .file) } ?? "?"
+        return """
+        FMLAB Linux \(info?["CFBundleShortVersionString"] as? String ?? "?") · Game Emulator
+        iOS \(UIDevice.current.systemVersion) · \(UIDevice.current.model)
+        Console: \(gioco.core.console) · core \(gioco.core.nome)
+        File: .\(gioco.url.pathExtension) · \(dim) · \(gioco.cartella == nil ? "Giochi" : "cartella collegata")
+        Dati del motore: \(FMLABDati.versione)
+        Errore: \(avviso.text ?? "-")
+        """
+    }
+
     private func mostra(_ testo: String) {
         let l = UILabel(); l.text = "  " + testo + "  "; l.textColor = .white; l.backgroundColor = UIColor.black.withAlphaComponent(0.75)
         l.font = .preferredFont(forTextStyle: .callout); l.layer.cornerRadius = 10; l.clipsToBounds = true; l.sizeToFit()
