@@ -473,6 +473,7 @@ struct GameEmulatorView: View {
     @AppStorage("FMLAB.comandi.vibra") private var vibra = true
     @AppStorage("FMLAB.riprendi") private var riprendi = true
     @AppStorage("FMLAB.veloce.velocita") private var velocita = 3.0
+    @AppStorage("FMLAB.comandi.sopra") private var sopra = true
     @AppStorage(FMLABCopertine.chiaveAttive) private var copertine = true
 
     private var perConsole: [(String, [FMLABGioco])] {
@@ -544,6 +545,7 @@ struct GameEmulatorView: View {
                 Text("Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched). DS games show their own icon; for the others put a picture with the same name next to the game (e.g. Zelda.png beside Zelda.sfc) or in Giochi/Copertine.")
             }
             Section {
+                Toggle(isOn: $sopra) { VStack(alignment: .leading, spacing: 3) { Text("Bigger Screen"); Text("The game takes all the space it can and the controls sit on top, see-through (above all on DS and in landscape).").font(.caption).foregroundColor(.secondary) } }
                 Picker("Controls Size", selection: $scala) { Text("Small").tag(0.85); Text("Normal").tag(1.0); Text("Large").tag(1.2) }
                 VStack(alignment: .leading) { Text("Controls Opacity"); Slider(value: $opacita, in: 0.3...1) }
                 Toggle("Vibration", isOn: $vibra)
@@ -809,6 +811,10 @@ final class FMLABGiocoController: UIViewController {
                        NotificationCenter.default.addObserver(forName: .GCControllerDidDisconnect, object: nil, queue: .main, using: controller)]
         controller(Notification(name: .GCControllerDidConnect))
         view.addSubview(pad)
+        for nome in [UIScene.didActivateNotification, UIScene.didDisconnectNotification, UIScene.willConnectNotification] {
+            osservatori.append(NotificationCenter.default.addObserver(forName: nome, object: nil, queue: .main) { [weak self] _ in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { self?.collegaEsterno() } })
+        }
         avviso.textColor = .white; avviso.numberOfLines = 0; avviso.textAlignment = .center; avviso.font = .preferredFont(forTextStyle: .body)
         view.addSubview(avviso)
     }
@@ -816,6 +822,7 @@ final class FMLABGiocoController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         guard !avviato else { return }; avviato = true
+        collegaEsterno()
         guard let e = emulatore else { apriMenu(); return }
         let riprendi = UserDefaults.standard.object(forKey: "FMLAB.riprendi") as? Bool ?? true
         e.salvaUscita = riprendi
@@ -827,13 +834,63 @@ final class FMLABGiocoController: UIViewController {
         present(m, animated: true)
     }
     override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated); emulatore?.ferma()
+        super.viewWillDisappear(animated); emulatore?.ferma(); staccaEsterno()
         if accessoCartella { gioco.cartella?.stopAccessingSecurityScopedResource(); accessoCartella = false }
+    }
+
+    // MARK: schermo esterno (AirPlay, monitor, TV): il gioco va lì, il telefono fa da controller
+    private var esterno: UIView?
+    private var specchio: CALayer?
+    private var giroEsterno: CADisplayLink?
+    private func finestraEsterna() -> UIWindow? {
+        UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            .first { $0.session.role.rawValue.contains("ExternalDisplay") }?.windows.first
+    }
+    private func collegaEsterno() {
+        guard emulatore != nil else { return }
+        if let w = finestraEsterna() {
+            if esterno == nil {
+                let v = UIView(frame: w.bounds); v.backgroundColor = .black; v.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                let l = CALayer(); l.magnificationFilter = .nearest; l.contentsGravity = .resizeAspect; v.layer.addSublayer(l)
+                w.addSubview(v); esterno = v; specchio = l
+                let g = CADisplayLink(target: self, selector: #selector(copiaSuEsterno)); g.add(to: .main, forMode: .common); giroEsterno = g
+                mostra(LF("Game on the external screen: the iPhone is the controller"))
+            }
+        } else { staccaEsterno() }
+        view.setNeedsLayout()
+    }
+    private func staccaEsterno() {
+        giroEsterno?.invalidate(); giroEsterno = nil
+        esterno?.removeFromSuperview(); esterno = nil; specchio = nil
+    }
+    @objc private func copiaSuEsterno() {
+        guard let e = esterno, let l = specchio, let v = emulatore?.vista else { return }
+        CATransaction.begin(); CATransaction.setDisableActions(true)
+        l.contents = v.layer.contents
+        let r = max(0.3, emulatore?.rapporto ?? 4.0 / 3.0), b = e.bounds
+        var w = b.width, h = w / r; if h > b.height { h = b.height; w = h * r }
+        l.frame = CGRect(x: (b.width - w) / 2, y: (b.height - h) / 2, width: w, height: h)
+        CATransaction.commit()
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         let b = view.bounds, s = view.safeAreaLayoutGuide.layoutFrame
+        let sopra = UserDefaults.standard.object(forKey: "FMLAB.comandi.sopra") as? Bool ?? true
+        let ds = emulatore?.tocco == true
+        pad.sopra = false
+        // con lo schermo esterno il gioco è lì: sul telefono solo i comandi, grandi (il DS tiene gli schermi per il tocco)
+        if esterno != nil && !ds {
+            emulatore?.vista.isHidden = true
+            avviso.frame = .zero
+            pad.modo = b.height >= b.width ? .verticale : .orizzontale
+            pad.frame = b
+            pad.areaSicura = UIEdgeInsets(top: s.minY, left: s.minX, bottom: b.maxY - s.maxY, right: b.maxX - s.maxX)
+            pad.spazioLato = b.width / 3
+            if pad.modo == .verticale { pad.frame = CGRect(x: 0, y: b.height * 0.25, width: b.width, height: b.height * 0.75) }
+            pad.setNeedsLayout(); return
+        }
+        emulatore?.vista.isHidden = false
         let r = max(0.3, emulatore?.rapporto ?? 4.0 / 3.0)
         avviso.frame = s.insetBy(dx: 24, dy: 80)
         // Nintendo DS: in verticale gli schermi uno sopra l'altro, in orizzontale affiancati (molto più grandi)
@@ -844,18 +901,21 @@ final class FMLABGiocoController: UIViewController {
         if b.height >= b.width {
             // verticale: gioco in alto, comandi sotto (come una console portatile)
             var w = s.width, h = w / r
-            let massimo = s.height * (r < 1 ? 0.7 : 0.5)
+            let massimo = s.height * (sopra && ds ? 1 : r < 1 ? 0.7 : 0.5)
             if h > massimo { h = massimo; w = h * r }
             let gioco = CGRect(x: s.midX - w / 2, y: s.minY + 8, width: w, height: h).integral
             emulatore?.vista.frame = gioco
             pad.modo = .verticale
-            pad.frame = CGRect(x: 0, y: gioco.maxY, width: b.width, height: b.maxY - gioco.maxY)
+            // i comandi si prendono almeno un terzo dello schermo: se il gioco arriva lì, ci stanno sopra trasparenti
+            let alto = min(gioco.maxY, b.maxY - b.height * 0.34)
+            pad.frame = CGRect(x: 0, y: alto, width: b.width, height: b.maxY - alto)
+            pad.sopra = gioco.maxY > alto + 1
             pad.areaSicura = UIEdgeInsets(top: 0, left: s.minX, bottom: b.maxY - s.maxY, right: b.maxX - s.maxX)
         } else {
             // orizzontale: gioco al centro a tutta altezza, comandi ai lati (sopra il gioco se lo spazio è poco)
             var h = s.height, w = h * r
             // DS affiancati: ai lati resta lo spazio giusto per croce e tasti, così non coprono gli schermi
-            let laterale: CGFloat = emulatore?.tocco == true ? 128 : 0
+            let laterale: CGFloat = ds && !sopra ? 128 : 0
             if w > s.width - 2 * laterale { w = s.width - 2 * laterale; h = w / r }
             emulatore?.vista.frame = CGRect(x: s.midX - w / 2, y: s.midY - h / 2, width: w, height: h).integral
             pad.modo = .orizzontale
@@ -980,6 +1040,8 @@ final class FMLABPad: UIView {
     var disposizione = 0 { didSet { costruisci() } }
     var areaSicura = UIEdgeInsets.zero
     var spazioLato: CGFloat = 0
+    /// In verticale i comandi stanno sopra il gioco (schermo più grande): più trasparenti.
+    var sopra = false
     var tasto: ((FMLABTasto, Bool) -> Void)?
     var menu: (() -> Void)?
     var veloce: ((Bool) -> Void)?
@@ -1051,7 +1113,7 @@ final class FMLABPad: UIView {
         let utente = UserDefaults.standard.object(forKey: "FMLAB.comandi.scala") as? Double ?? 1
         let opacita = CGFloat(UserDefaults.standard.object(forKey: "FMLAB.comandi.opacita") as? Double ?? 0.9)
         let k = min(max(lato0 / 390, 0.85), 1.5) * CGFloat(utente)
-        let alfa: CGFloat = modo == .orizzontale && spazioLato < 150 * k ? opacita * 0.5 : opacita
+        let alfa: CGFloat = (modo == .orizzontale && spazioLato < 150 * k) || sopra ? opacita * 0.5 : opacita
         let fondo = UIColor(white: 0.22, alpha: alfa)
         let pillola = CGSize(width: 72 * k, height: 26 * k), spalla = CGSize(width: 76 * k, height: 30 * k), tondo = CGSize(width: 44 * k, height: 30 * k)
         var centroCroce: CGPoint, centroTasti: CGPoint, lato: CGFloat

@@ -258,6 +258,7 @@
 "Backup restored: %ld files." = "Copia rimessa: %ld file.";
 "Bar" = "Barra";
 "Based on LinuxRunner" = "Basata su LinuxRunner";
+"Bigger Screen" = "Schermo più grande";
 "Blinking Cursor" = "Cursore lampeggiante";
 "Block" = "Blocco";
 "Boot failed (%d)" = "Avvio non riuscito (%d)";
@@ -620,6 +621,7 @@
 "Game Emulator" = "Game Emulator";
 "Game Emulator · FMLAB" = "Game Emulator · FMLAB";
 "Game Folders" = "Cartelle dei giochi";
+"Game on the external screen: the iPhone is the controller" = "Gioco sullo schermo esterno: l'iPhone fa da controller";
 "Games" = "Giochi";
 "Games Only" = "Solo giochi";
 "General" = "Generali";
@@ -1281,6 +1283,7 @@
 "The first-start configuration has made no progress for 15 minutes. Details shows the package and process; keep LinuxRunner open and tap Retry." = "La configurazione del primo avvio è ferma da 15 minuti. Dettagli mostra pacchetto e processo; tieni aperta FMLAB Linux e tocca Riprova.";
 "The game file could not be read." = "Non è stato possibile leggere il file del gioco.";
 "The game file is deleted. Its saves in Giochi/Salvataggi are kept." = "Il file del gioco viene eliminato. I suoi salvataggi in Giochi/Salvataggi restano.";
+"The game takes all the space it can and the controls sit on top, see-through (above all on DS and in landscape)." = "Il gioco prende tutto lo spazio che può e i comandi gli stanno sopra, trasparenti (soprattutto sul DS e in orizzontale).";
 "The guest passwd program is not installed." = "Il programma passwd non è installato in Linux.";
 "The installation did not finish within an hour. Restart LinuxRunner and try again." = "L'installazione non è finita in un'ora. Riavvia FMLAB Linux e riprova.";
 "The installation failed at “%@”. Export the Open Desktop Report and try again." = "L'installazione si è fermata a “%@”. Esporta il rapporto di apertura del desktop e riprova.";

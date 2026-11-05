@@ -2,6 +2,14 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.10.2
+- **Schermo più grande** (Giochi › Comandi e salvataggi, acceso di base): il gioco prende tutto lo spazio che può e
+  i comandi gli stanno sopra, trasparenti. Sul DS in verticale gli schermi vanno a tutta larghezza, in orizzontale
+  affiancati da bordo a bordo.
+- **AirPlay / monitor / TV**: con uno schermo esterno collegato il gioco va lì a tutto schermo e il telefono fa da
+  controller, con i comandi grandi. Sul DS il telefono tiene anche gli schermi (quello di sotto si tocca) e la TV li
+  mostra in grande. Si collega e scollega anche durante il gioco.
+
 ## 0.10.1
 - **Dati del motore: prima si chiede**. Nella scheda Giochi FMLAB controlla, scarica e verifica i dati nuovi, ma
   non li usa da solo: compare *Aggiornamento dei dati del motore disponibile* con la versione, le novità e quella in

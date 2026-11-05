@@ -824,6 +824,9 @@ TR.update({
 "New engine data found: %@": "Trovati dati del motore nuovi: %@",
 "Update Now": "Aggiorna ora",
 "Updating engine data and cleaning up…": "Aggiorno i dati del motore e pulisco…",
+"Bigger Screen": "Schermo più grande",
+"Game on the external screen: the iPhone is the controller": "Gioco sullo schermo esterno: l'iPhone fa da controller",
+"The game takes all the space it can and the controls sit on top, see-through (above all on DS and in landscape).": "Il gioco prende tutto lo spazio che può e i comandi gli stanno sopra, trasparenti (soprattutto sul DS e in orizzontale).",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo
