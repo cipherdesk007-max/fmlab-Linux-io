@@ -510,7 +510,7 @@ struct FMLABGuidaTV: View {
             } footer: { Text("Sends only the sound (like music from Spotify): the picture stays on the iPhone.") }
         }
         .navigationTitle(perGiochi ? LF("Play on the TV") : LF("Linux Desktop on the TV"))
-        .toolbar { if let chiudi { ToolbarItem(placement: .confirmationAction) { Button("Done") { chiudi() } } } }
+        .toolbar { ToolbarItem(placement: .confirmationAction) { if let chiudi { Button("Done") { chiudi() } } } }
         .onAppear(perform: aggiorna)
         .onReceive(giro) { _ in aggiorna() }
     }
