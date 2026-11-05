@@ -197,6 +197,7 @@
 "Administrator (can use sudo)" = "Amministratore (può usare sudo)";
 "Advanced" = "Avanzate";
 "Advanced Command Launcher" = "Avvio comandi avanzato";
+"AirPlay TV…" = "TV AirPlay…";
 "AirPlay and TV" = "AirPlay e TV";
 "All" = "Tutto";
 "Alpine 3.24.2 ARM64 from the verified bundled image. Debian and Ubuntu support is planned." = "Alpine 3.24.2 ARM64 dall'immagine inclusa e verificata. Il supporto a Debian e Ubuntu è in programma.";
@@ -476,6 +477,7 @@
 "Downloading/verifying %lld (%lld/%lld)" = "Download e verifica di %lld (%lld/%lld)";
 "Downloading: " = "Download: ";
 "Downloads official Debian packages from a bundled manifest authenticated against Debian's signed release and SHA-256 package index. Requires at least 1 GB free space. Alpine remains installed." = "Scarica i pacchetti ufficiali di Debian da un elenco incluso, verificato con la release firmata di Debian e l'indice SHA-256 dei pacchetti. Serve almeno 1 GB libero. Alpine resta installata.";
+"Drag a button to move it, pinch it to make it bigger or smaller. Saved for this console, separately for portrait and landscape." = "Trascina un tasto per spostarlo, pizzicalo per ingrandirlo o rimpicciolirlo. Si salva per questa console, a parte per verticale e orizzontale.";
 "Drag to move · pinch to resize" = "Trascina per spostare · pizzica per ridimensionare";
 "Dropped to keep latency low" = "Scartato per tenere basso il ritardo";
 "Each comes from the distribution's own packages (network needed; Enlightenment is a large download, about 450 MB on Debian). The one installed last opens with Open Desktop; switch any time in Settings › Desktop Environment." = "Ognuno viene dai pacchetti della distribuzione (serve la rete; Enlightenment è grande, circa 450 MB su Debian). L'ultimo installato si apre con Apri desktop; puoi cambiare quando vuoi in Impostazioni › Ambiente desktop.";
@@ -592,6 +594,8 @@
 "Files could not be written in Linux" = "Non è stato possibile scrivere i file in Linux";
 "Files — tap to export" = "File: tocca per esportare";
 "Filters" = "Filtri";
+"Find AirPlay TVs lists the devices nearby and sends the sound there. For the picture: Control Center › Screen Mirroring › your Apple TV or AirPlay TV (iOS lets only Control Center start it), or a USB-C/HDMI cable. With a game open, it goes full screen on the TV and the iPhone becomes the controller (on DS the iPhone keeps the screens for touch). The Linux desktop has its own setting in Settings › Devices." = "Cerca TV AirPlay mostra i dispositivi vicini e manda lì il suono. Per l'immagine: Centro di Controllo › Duplica schermo › la tua Apple TV o TV AirPlay (iOS lascia avviarla solo dal Centro di Controllo), o un cavo USB-C/HDMI. Con un gioco aperto va a tutto schermo sulla TV e l'iPhone diventa il controller (sul DS l'iPhone tiene gli schermi per il tocco). Il desktop Linux ha la sua impostazione in Impostazioni › Dispositivi.";
+"Find AirPlay TVs…" = "Cerca TV AirPlay…";
 "First start in this environment, or components were missing. This needs the network once and can take several minutes. Keep LinuxRunner open." = "Primo avvio in questo ambiente, o mancava qualcosa. Serve la rete una volta e può volerci qualche minuto. Tieni aperta FMLAB Linux.";
 "Fit" = "Adatta";
 "Fit Screen" = "Adatta allo schermo";
@@ -894,6 +898,7 @@
 "Mouse sensitivity" = "Sensibilità del mouse";
 "Mouse sensitivity: %.2g×" = "Sensibilità del mouse: %.2g×";
 "Move (instant, no extra space)" = "Sposta (istantaneo, nessuno spazio in più)";
+"Move Buttons" = "Sposta i tasti";
 "Move Buttons…" = "Sposta i tasti…";
 "Move: the distribution goes to FMLAB Linux and LinuxRunner no longer has it. Copy: uses twice the space." = "Sposta: la distribuzione passa a FMLAB Linux e LinuxRunner non la avrà più. Copia: occupa il doppio dello spazio.";
 "Move: the distribution goes to FMLAB Linux and LinuxRunner no longer has it. Copy: uses twice the space. Delete: removes it from LinuxRunner's files for good." = "Sposta: la distribuzione passa a FMLAB Linux e LinuxRunner non l'ha più. Copia: occupa il doppio. Elimina: la toglie per sempre dai file di LinuxRunner.";

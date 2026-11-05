@@ -644,9 +644,10 @@ struct GameEmulatorView: View {
             } header: { Text("Graphics") } footer: { Text("Sharp Pixels is the most faithful; TV draws the lines of an old television, LCD the grid of a Game Boy screen. Valid from the next game you open.") }
             Section {
                 Toggle("Use the External Screen for Games", isOn: $usaEsterno)
-                HStack { Label("External screen", systemImage: "airplayvideo"); Spacer(); Text(schermoEsterno ?? LF("None")).foregroundColor(schermoEsterno == nil ? .secondary : .green) }
+                HStack { Label("External screen", systemImage: "tv"); Spacer(); Text(schermoEsterno ?? LF("None")).foregroundColor(schermoEsterno == nil ? .secondary : .green) }
+                FMLABRigaAirPlay()
             } header: { Text("AirPlay and TV") } footer: {
-                Text("Control Center › Screen Mirroring › your Apple TV or AirPlay TV (or a USB-C/HDMI cable). With a game open, it goes full screen on the TV and the iPhone becomes the controller (on DS the iPhone keeps the screens for touch). The Linux desktop has its own setting in Settings › Desktop.")
+                Text("Find AirPlay TVs lists the devices nearby and sends the sound there. For the picture: Control Center › Screen Mirroring › your Apple TV or AirPlay TV (iOS lets only Control Center start it), or a USB-C/HDMI cable. With a game open, it goes full screen on the TV and the iPhone becomes the controller (on DS the iPhone keeps the screens for touch). The Linux desktop has its own setting in Settings › Devices.")
             }
             Section {
                 Button { FMLABCopia.esporta { errore = $0 } } label: { Label("Export Backup…", systemImage: "square.and.arrow.up") }
@@ -1154,6 +1155,8 @@ final class FMLABGiocoController: UIViewController {
             m.addAction(UIAlertAction(title: LF("Take Screenshot"), style: .default) { [weak self] _ in e.inPausa = false; self?.fotografa() })
             m.addAction(UIAlertAction(title: tenuto == nil ? LF("Hold a Button…") : String(format: LF("Release %@"), nomeTasto(tenuto!)), style: .default) { [weak self] _ in self?.scegliTenuto() })
             m.addAction(UIAlertAction(title: LF("Move Buttons…"), style: .default) { [weak self] _ in self?.pad.modifica = true })
+            m.addAction(UIAlertAction(title: LF("AirPlay TV…"), style: .default) { [weak self] _ in
+                guard let self else { return }; e.inPausa = false; FMLABAirPlay.apri(da: self.view) })
             if e.tocco {
                 m.addAction(UIAlertAction(title: LF("Swap Screens"), style: .default) { [weak self] _ in
                     guard let self else { return }; e.inPausa = false; self.scambiati.toggle(); self.view.setNeedsLayout()
@@ -1271,7 +1274,8 @@ final class FMLABPad: UIView {
     var modifica = false {
         didSet {
             guard modifica != oldValue else { return }
-            barraModifica.isHidden = !modifica
+            if modifica { superview?.addSubview(schedaModifica); schedaModifica.alpha = 0; UIView.animate(withDuration: 0.2) { self.schedaModifica.alpha = 1 } }
+            else { schedaModifica.removeFromSuperview() }
             bottoneMenu.isUserInteractionEnabled = !modifica; bottoneVeloce.isUserInteractionEnabled = !modifica; pizzicoGesto.isEnabled = modifica
             if modifica { for t in premuti { if let k = FMLABTasto(rawValue: t) { tasto?(k, false) } }; premuti = []; tocchi = [:] }
             else { UserDefaults.standard.set(posizioni, forKey: chiavePosizioni) }
@@ -1279,6 +1283,7 @@ final class FMLABPad: UIView {
         }
     }
     private let barraModifica = UIStackView()
+    private let schedaModifica = UIVisualEffectView(effect: UIBlurEffect(style: .systemThickMaterialDark))
     private lazy var pizzicoGesto = UIPinchGestureRecognizer(target: self, action: #selector(pizzico(_:)))
     private var trascinato: String?
     private var ultimoPunto: CGPoint = .zero
@@ -1326,16 +1331,22 @@ final class FMLABPad: UIView {
             self.veloce?(self.bottoneVeloce.isSelected)
         }, for: .touchUpInside)
         addSubview(bottoneVeloce)
-        let spiega = UILabel(); spiega.text = LF("Drag to move · pinch to resize"); spiega.textColor = .white; spiega.font = .preferredFont(forTextStyle: .footnote)
-        let ripristina = UIButton(type: .system); ripristina.setTitle(LF("Reset"), for: .normal); ripristina.tintColor = .white
-        ripristina.addAction(UIAction { [weak self] _ in self?.posizioni = [:]; self?.setNeedsLayout() }, for: .touchUpInside)
-        let fine = UIButton(type: .system); fine.setTitle(LF("Done"), for: .normal); fine.titleLabel?.font = .boldSystemFont(ofSize: 17); fine.tintColor = rosso
+        // scheda "Sposta i tasti": sta sopra il gioco (in pausa), non sopra i comandi da spostare
+        let titolo = UILabel(); titolo.text = LF("Move Buttons"); titolo.font = .preferredFont(forTextStyle: .headline); titolo.textColor = .white
+        let spiega = UILabel(); spiega.numberOfLines = 0; spiega.textColor = UIColor(white: 1, alpha: 0.8); spiega.font = .preferredFont(forTextStyle: .footnote)
+        spiega.text = LF("Drag a button to move it, pinch it to make it bigger or smaller. Saved for this console, separately for portrait and landscape.")
+        var cr = UIButton.Configuration.gray(); cr.title = LF("Reset"); cr.baseForegroundColor = .white; cr.cornerStyle = .capsule
+        let ripristina = UIButton(configuration: cr)
+        ripristina.addAction(UIAction { [weak self] _ in self?.posizioni = [:]; self?.vibra.impactOccurred(); self?.setNeedsLayout() }, for: .touchUpInside)
+        var cf = UIButton.Configuration.filled(); cf.title = LF("Done"); cf.baseBackgroundColor = rosso; cf.cornerStyle = .capsule
+        let fine = UIButton(configuration: cf)
         fine.addAction(UIAction { [weak self] _ in self?.modifica = false }, for: .touchUpInside)
-        for v in [spiega, ripristina, fine] { barraModifica.addArrangedSubview(v) }
-        barraModifica.spacing = 16; barraModifica.alignment = .center; barraModifica.isLayoutMarginsRelativeArrangement = true
-        barraModifica.layoutMargins = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
-        barraModifica.backgroundColor = UIColor(white: 0.1, alpha: 0.9); barraModifica.layer.cornerRadius = 14; barraModifica.isHidden = true
-        addSubview(barraModifica)
+        let tasti = UIStackView(arrangedSubviews: [ripristina, fine]); tasti.spacing = 12; tasti.distribution = .fillEqually
+        for v in [titolo, spiega, tasti] { barraModifica.addArrangedSubview(v) }
+        barraModifica.axis = .vertical; barraModifica.spacing = 8; barraModifica.isLayoutMarginsRelativeArrangement = true
+        barraModifica.layoutMargins = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
+        schedaModifica.layer.cornerRadius = 18; schedaModifica.clipsToBounds = true
+        schedaModifica.contentView.addSubview(barraModifica)
         pizzicoGesto.isEnabled = false   // solo in modifica: mentre si gioca non deve mai annullare i tocchi
         addGestureRecognizer(pizzicoGesto)
         costruisci()
@@ -1419,11 +1430,18 @@ final class FMLABPad: UIView {
             posaTondo(.b, CGPoint(x: centroTasti.x - passo * 0.75, y: centroTasti.y + passo * 0.45), d * 1.1, fondo)
         }
         applicaPosizioni()
-        let bm = barraModifica.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-        barraModifica.frame = CGRect(x: (w - bm.width) / 2, y: max(areaSicura.top + 50, h * 0.12), width: bm.width, height: bm.height)
+        if modifica, let sv = superview {
+            // verticale: in alto sopra il gioco; orizzontale: al centro (i comandi stanno ai lati)
+            let sa = sv.safeAreaLayoutGuide.layoutFrame, lw = min(400, sa.width - 32)
+            let alt = barraModifica.systemLayoutSizeFitting(CGSize(width: lw, height: 0), withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel).height
+            let y = sv.bounds.height >= sv.bounds.width ? sa.minY + 12 : sa.midY - alt / 2
+            schedaModifica.frame = CGRect(x: sa.midX - lw / 2, y: y, width: lw, height: alt).integral
+            barraModifica.frame = schedaModifica.bounds
+            sv.bringSubviewToFront(schedaModifica)
+        }
         for v in [croce, bottoneMenu, bottoneVeloce] { v.layer.borderWidth = 0 }
         colora()
-        if modifica { for v in elementi.values { v.layer.borderColor = rosso.cgColor; v.layer.borderWidth = 2 } }
+        if modifica { for (k, v) in elementi { v.layer.borderColor = (k == trascinato ? UIColor.white : rosso).cgColor; v.layer.borderWidth = k == trascinato ? 3 : 2 } }
     }
     private var elementi: [String: UIView] {
         var e: [String: UIView] = ["croce": croce, "menu": bottoneMenu, "veloce": bottoneVeloce]
@@ -1509,7 +1527,7 @@ final class FMLABPad: UIView {
         return !tasti(in: point).isEmpty || croce.frame.insetBy(dx: -30, dy: -30).contains(point)
     }
     override func touchesBegan(_ t: Set<UITouch>, with e: UIEvent?) {
-        if modifica { if let x = t.first, t.count == 1 { ultimoPunto = x.location(in: self); trascinato = elemento(in: ultimoPunto) }; return }
+        if modifica { if let x = t.first, t.count == 1 { ultimoPunto = x.location(in: self); trascinato = elemento(in: ultimoPunto); if trascinato != nil { vibra.impactOccurred() }; setNeedsLayout() }; return }
         for x in t { tocchi[ObjectIdentifier(x)] = tasti(in: x.location(in: self)) }; aggiornaTocchi(e) }
     override func touchesMoved(_ t: Set<UITouch>, with e: UIEvent?) {
         if modifica {
@@ -1520,7 +1538,7 @@ final class FMLABPad: UIView {
         }
         for x in t { tocchi[ObjectIdentifier(x)] = tasti(in: x.location(in: self)) }; aggiornaTocchi(e) }
     override func touchesEnded(_ t: Set<UITouch>, with e: UIEvent?) {
-        if modifica { trascinato = nil; return }
+        if modifica { trascinato = nil; setNeedsLayout(); return }
         for x in t { tocchi[ObjectIdentifier(x)] = nil }; aggiornaTocchi(e) }
     override func touchesCancelled(_ t: Set<UITouch>, with e: UIEvent?) { for x in t { tocchi[ObjectIdentifier(x)] = nil }; aggiornaTocchi(e) }
 }

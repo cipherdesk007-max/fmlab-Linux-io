@@ -2,6 +2,15 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.10.5
+- **Cerca TV AirPlay dall'app**: nella scheda Giochi (AirPlay e TV), in Impostazioni › Dispositivi e nel menu del
+  gioco (*TV AirPlay…*) si apre l'elenco di sistema dei dispositivi AirPlay vicini; sceglierne uno manda lì il suono.
+  Per l'immagine resta Duplica schermo del Centro di Controllo: iOS non lascia avviarla a nessuna app (lo dice anche
+  la spiegazione, con il percorso giusto per il desktop Linux: Impostazioni › Dispositivi).
+- **Sposta i tasti, più chiaro**: una scheda vera (titolo, spiegazione, *Ripristina* e *Fine* grandi) sopra il gioco
+  in pausa invece della striscia che finiva sopra la X; in orizzontale sta al centro. Il tasto che stai spostando si
+  illumina e vibra quando lo prendi.
+
 ## 0.10.4
 - **DS in orizzontale a tutto schermo**: prima gli schermi affiancati dovevano stare in larghezza, quindi restavano
   bassi con tanto nero sopra e sotto. Ora l'app divide da sola l'immagine del DS: lo **schermo principale va a

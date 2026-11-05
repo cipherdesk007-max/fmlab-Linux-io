@@ -3,6 +3,7 @@
 // delle distribuzioni da LinuxRunner, pulizia.
 import SwiftUI
 import UIKit
+import AVKit
 
 // MARK: - FMLAB: lingua
 /// Testo tradotto (it.lproj) per le stringhe che non passano da Text("...")
@@ -429,6 +430,41 @@ struct FMLABPulizia: View {
             }
             let testo = String(format: LF("Freed %@."), ByteCountFormatter.string(fromByteCount: liberati, countStyle: .file))
             await MainActor.run { esito = testo; lavoro = false }
+        }
+    }
+}
+
+
+// MARK: AirPlay: cerca le TV vicine senza uscire dall'app
+/// Elenco di sistema dei dispositivi AirPlay (Apple TV, TV AirPlay, Mac). Sceglierne uno manda lì il suono;
+/// l'immagine la manda solo Duplica schermo del Centro di Controllo (iOS non lascia avviarla a un'app).
+final class FMLABAirPlay {
+    private static let scelta: AVRoutePickerView = {
+        let v = AVRoutePickerView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+        v.prioritizesVideoDevices = true
+        return v
+    }()
+    /// Apre l'elenco da qualunque punto (menu del gioco, Impostazioni).
+    static func apri(da vista: UIView) {
+        let v = scelta
+        if v.superview !== vista { v.removeFromSuperview(); v.alpha = 0.02; vista.addSubview(v) }
+        for case let b as UIButton in v.subviews { b.sendActions(for: .touchUpInside); return }
+    }
+}
+struct FMLABSceltaAirPlay: UIViewRepresentable {
+    func makeUIView(context: Context) -> AVRoutePickerView {
+        let v = AVRoutePickerView(); v.prioritizesVideoDevices = true
+        v.tintColor = .clear; v.activeTintColor = .clear; v.backgroundColor = .clear
+        return v
+    }
+    func updateUIView(_ v: AVRoutePickerView, context: Context) {}
+}
+/// Riga "Cerca TV AirPlay…": tutta la riga apre l'elenco di sistema.
+struct FMLABRigaAirPlay: View {
+    var body: some View {
+        ZStack {
+            HStack { Label("Find AirPlay TVs…", systemImage: "airplayvideo"); Spacer(); Image(systemName: "chevron.right").font(.caption).foregroundColor(.secondary) }
+            FMLABSceltaAirPlay()
         }
     }
 }
