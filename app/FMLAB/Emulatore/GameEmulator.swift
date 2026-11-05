@@ -369,6 +369,7 @@ enum FMLABDati {
             for campo in ["nome", "nota"] where c[campo] != nil { guard c[campo] is [String: String] else { return nil } }
         }
         if d["novita"] != nil { guard d["novita"] is [String: String] else { return nil } }
+        if d["urgente"] != nil { guard d["urgente"] is Bool else { return nil } }
         return d
     }
     private static func usa(_ d: [String: Any]) {
@@ -409,7 +410,12 @@ enum FMLABDati {
                     UserDefaults.standard.set("scartati", forKey: "FMLAB.dati.esito"); stato.imposta(.errore, 1); return
                 }
                 UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: chiave)
-                if (d["versione"] as? String) != versione {
+                if (d["versione"] as? String) != versione, d["urgente"] as? Bool == true {
+                    // correzione grave (es. un'opzione che blocca un gioco): si applica subito e lo si dice
+                    try? data.write(to: attesa, options: .atomic)
+                    applica()
+                    UserDefaults.standard.set("urgente", forKey: "FMLAB.dati.esito")
+                } else if (d["versione"] as? String) != versione {
                     // non si cambia niente da soli: si tiene da parte e si chiede
                     try? data.write(to: attesa, options: .atomic)
                     UserDefaults.standard.set("disponibili", forKey: "FMLAB.dati.esito")
@@ -565,6 +571,7 @@ struct GameEmulatorView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
                         Label(String(format: LF("Engine data updated: %@"), nuovi), systemImage: "sparkles").font(.callout.weight(.semibold)).foregroundColor(.green)
+                        if FMLABDati.esito == "urgente" { Text("Urgent fix: applied straight away without asking. Normal updates always ask first.").font(.caption).foregroundColor(.orange) }
                         if let n = FMLABDati.novita { Text(n).font(.callout) }
                         Text("Valid from the next game you open. Nothing to install.").font(.caption).foregroundColor(.secondary)
                     }.padding(.vertical, 4)

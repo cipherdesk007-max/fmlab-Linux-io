@@ -1423,6 +1423,7 @@
 "Updated from fmlab-retro" = "Aggiornati da fmlab-retro";
 "Updates: in the terminal, sudo apt update && sudo apt upgrade (Debian and FMLAB together). Put your games in Files › FMLAB Linux › Shared › Giochi, then run rk-giochi importa." = "Aggiornamenti: nel terminale sudo apt update && sudo apt upgrade (Debian e FMLAB insieme). Metti i tuoi giochi in File › FMLAB Linux › Shared › Giochi, poi lancia rk-giochi importa.";
 "Updating engine data and cleaning up…" = "Aggiorno i dati del motore e pulisco…";
+"Urgent fix: applied straight away without asking. Normal updates always ask first." = "Correzione urgente: applicata subito senza chiedere. Gli aggiornamenti normali chiedono sempre prima.";
 "Use %@?" = "Usare %@?";
 "Use %lf?" = "Usare %lf?";
 "Use %lld?" = "Usare %lld?";

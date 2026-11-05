@@ -15,6 +15,8 @@ Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANG
   ai pixel del gioco.
 - **DS in verticale**: i comandi non coprono più lo schermo che si tocca (il gioco si ferma al 70% e i comandi
   stanno sotto); in orizzontale restano sempre ai lati.
+- **Dati del motore: chiede sempre**, tranne le correzioni gravi: se fmlab-retro segna i dati come `urgente`
+  (es. un'opzione che blocca un gioco) si applicano subito e la scheda Giochi lo dice.
 - **AirPlay e TV anche nella scheda Giochi**, separato da quello del desktop Linux: si vede lo schermo collegato e
   si può scegliere se usarlo per i giochi.
 
