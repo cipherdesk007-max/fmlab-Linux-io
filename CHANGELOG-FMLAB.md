@@ -8,6 +8,9 @@ Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANG
   la TV mostra solo il gioco e il telefono diventa **solo il controller** (sul DS il telefono tiene gli schermi per
   il tocco). Se colleghi la TV mentre giochi, o si stacca, se ne accorge da solo entro un secondo e mezzo.
 - Scheda Giochi › AirPlay e TV: con la sola duplicazione attiva scrive *Duplicazione attiva: apri un gioco*.
+- DS in orizzontale (*Schermo principale grande*): lo schermo da toccare sta in alto a destra e non arriva più sopra
+  la X.
+- README: foto nuove (DS in orizzontale, dati che chiedono, AirPlay) e tolte quelle vecchie o doppie.
 - *Copia rapporto* dice anche se lo schermo esterno c'è e se il gioco lo sta usando.
 
 ## 0.10.5

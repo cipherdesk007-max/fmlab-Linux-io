@@ -1095,8 +1095,9 @@ final class FMLABGiocoController: UIViewController {
             let restoMin: CGFloat = min(220, s.width * 0.3)
             if s.width - w < restoMin { w = s.width - restoMin; h = w / q }
             grande = CGRect(x: s.minX, y: s.midY - h / 2, width: w, height: h)
-            let pw = s.maxX - grande.maxX - m, ph = pw / q
-            piccolo = CGRect(x: grande.maxX + m, y: max(s.minY + 52, s.midY - ph / 2 - ph * 0.35), width: pw, height: ph)
+            // in alto a destra sotto L/R, non più alto del 38% così non arriva sui tasti A B X Y
+            let ph = min((s.maxX - grande.maxX - m) / q, s.height * 0.38), pw = ph * q
+            piccolo = CGRect(x: s.maxX - pw, y: s.minY + 48, width: pw, height: ph)
         }
         // "Scambia gli schermi": il touch va in grande
         let alto = scambiati ? piccolo : grande, basso = scambiati ? grande : piccolo

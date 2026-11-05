@@ -19,29 +19,24 @@ refresh by themselves on every release in [docs/screenshots/ultima-versione](doc
   <img src="docs/images/0.9.5/desktop-orizzontale.png" width="100%" alt="Desktop in landscape (0.9.5)">
 </p>
 <p align="center">
-  <img src="docs/images/0.10.2/giochi.png" width="24%" alt="Games tab (games blurred)">
+  <img src="docs/images/0.10.6/ds-orizzontale.png" width="72%" alt="DS in landscape: main screen full height (game blurred)">
   <img src="docs/images/0.10.2/gioco-ds-verticale.png" width="24%" alt="DS in portrait, controls below (game blurred)">
+</p>
+<p align="center">
+  <img src="docs/images/0.10.2/giochi.png" width="24%" alt="Games tab (games blurred)">
+  <img src="docs/images/0.10.6/dati-chiede.png" width="24%" alt="Engine data: asks first">
+  <img src="docs/images/0.10.6/airplay.png" width="24%" alt="AirPlay and TV in the Games tab">
   <img src="docs/images/0.10.2/comandi.png" width="24%" alt="Controls and saves">
-  <img src="docs/images/0.10.2/distribuzioni.png" width="24%" alt="Distributions without the emulator">
 </p>
 <p align="center">
   <img src="docs/images/0.9.5/home.png" width="24%" alt="Home">
-  <img src="docs/images/0.9.5/distribuzioni.png" width="24%" alt="Distributions with Game Emulator">
-  <img src="docs/images/0.9.6/console.png" width="24%" alt="Game Emulator: consoles with notes and game count">
-  <img src="docs/images/0.9.6/dati-del-motore.png" width="24%" alt="Engine data updated from fmlab-retro without a new app">
-</p>
-<p align="center">
-  <img src="docs/images/0.9.5/game-emulator-cartelle.png" width="24%" alt="Game Emulator: folders and controls">
+  <img src="docs/images/0.10.2/distribuzioni.png" width="24%" alt="Distributions">
+  <img src="docs/images/0.7.2/sessioni.png" width="24%" alt="Sessions">
+  <img src="docs/images/0.7.2/impostazioni.png" width="24%" alt="Settings">
 </p>
 <p align="center">
   <img src="docs/images/0.8.2/desktop-verticale-ruotato.png" width="24%" alt="Desktop rotated to portrait, buttons at the bottom">
   <img src="docs/images/0.8.2/desktop-orizzontale.png" width="72%" alt="Desktop in landscape">
-</p>
-<p align="center">
-  <img src="docs/images/0.7.2/home.png" width="24%" alt="Home">
-  <img src="docs/images/0.7.2/distribuzioni.png" width="24%" alt="Distributions">
-  <img src="docs/images/0.7.2/sessioni.png" width="24%" alt="Sessions">
-  <img src="docs/images/0.7.2/impostazioni.png" width="24%" alt="Settings">
 </p>
 
 ## Installation

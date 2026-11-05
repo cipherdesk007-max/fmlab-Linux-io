@@ -20,29 +20,24 @@ aggiornano da sole a ogni versione in [docs/screenshots/ultima-versione](docs/sc
   <img src="docs/images/0.9.5/desktop-orizzontale.png" width="100%" alt="Desktop in orizzontale (0.9.5)">
 </p>
 <p align="center">
-  <img src="docs/images/0.10.2/giochi.png" width="24%" alt="Scheda Giochi (giochi sfocati)">
+  <img src="docs/images/0.10.6/ds-orizzontale.png" width="72%" alt="DS in orizzontale: schermo principale a tutta altezza (gioco sfocato)">
   <img src="docs/images/0.10.2/gioco-ds-verticale.png" width="24%" alt="DS in verticale con i comandi sotto (gioco sfocato)">
+</p>
+<p align="center">
+  <img src="docs/images/0.10.2/giochi.png" width="24%" alt="Scheda Giochi (giochi sfocati)">
+  <img src="docs/images/0.10.6/dati-chiede.png" width="24%" alt="Dati del motore: prima chiede">
+  <img src="docs/images/0.10.6/airplay.png" width="24%" alt="AirPlay e TV nella scheda Giochi">
   <img src="docs/images/0.10.2/comandi.png" width="24%" alt="Comandi e salvataggi">
-  <img src="docs/images/0.10.2/distribuzioni.png" width="24%" alt="Distribuzioni senza emulatore">
 </p>
 <p align="center">
   <img src="docs/images/0.9.5/home.png" width="24%" alt="Home">
-  <img src="docs/images/0.9.5/distribuzioni.png" width="24%" alt="Distribuzioni con Game Emulator">
-  <img src="docs/images/0.9.6/console.png" width="24%" alt="Game Emulator: console con note e numero di giochi">
-  <img src="docs/images/0.9.6/dati-del-motore.png" width="24%" alt="Dati del motore aggiornati da fmlab-retro senza nuova app">
-</p>
-<p align="center">
-  <img src="docs/images/0.9.5/game-emulator-cartelle.png" width="24%" alt="Game Emulator: cartelle e comandi">
+  <img src="docs/images/0.10.2/distribuzioni.png" width="24%" alt="Distribuzioni">
+  <img src="docs/images/0.7.2/sessioni.png" width="24%" alt="Sessioni">
+  <img src="docs/images/0.7.2/impostazioni.png" width="24%" alt="Impostazioni">
 </p>
 <p align="center">
   <img src="docs/images/0.8.2/desktop-verticale-ruotato.png" width="24%" alt="Desktop girato in verticale, pallini in basso">
   <img src="docs/images/0.8.2/desktop-orizzontale.png" width="72%" alt="Desktop in orizzontale">
-</p>
-<p align="center">
-  <img src="docs/images/0.7.2/home.png" width="24%" alt="Home">
-  <img src="docs/images/0.7.2/distribuzioni.png" width="24%" alt="Distribuzioni">
-  <img src="docs/images/0.7.2/sessioni.png" width="24%" alt="Sessioni">
-  <img src="docs/images/0.7.2/impostazioni.png" width="24%" alt="Impostazioni">
 </p>
 
 <p align="center">
