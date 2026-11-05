@@ -867,6 +867,9 @@ TR.update({
 "Show Speed (FPS)": "Mostra velocità (FPS)",
 "Wide 16:9": "Larga 16:9",
 "Sharp Pixels is the most faithful; TV draws the lines of an old television, LCD the grid of a Game Boy screen. Valid from the next game you open. Original keeps the real shape of the console; Wide and Fill stretch the picture in landscape (no black bars, round things look a bit oval).": "Pixel netti è il più fedele; TV disegna le righe di un vecchio televisore, LCD la griglia dello schermo di un Game Boy. Vale dal prossimo gioco che apri. Originale tiene la forma vera della console; Larga e Tutto lo schermo allargano l'immagine in orizzontale (niente bande nere, le cose rotonde vengono un po' ovali).",
+"Changes right away. Shape applies in landscape.": "Cambia subito. La forma vale in orizzontale.",
+"Picture…": "Immagine…",
+"Shape": "Forma",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

@@ -83,12 +83,12 @@ enum FMLABArchivioGiochi {
             } else if nome.hasPrefix(".") { continue }
             let est = vero.pathExtension.lowercased()
             let archivio = ["zip", "7z", "rar"].contains(est)
-            guard let c = archivio ? (scaricare ? nil : FMLABEmulatore.core(dentroArchivio: vero.path)) : FMLABEmulatore.core(per: vero.lastPathComponent) else { continue }
+            guard let c = archivio ? (scaricare ? nil : FMLABEmulatore.core(dentroArchivio: vero.path)) : (scaricare ? FMLABEmulatore.core(per: vero.lastPathComponent) : FMLABEmulatore.core(perFile: vero.path)) else { continue }
             // le tracce .bin di un disco con .cue accanto non sono giochi a sé
             if est == "bin", (try? FileManager.default.contentsOfDirectory(atPath: vero.deletingLastPathComponent().path))?.contains(where: { $0.lowercased().hasSuffix(".cue") }) == true { continue }
             trovati.append(FMLABGioco(url: vero, core: c, cartella: cartella, nomeCartella: nomeCartella, inDownload: scaricare,
                                       icona: scaricare ? nil : FMLABIcona.per(vero, core: c.nome),
-                                      titolo: scaricare || archivio ? nil : FMLABIcona.titolo(vero, core: c.nome)))
+                                      titolo: scaricare ? nil : archivio ? FMLABEmulatore.nomeDentro(archivio: vero.path) : FMLABIcona.titolo(vero, core: c.nome)))
         }
         return trovati
     }
@@ -168,7 +168,7 @@ enum FMLABIcona {
 /// file (funziona coi nomi standard No-Intro/Redump, es. "Super Mario World (USA)"). Si salvano in Giochi/Copertine;
 /// un gioco senza copertina trovata non si ricerca più.
 enum FMLABCopertine {
-    static let chiaveAttive = "FMLAB.copertine.automatiche", chiaveMancanti = "FMLAB.copertine.mancanti"
+    static let chiaveAttive = "FMLAB.copertine.automatiche", chiaveMancanti = "FMLAB.copertine.mancanti2"
     static var attive: Bool { UserDefaults.standard.object(forKey: chiaveAttive) as? Bool ?? true }
     static func sistema(_ g: FMLABGioco) -> String? {
         switch g.core.nome {
@@ -178,32 +178,59 @@ enum FMLABCopertine {
         case "bsnes": return "Nintendo_-_Super_Nintendo_Entertainment_System"
         case "pcsx_rearmed": return "Sony_-_PlayStation"
         case "desmume": return "Nintendo_-_Nintendo_DS"
+        case "ppsspp": return "Sony_-_PlayStation_Portable"
         default: return nil
         }
+    }
+    /// Nomi da provare nella raccolta: nome standard dentro l'archivio o titolo, poi il nome del file ripulito
+    /// ("[PS1] Disney's Hercules [I] [SCES-00894]" → "Disney's Hercules"), anche con le regioni più comuni.
+    static func candidati(_ g: FMLABGioco) -> [String] {
+        var c: [String] = []
+        func pulito(_ t: String) -> String {
+            t.replacingOccurrences(of: #"\[[^\]]*\]"#, with: "", options: .regularExpression)
+             .replacingOccurrences(of: "_", with: " ").replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+             .trimmingCharacters(in: .whitespaces)
+        }
+        for t in [g.titolo, g.nomeFile].compactMap({ $0 }) {
+            for v in [t, pulito(t)] where !v.isEmpty && !c.contains(v) { c.append(v) }
+        }
+        let base = pulito(g.nomeFile)
+        if !base.isEmpty, !base.contains("(") { for reg in ["(Europe)", "(USA)", "(Italy)", "(Japan)"] { c.append("\(base) \(reg)") } }
+        return Array(c.prefix(8))
     }
     /// Cerca le copertine che mancano; chiama `fatto` se ne ha trovata almeno una.
     static func cerca(_ giochi: [FMLABGioco], fatto: @escaping () -> Void) {
         guard attive else { return }
         var mancanti = Set(UserDefaults.standard.stringArray(forKey: chiaveMancanti) ?? [])
         let cartella = FMLABEmulatore.cartellaGiochi().appendingPathComponent("Copertine")
-        let daCercare = giochi.filter { $0.icona == nil && !$0.inDownload && !mancanti.contains($0.nome) }.prefix(24)
+        let daCercare = giochi.filter { $0.icona == nil && !$0.inDownload && !mancanti.contains($0.nomeFile) }.prefix(16)
         guard !daCercare.isEmpty else { return }
         let gruppo = DispatchGroup(); var trovate = 0; let lock = NSLock()
         for g in daCercare {
             guard let sis = sistema(g) else { continue }
-            // regola di libretro-thumbnails: questi caratteri diventano _
-            let nome = String(g.nome.map { "&*/:`<>?\\|\"".contains($0) ? "_" : $0 })
-            guard let n = nome.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
-                  let u = URL(string: "https://raw.githubusercontent.com/libretro-thumbnails/\(sis)/master/Named_Boxarts/\(n).png") else { continue }
             gruppo.enter()
-            URLSession.shared.dataTask(with: u) { d, risposta, _ in
+            // uno alla volta: al primo nome trovato si smette
+            DispatchQueue.global(qos: .utility).async {
                 defer { gruppo.leave() }
-                lock.lock(); defer { lock.unlock() }
-                if (risposta as? HTTPURLResponse)?.statusCode == 200, let d, UIImage(data: d) != nil {
-                    try? FileManager.default.createDirectory(at: cartella, withIntermediateDirectories: true)
-                    try? d.write(to: cartella.appendingPathComponent(g.nome).appendingPathExtension("png")); trovate += 1
-                } else if (risposta as? HTTPURLResponse)?.statusCode == 404 { mancanti.insert(g.nome) }
-            }.resume()
+                var trovata = false, tutti404 = true
+                for nome in candidati(g) {
+                    // regola di libretro-thumbnails: questi caratteri diventano _
+                    let n0 = String(nome.map { "&*/:`<>?\\|\"".contains($0) ? "_" : $0 })
+                    guard let n = n0.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
+                          let u = URL(string: "https://raw.githubusercontent.com/libretro-thumbnails/\(sis)/master/Named_Boxarts/\(n).png") else { continue }
+                    let sem = DispatchSemaphore(value: 0); var dati: Data?; var codice = 0
+                    URLSession.shared.dataTask(with: u) { d, risposta, _ in dati = d; codice = (risposta as? HTTPURLResponse)?.statusCode ?? 0; sem.signal() }.resume()
+                    _ = sem.wait(timeout: .now() + 20)
+                    if codice != 404 { tutti404 = false }
+                    if codice == 200, let d = dati, UIImage(data: d) != nil {
+                        try? FileManager.default.createDirectory(at: cartella, withIntermediateDirectories: true)
+                        // col nome del file: è quello che FMLABIcona.per cerca
+                        try? d.write(to: cartella.appendingPathComponent(g.nomeFile).appendingPathExtension("png"))
+                        trovata = true; break
+                    }
+                }
+                lock.lock(); if trovata { trovate += 1 } else if tutti404 { mancanti.insert(g.nomeFile) }; lock.unlock()
+            }
         }
         gruppo.notify(queue: .main) {
             UserDefaults.standard.set(Array(mancanti), forKey: chiaveMancanti)
@@ -221,6 +248,7 @@ func fmlabSigla(_ core: String, gbc: Bool = false) -> (String, Color) {
     case "bsnes": return ("SNES", Color(red: 0.45, green: 0.42, blue: 0.6))
     case "pcsx_rearmed": return ("PS1", Color(red: 0.3, green: 0.3, blue: 0.35))
     case "desmume": return ("DS", Color(red: 0.25, green: 0.4, blue: 0.6))
+    case "ppsspp": return ("PSP", Color(red: 0.15, green: 0.2, blue: 0.3))
     default: return ("?", .gray)
     }
 }
@@ -361,7 +389,7 @@ enum FMLABDati {
         guard let d = try? JSONSerialization.jsonObject(with: data) as? [String: Any], d["schema"] as? Int == 1,
               let v = d["versione"] as? String, v.range(of: #"^\d{4}\.\d\d\.\d\d-\d+$"#, options: .regularExpression) != nil,
               let core = d["core"] as? [String: [String: Any]] else { return nil }
-        let noti: Set<String> = ["fceumm", "gambatte", "bsnes", "pcsx_rearmed", "mgba", "desmume"]
+        let noti: Set<String> = ["fceumm", "gambatte", "bsnes", "pcsx_rearmed", "mgba", "desmume", "ppsspp"]
         for (n, c) in core {
             guard noti.contains(n), let e = c["estensioni"] as? [String], !e.isEmpty,
                   e.allSatisfy({ $0.range(of: #"^[a-z0-9]{1,5}$"#, options: .regularExpression) != nil }),
@@ -766,7 +794,7 @@ struct GameEmulatorView: View {
                 DispatchQueue.main.async {
                     estraendo = nil
                     switch esito {
-                    case .success(let p): var g = gioco; g = FMLABGioco(url: URL(fileURLWithPath: p), core: FMLABEmulatore.core(per: p) ?? gioco.core, cartella: nil, nomeCartella: gioco.nomeCartella, inDownload: false, icona: gioco.icona); inGioco = g
+                    case .success(let p): var g = gioco; g = FMLABGioco(url: URL(fileURLWithPath: p), core: FMLABEmulatore.core(perFile: p) ?? gioco.core, cartella: nil, nomeCartella: gioco.nomeCartella, inDownload: false, icona: gioco.icona, titolo: gioco.nome); inGioco = g
                     case .failure(let e): errore = e.localizedDescription
                     }
                 }
@@ -893,9 +921,7 @@ final class FMLABGiocoController: UIViewController {
         accessoCartella = gioco.cartella?.startAccessingSecurityScopedResource() ?? false
         // grafica migliorata: opzioni dei core sopra a quelle dei dati (si possono spegnere nella scheda Giochi)
         let hd = UserDefaults.standard.object(forKey: "FMLAB.grafica.migliorata") as? Bool ?? true
-        FMLABEmulatore.usaOpzioniUtente(hd ? ["desmume_internal_resolution": "512x384", "bsnes_mode7_scale": "2x",
-                                              "pcsx_rearmed_neon_enhancement_enable": "enabled", "pcsx_rearmed_neon_enhancement_no_main": "enabled",
-                                              "pcsx_rearmed_dithering": "disabled"] : [:])
+        FMLABEmulatore.usaOpzioniUtente(hd ? Self.opzioniHD : [:])
         do {
             let e = try FMLABEmulatore(conCore: gioco.core, gioco: gioco.url.path)
             emulatore = e
@@ -1101,6 +1127,45 @@ final class FMLABGiocoController: UIViewController {
     /// Pixel tutti uguali: l'altezza diventa un multiplo esatto delle righe del gioco (es. 240 × 5 = 1200 pixel veri),
     /// così nessuna riga è più grossa delle altre e le scritte non "tremano" mentre scorre. Si usa solo se si perde
     /// al massimo il 15% di schermo; con Morbido resta la misura piena.
+    static let opzioniHD = ["desmume_internal_resolution": "512x384", "bsnes_mode7_scale": "2x",
+                            "pcsx_rearmed_neon_enhancement_enable": "enabled", "pcsx_rearmed_neon_enhancement_no_main": "enabled",
+                            "pcsx_rearmed_dithering": "disabled"]
+    static let opzioniNormali = ["desmume_internal_resolution": "256x192", "bsnes_mode7_scale": "1x",
+                                 "pcsx_rearmed_neon_enhancement_enable": "disabled", "pcsx_rearmed_neon_enhancement_no_main": "disabled",
+                                 "pcsx_rearmed_dithering": "enabled"]
+    /// Menu del gioco › Immagine…: filtro, forma e grafica migliorata cambiano subito, senza uscire dal gioco.
+    private func scegliImmagine() {
+        guard let e = emulatore else { return }
+        let d = UserDefaults.standard
+        let filtro = d.string(forKey: "FMLAB.grafica.filtro") ?? "netti", forma = d.string(forKey: "FMLAB.grafica.formato") ?? "originale"
+        let hd = d.object(forKey: "FMLAB.grafica.migliorata") as? Bool ?? true
+        let m = UIAlertController(title: LF("Picture"), message: LF("Changes right away. Shape applies in landscape."), preferredStyle: .actionSheet)
+        func voce(_ t: String, _ scelto: Bool, _ fai: @escaping () -> Void) {
+            m.addAction(UIAlertAction(title: (scelto ? "✓ " : "") + t, style: .default) { [weak self] _ in
+                fai(); self?.filtroPer = .zero; self?.view.setNeedsLayout(); self?.view.layoutIfNeeded(); e.inPausa = false })
+        }
+        for (k, t) in [("netti", "Sharp Pixels"), ("morbido", "Smooth"), ("tv", "TV (scanlines)"), ("lcd", "Handheld LCD")] {
+            voce(LF(t), filtro == k) { d.set(k, forKey: "FMLAB.grafica.filtro") }
+        }
+        if !e.tocco {
+            for (k, t) in [("originale", "Original"), ("largo", "Wide 16:9"), ("pieno", "Fill the Screen")] {
+                voce(LF("Shape") + ": " + LF(t), forma == k) { d.set(k, forKey: "FMLAB.grafica.formato") }
+            }
+        }
+        if ["desmume", "bsnes", "pcsx_rearmed"].contains(gioco.core.nome) {
+            voce(LF("Enhanced Graphics"), hd) {
+                d.set(!hd, forKey: "FMLAB.grafica.migliorata")
+                let o = !hd ? Self.opzioniHD : Self.opzioniNormali
+                FMLABEmulatore.usaOpzioniUtente(!hd ? Self.opzioniHD : [:])
+                for (k, v) in o where k.hasPrefix(self.gioco.core.nome.components(separatedBy: "_")[0]) { e.opzione(k, valore: v) }
+            }
+        }
+        m.addAction(UIAlertAction(title: LF("Cancel"), style: .cancel) { _ in e.inPausa = false })
+        m.popoverPresentationController?.sourceView = view
+        m.popoverPresentationController?.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 1, height: 1)
+        present(m, animated: true)
+    }
+
     /// "Mostra velocità": fotogrammi veri al secondo / quelli della console (es. 50/50 PAL, 60/60 NTSC).
     private func mostraVelocita(_ si: Bool) {
         UserDefaults.standard.set(si, forKey: "FMLAB.mostraFPS")
@@ -1239,6 +1304,7 @@ final class FMLABGiocoController: UIViewController {
             m.addAction(carica)
             m.addAction(UIAlertAction(title: LF("Take Screenshot"), style: .default) { [weak self] _ in e.inPausa = false; self?.fotografa() })
             m.addAction(UIAlertAction(title: tenuto == nil ? LF("Hold a Button…") : String(format: LF("Release %@"), nomeTasto(tenuto!)), style: .default) { [weak self] _ in self?.scegliTenuto() })
+            m.addAction(UIAlertAction(title: LF("Picture…"), style: .default) { [weak self] _ in self?.scegliImmagine() })
             m.addAction(UIAlertAction(title: LF("Move Buttons…"), style: .default) { [weak self] _ in self?.pad.modifica = true })
             let fpsSi = UserDefaults.standard.bool(forKey: "FMLAB.mostraFPS")
             m.addAction(UIAlertAction(title: fpsSi ? LF("Hide Speed") : LF("Show Speed (FPS)"), style: .default) { [weak self] _ in

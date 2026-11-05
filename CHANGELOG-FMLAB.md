@@ -2,6 +2,15 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.10.9
+- **Immagine… dentro il gioco**: dal menu del gioco si cambiano filtro (Pixel netti, Morbido, TV, LCD), forma
+  (Originale, 16:9, Tutto lo schermo) e Grafica migliorata, e si vede subito, senza chiudere e riaprire.
+- **Copertine anche per i giochi in archivio e con nomi "sporchi"**: per i .zip/.7z si usa il nome standard del
+  disco dentro (es. *Disney Action Game - Disney Presenta Hercules (Italy)*), che diventa anche il titolo; si provano
+  pure il nome ripulito da [PS1], [I], [SCES-…] e le regioni più comuni. Prima la copertina trovata si salvava con un
+  nome che poi non veniva cercato: corretto. Le ricerche fallite si rifanno una volta.
+- Prepara la **PSP**: .iso e .pbp si riconoscono guardando dentro il file (PSP o PlayStation), anche negli archivi.
+
 ## 0.10.8
 - **Più fluido**: il ritmo del gioco non fa più "strappi" per stare dietro al suono (prima un fotogramma poteva
   durare il 50% in più): ora la correzione è dolce, al massimo ±1,5%, come il controllo dinamico di RetroArch.

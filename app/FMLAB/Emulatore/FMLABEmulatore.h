@@ -29,9 +29,13 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 + (NSArray<FMLABCore *> *)core NS_SWIFT_NAME(core());
 /// Il core giusto per un file, dall'estensione (nil se nessuno).
 + (nullable FMLABCore *)corePer:(NSString *)file NS_SWIFT_NAME(core(per:));
+/// Come core(per:) ma guarda anche dentro il file (.iso/.pbp: PlayStation o PSP).
++ (nullable FMLABCore *)corePerFile:(NSString *)percorso NS_SWIFT_NAME(core(perFile:));
 /// Archivi (.zip, .7z, .rar): il core giusto guardando i file dentro (senza estrarre).
 + (nullable FMLABCore *)coreDentroArchivio:(NSString *)archivio NS_SWIFT_NAME(core(dentroArchivio:));
 /// Estrae l'archivio (una volta sola, nella cache dell'app) e dà il file del gioco da aprire.
+/// Nome del gioco dentro un archivio (di solito il nome standard Redump/No-Intro, utile per le copertine).
++ (nullable NSString *)nomeDentroArchivio:(NSString *)archivio NS_SWIFT_NAME(nomeDentro(archivio:));
 + (nullable NSString *)preparaArchivio:(NSString *)archivio error:(NSError **)error NS_SWIFT_NAME(prepara(archivio:));
 /// Cartelle in Documenti (visibili nell'app File): Giochi, Giochi/BIOS, Giochi/Salvataggi.
 + (NSURL *)cartellaGiochi;

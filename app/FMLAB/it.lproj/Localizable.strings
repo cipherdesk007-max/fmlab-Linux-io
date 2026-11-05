@@ -292,6 +292,7 @@
 "Categories: EXEC, SYSCALL, FS, MEMORY, SIGNAL, NETWORK, LOADER, UI. This export includes app events and instruction-fault metadata. Detailed syscall tracing is a developer build option." = "Categorie: EXEC, SYSCALL, FS, MEMORY, SIGNAL, NETWORK, LOADER, UI. L'esportazione include gli eventi dell'app e i dati sugli errori di istruzione. La traccia dettagliata delle chiamate di sistema è un'opzione delle build per sviluppatori.";
 "Category" = "Categoria";
 "Certificate checking stays on. Tap Retry; if it repeats, check the date and time in iOS Settings." = "Il controllo dei certificati resta acceso. Tocca Riprova; se si ripete, controlla data e ora nelle Impostazioni di iOS.";
+"Changes right away. Shape applies in landscape." = "Cambia subito. La forma vale in orizzontale.";
 "Changing the viewer does not replace X11 or create another Linux session. No GPU utilization or wireless performance is inferred from connection state." = "Cambiare visore non sostituisce X11 né crea un'altra sessione Linux. Dallo stato della connessione non si deducono uso della GPU né prestazioni senza fili.";
 "Check / Repair Package State" = "Controlla / ripara i pacchetti";
 "Check Access" = "Controlla accesso";
@@ -1039,6 +1040,7 @@
 "Phone reads the screen and picks the sharpest size: each Linux pixel becomes an exact square of iPhone pixels (iPhone 15 Pro Max: 1308 × 644 next to the camera, exactly 2×). If the phone is hot or in Low Power Mode it uses the lighter 540-row size." = "Telefono legge lo schermo e sceglie da solo la misura più nitida: ogni pixel di Linux diventa un quadrato preciso di pixel dell'iPhone (iPhone 15 Pro Max: 1308 × 644 accanto alla fotocamera, esattamente 2×). Se il telefono è caldo o in Risparmio energetico usa la misura più leggera da 540 righe.";
 "Phone · Full Screen" = "Telefono · tutto schermo";
 "Picture" = "Immagine";
+"Picture…" = "Immagine…";
 "Played" = "Riprodotto";
 "Plays sound from Linux programs (browsers, media players, games) through the iPhone, mixed with other apps. Applies to the next desktop or app session. Sound stops while LinuxRunner is in the background." = "Fa sentire l'audio dei programmi Linux (browser, lettori, giochi) dall'iPhone, insieme alle altre app. Vale dalla prossima sessione del desktop o dell'app. L'audio si ferma quando FMLAB Linux è in sottofondo.";
 "Please keep LinuxRunner open." = "Tieni FMLAB Linux aperta.";
@@ -1190,6 +1192,7 @@
 "Shaders: %lld compiled, %@ cache hits" = "Shader: %lld compilati, %@ dalla cache";
 "Shaders: %lld compiled, %lf cache hits" = "Shader: %lld compilati, %lf dalla cache";
 "Shaders: %lld compiled, %lld cache hits" = "Shader: %lld compilati, %lld dalla cache";
+"Shape" = "Forma";
 "Shape in Landscape" = "Forma in orizzontale";
 "Share" = "Condividi";
 "Share Report" = "Condividi rapporto";

@@ -6,7 +6,7 @@ Real Linux on the iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), the FMLAB e
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. No jailbreak, no virtual machine: ARM64 Linux programs
 run inside the app through an interpreter and a layer that translates system calls.
 
-> **Status: 0.10.8.** LinuxRunner 1.1.0 (build 900), same engine (ARM64 interpreter, JIT, Metal GPU), with the FMLAB
+> **Status: 0.10.9.** LinuxRunner 1.1.0 (build 900), same engine (ARM64 interpreter, JIT, Metal GPU), with the FMLAB
 > name, logo and red-and-black colours, its own identifier (`dev.fmlab.linux`, so it installs **next to**
 > LinuxRunner without touching its data), in-app updates and the improvements listed below.
 

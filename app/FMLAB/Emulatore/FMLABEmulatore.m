@@ -35,7 +35,7 @@ static NSDictionary<NSString *, NSString *> *G_opzioniUtente;
 static NSDictionary<NSString *, NSArray<NSString *> *> *FMLABEstensioni(void) {
     if (!G_estensioni) G_estensioni = @{ @"fceumm": @[@"nes", @"fds", @"unf", @"unif"], @"gambatte": @[@"gb", @"gbc", @"dmg"], @"mgba": @[@"gba"],
               @"bsnes": @[@"sfc", @"smc", @"bs"], @"pcsx_rearmed": @[@"cue", @"pbp", @"chd", @"m3u", @"iso", @"img", @"bin"],
-              @"desmume": @[@"nds"] };
+              @"desmume": @[@"nds"], @"ppsspp": @[@"cso", @"iso", @"pbp", @"elf", @"prx"] };
     return G_estensioni;
 }
 // Opzioni dei core: tutto senza JIT (iOS non lo permette senza StikDebug) e regolato per l'iPhone.
@@ -44,7 +44,8 @@ static NSDictionary<NSString *, NSString *> *FMLABOpzioniFisse(NSString *core) {
     return @{ @"pcsx_rearmed_drc": @"disabled", @"pcsx_rearmed_frameskip": @"0",
               @"desmume_cpu_mode": @"interpreter", @"desmume_internal_resolution": @"256x192",
               @"desmume_screens_layout": @"top/bottom", @"desmume_pointer_type": @"touch",
-              @"desmume_frameskip": @"0", @"mgba_skip_bios": @"ON", @"fceumm_aspect": @"8:7 PAR" };
+              @"desmume_frameskip": @"0", @"mgba_skip_bios": @"ON", @"fceumm_aspect": @"8:7 PAR",
+              @"ppsspp_cpu_core": @"IR JIT", @"ppsspp_backend": @"none", @"ppsspp_fast_memory": @"enabled" };
 }
 
 #pragma mark - Stato del core attivo (libretro chiama funzioni C senza contesto: un solo gioco alla volta)
@@ -332,10 +333,35 @@ static BOOL fmlabArchivio(struct archive *a) {
             NSString *nome = @(n).lastPathComponent; if ([nome hasPrefix:@"."]) continue;
             trovato = [self corePer:nome];
             if ([nome.pathExtension.lowercaseString isEqual:@"bin"]) trovato = nil;   // da solo non basta: serve il .cue
+            NSString *est = nome.pathExtension.lowercaseString;
+            if (trovato && [@[@"iso", @"pbp", @"cso"] containsObject:est]) {
+                // si legge l'inizio del file dentro l'archivio (fino a 1 MB) per capire se è PSP o PlayStation
+                NSMutableData *inizio = [NSMutableData data]; char b[1 << 16]; la_ssize_t k;
+                while (inizio.length < (1 << 20) && (k = archive_read_data(a, b, sizeof b)) > 0) [inizio appendBytes:b length:(NSUInteger)k];
+                NSString *n = fmlabSistemaDa(est, inizio, ^NSData *(uint64_t da, NSUInteger q) {
+                    return da + q <= inizio.length ? [inizio subdataWithRange:NSMakeRange((NSUInteger)da, q)] : nil; });
+                FMLABCore *c = n ? [self coreNome:n] : nil;
+                if (c && [c.estensioni containsObject:est]) trovato = c;
+            }
         }
     }
     archive_read_free(a);
     return trovato;
+}
++ (NSString *)nomeDentroArchivio:(NSString *)archivio {
+    struct archive *a = archive_read_new(); fmlabArchivio(a);
+    NSString *trovato = nil, *disco = nil;
+    if (archive_read_open_filename(a, archivio.fileSystemRepresentation, 1 << 16) == ARCHIVE_OK) {
+        struct archive_entry *e; int giri = 0;
+        while (giri++ < 64 && archive_read_next_header(a, &e) == ARCHIVE_OK) {
+            const char *n = archive_entry_pathname(e); if (!n || archive_entry_filetype(e) != AE_IFREG) continue;
+            NSString *nome = @(n).lastPathComponent, *est = nome.pathExtension.lowercaseString; if ([nome hasPrefix:@"."]) continue;
+            if ([est isEqual:@"cue"] || [est isEqual:@"m3u"]) { disco = nome.stringByDeletingPathExtension; break; }
+            if (!trovato && ![est isEqual:@"bin"] && [self corePer:nome]) trovato = nome.stringByDeletingPathExtension;
+        }
+    }
+    archive_read_free(a);
+    return disco ?: trovato;
 }
 + (NSString *)preparaArchivio:(NSString *)archivio error:(NSError **)error {
     NSDictionary *at = [NSFileManager.defaultManager attributesOfItemAtPath:archivio error:nil];
@@ -393,7 +419,7 @@ static BOOL fmlabArchivio(struct archive *a) {
             [a addObject:[[FMLABCore alloc] initNome:nome console:console ?: nome percorso:b.executablePath estensioni:est]];
         }
         // in ordine di uscita delle console
-        NSArray *ordine = @[@"fceumm", @"gambatte", @"bsnes", @"pcsx_rearmed", @"mgba", @"desmume"];
+        NSArray *ordine = @[@"fceumm", @"gambatte", @"bsnes", @"pcsx_rearmed", @"mgba", @"desmume", @"ppsspp"];
         [a sortUsingComparator:^NSComparisonResult(FMLABCore *x, FMLABCore *y) {
             NSUInteger i = [ordine indexOfObject:x.nome], j = [ordine indexOfObject:y.nome];
             return i < j ? NSOrderedAscending : i > j ? NSOrderedDescending : NSOrderedSame;
@@ -409,6 +435,34 @@ static BOOL fmlabArchivio(struct archive *a) {
     // .bin da solo è ambiguo: lo prende la PlayStation solo se non c'è un .cue accanto
     for (FMLABCore *c in self.core) if ([c.estensioni containsObject:e]) return c;
     return nil;
+}
+
+// .iso e .pbp esistono sia per PlayStation sia per PSP: si guarda dentro.
+//   ISO PSP: identificativo di sistema "PSP GAME" nel descrittore del volume (0x8008)
+//   PBP: se i dati (DATA.PSAR) iniziano con PSISOIMG/PSTITLEIMG è un gioco PlayStation convertito, se no è PSP
+static NSString *fmlabSistemaDa(NSString *est, NSData *testa, NSData *(^leggi)(uint64_t da, NSUInteger n)) {
+    if ([est isEqual:@"cso"]) return @"ppsspp";
+    if ([est isEqual:@"iso"]) { NSData *d = leggi(0x8008, 8); return d && memcmp(d.bytes, "PSP GAME", 8) == 0 ? @"ppsspp" : @"pcsx_rearmed"; }
+    if ([est isEqual:@"pbp"]) {
+        NSData *h = leggi(0, 0x28); if (h.length < 0x28 || memcmp(h.bytes, "\0PBP", 4) != 0) return @"pcsx_rearmed";
+        uint32_t psar; memcpy(&psar, (const uint8_t *)h.bytes + 0x24, 4); psar = CFSwapInt32LittleToHost(psar);
+        NSData *p = leggi(psar, 8);
+        return p.length == 8 && (memcmp(p.bytes, "PSISOIMG", 8) == 0 || memcmp(p.bytes, "PSTITLEI", 8) == 0) ? @"pcsx_rearmed" : @"ppsspp";
+    }
+    return nil;
+}
++ (FMLABCore *)coreNome:(NSString *)n { for (FMLABCore *c in self.core) if ([c.nome isEqual:n]) return c; return nil; }
++ (FMLABCore *)corePerFile:(NSString *)percorso {
+    NSString *e = percorso.pathExtension.lowercaseString;
+    if ([@[@"iso", @"pbp", @"cso"] containsObject:e]) {
+        NSFileHandle *h = [NSFileHandle fileHandleForReadingAtPath:percorso];
+        NSString *n = fmlabSistemaDa(e, nil, ^NSData *(uint64_t da, NSUInteger k) {
+            if (!h) return nil; @try { [h seekToFileOffset:da]; return [h readDataOfLength:k]; } @catch (id x) { return nil; } });
+        [h closeFile];
+        FMLABCore *c = n ? [self coreNome:n] : nil;
+        if (c && [c.estensioni containsObject:e]) return c;
+    }
+    return [self corePer:percorso.lastPathComponent];
 }
 
 static NSError *fmlabErrore(NSString *messaggio) {
@@ -431,6 +485,24 @@ static NSError *fmlabErrore(NSString *messaggio) {
     S(memData, "retro_get_memory_data") S(memSize, "retro_get_memory_size")
 #undef S
     strlcpy(G_sistema, FMLABEmulatore.cartellaBIOS.fileSystemRepresentation, sizeof G_sistema);
+    if ([core.nome isEqual:@"ppsspp"]) {
+        // i file di sistema di PPSSPP (font del firmware, compat.ini) viaggiano dentro il core: si copiano una volta
+        NSFileManager *fm = NSFileManager.defaultManager;
+        NSURL *sis = [[fm URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject URLByAppendingPathComponent:@"FMLAB/Sistema" isDirectory:YES];
+        NSString *sorgente = [core.percorso.stringByDeletingLastPathComponent stringByAppendingPathComponent:@"PPSSPP"];
+        NSURL *dest = [sis URLByAppendingPathComponent:@"PPSSPP" isDirectory:YES], *segno = [dest URLByAppendingPathComponent:@".fmlab"];
+        NSString *versione = [NSString stringWithFormat:@"%@", [fm attributesOfItemAtPath:core.percorso error:nil][NSFileSize]];
+        NSString *ce = [NSString stringWithContentsOfURL:segno encoding:NSUTF8StringEncoding error:nil];
+        if ([fm fileExistsAtPath:sorgente] && ![ce isEqual:versione]) {
+            [fm createDirectoryAtURL:dest withIntermediateDirectories:YES attributes:nil error:nil];
+            for (NSString *n in [fm contentsOfDirectoryAtPath:sorgente error:nil]) {
+                NSURL *u = [dest URLByAppendingPathComponent:n]; [fm removeItemAtURL:u error:nil];
+                [fm copyItemAtPath:[sorgente stringByAppendingPathComponent:n] toPath:u.path error:nil];
+            }
+            [versione writeToURL:segno atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        }
+        strlcpy(G_sistema, sis.fileSystemRepresentation, sizeof G_sistema);
+    }
     strlcpy(G_salvataggi, FMLABEmulatore.cartellaSalvataggi.fileSystemRepresentation, sizeof G_salvataggi);
     G_opzioni = [FMLABOpzioniFisse(core.nome) mutableCopy];
     @synchronized (FMLABEmulatore.class) { for (NSString *k in G_opzioniUtente) if ([k hasPrefix:[core.nome componentsSeparatedByString:@"_"].firstObject]) G_opzioni[k] = G_opzioniUtente[k]; }
