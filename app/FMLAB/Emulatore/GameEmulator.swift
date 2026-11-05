@@ -1081,6 +1081,24 @@ final class FMLABGiocoController: UIViewController {
             if pad.modo == .verticale { pad.frame = CGRect(x: 0, y: b.height * 0.25, width: b.width, height: b.height * 0.75) }
             pad.setNeedsLayout(); return
         }
+        // DS con la TV: sulla TV i due schermi, sul telefono SOLO lo schermo da toccare (serve per il pennino) e i tasti
+        if esterno != nil && ds, let e = emulatore {
+            e.vista.isHidden = false
+            dividiDS(true); secondoSchermo.isHidden = true
+            e.vista.layer.contentsRect = CGRect(x: 0, y: 0.5, width: 1, height: 0.5)
+            avviso.frame = .zero
+            let v = b.height >= b.width
+            var w: CGFloat, h: CGFloat, q: CGRect
+            if v { w = s.width; h = w * 0.75; if h > b.height * 0.42 { h = b.height * 0.42; w = h / 0.75 }; q = CGRect(x: s.midX - w / 2, y: s.minY + 8, width: w, height: h) }
+            else { h = s.height * 0.8; w = h / 0.75; q = CGRect(x: s.midX - w / 2, y: s.midY - h / 2, width: w, height: h) }
+            e.vista.frame = aiPixel(q); toccoDS.frame = e.vista.frame
+            pad.modo = v ? .verticale : .orizzontale
+            pad.frame = v ? CGRect(x: 0, y: q.maxY, width: b.width, height: b.maxY - q.maxY) : b
+            pad.areaSicura = UIEdgeInsets(top: v ? 0 : s.minY, left: s.minX, bottom: b.maxY - s.maxY, right: b.maxX - s.maxX)
+            pad.spazioLato = v ? 0 : max(0, q.minX - s.minX)
+            pad.sopra = !v
+            aggiornaFiltro(); pad.setNeedsLayout(); return
+        }
         emulatore?.vista.isHidden = false
         let r = max(0.3, emulatore?.rapporto ?? 4.0 / 3.0)
         avviso.frame = s.insetBy(dx: 24, dy: 80)
@@ -1280,7 +1298,7 @@ final class FMLABGiocoController: UIViewController {
         filtroVista.frame = e.vista.frame
         let m = e.misuraImmagine
         guard (f == "tv" || f == "lcd"), m.width > 0, m.height > 0, e.vista.bounds.height > 0 else { filtroVista.backgroundColor = .clear; return }
-        let divisa = !secondoSchermo.isHidden
+        let divisa = e.vista.layer.contentsRect.height < 0.99
         let px = e.vista.bounds.height / (divisa ? m.height / 2 : m.height), py = px
         let chiave = CGSize(width: px * (f == "lcd" ? 1 : 0), height: py)
         if chiave == filtroPer { return }

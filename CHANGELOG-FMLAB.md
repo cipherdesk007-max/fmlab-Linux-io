@@ -2,6 +2,10 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.11.7
+- **Con la TV il gioco si vede solo sulla TV** anche sul DS: sulla TV i due schermi, sul telefono solo lo schermo
+  da toccare (serve per il pennino) e i tasti. Le altre console sul telefono mostrano solo i tasti, grandi.
+
 ## 0.11.6
 - **In "Solo giochi" Linux non parte da solo**, anche con *Avvia runtime all'apertura* acceso (impostazione da
   sviluppatore): niente processore e memoria rubati ai giochi. Toccando *Linux* per tornare al resto dell'app,
