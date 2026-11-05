@@ -2,6 +2,11 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.11.4
+- **TV nera con il gioco (solo suono)**: il gioco si metteva dentro la finestra della TV del desktop Linux, che
+  può essere nascosta (per esempio con l'uscita del desktop spenta): così sulla TV non si vedeva niente. Ora il gioco
+  ha sempre una finestra sua sulla TV, sopra quella di Linux, e quando esci torna quella di Linux.
+
 ## 0.11.3
 - **Gioca sulla TV / Desktop Linux sulla TV**: una scheda sola, uguale per giochi e Linux (Giochi › AirPlay e TV,
   Impostazioni › Dispositivi › *Connect Wirelessly with AirPlay…*, menu del gioco). Dice **dal vivo** se Duplica

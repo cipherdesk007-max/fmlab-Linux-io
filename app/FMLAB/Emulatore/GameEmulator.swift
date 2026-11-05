@@ -1016,10 +1016,11 @@ final class FMLABGiocoController: UIViewController {
     private var controlloEsterno: Timer?
     private func finestraEsterna() -> UIWindow? {
         guard UserDefaults.standard.object(forKey: "FMLAB.giochi.esterno") as? Bool ?? true, let sc = Self.scenaEsterna() else { return nil }
-        // di solito la finestra c'è già (quella del desktop Linux, che si copre); se no se ne fa una
-        if let w = sc.windows.first(where: { $0 !== finestraPropria }) ?? finestraPropria { return w }
+        // sempre una finestra nostra, sopra quella del desktop Linux: quella di Linux può essere nascosta
+        // (uscita del desktop spenta) e un gioco messo lì dentro non si vedrebbe (TV nera, solo suono)
+        if let w = finestraPropria, w.windowScene === sc { w.isHidden = false; return w }
         let w = UIWindow(windowScene: sc); w.rootViewController = UIViewController(); w.rootViewController?.view.backgroundColor = .black
-        w.isHidden = false; finestraPropria = w
+        w.windowLevel = .normal + 1; w.isHidden = false; finestraPropria = w
         return w
     }
     private func collegaEsterno() {
