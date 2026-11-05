@@ -11,7 +11,7 @@ Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANG
   Senza JIT i giochi 2D e leggeri vanno bene; quelli 3D pesanti possono restare sotto la velocità piena
   (*Mostra velocità* lo dice).
 - **Tasti PlayStation veri** su PS1 e PSP: ○ ✕ △ □ colorati al posto di A B X Y (stesse posizioni).
-- Disco emulatore **core-9** (7 core).
+- Disco emulatore **core-15** (7 core).
 
 ## 0.10.9
 - **Immagine… dentro il gioco**: dal menu del gioco si cambiano filtro (Pixel netti, Morbido, TV, LCD), forma
