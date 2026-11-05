@@ -2,6 +2,14 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.11.1
+- **Grafica sulla GPU** nel Game Emulator (primo passo): l'emulatore ora sa dare ai core un contesto OpenGL ES
+  (il chip grafico dell'iPhone). La **PSP** disegna il 3D sulla GPU invece che col processore: più veloce, e con
+  *Grafica migliorata* a 2× (960×544). La CPU emulata gira su un filo suo, la grafica su un altro.
+  L'immagine finita si copia nel solito buffer, quindi schermi, TV esterna, filtri e foto restano uguali.
+  Giochi › Grafica › *Grafica sulla GPU (PSP)* per tornare al software se un gioco ha la grafica rotta.
+- È la base anche per le console più pesanti in futuro.
+
 ## 0.11.0
 - **PSP** (PlayStation Portable) nel Game Emulator: PPSSPP, la versione più recente, compilata per iPhone **senza
   JIT** (processore con l'interprete IR, grafica in software). Giochi .iso, .cso, .pbp (anche in .zip/.7z/.rar): .iso

@@ -558,6 +558,7 @@ struct GameEmulatorView: View {
     @AppStorage("FMLAB.grafica.migliorata") private var graficaMigliorata = true
     @AppStorage("FMLAB.grafica.filtro") private var filtro = "netti"
     @AppStorage("FMLAB.grafica.formato") private var formato = "originale"
+    @AppStorage("FMLAB.grafica.gpu") private var gpu = true
     @AppStorage("FMLAB.giochi.esterno") private var usaEsterno = true
     @State private var schermoEsterno = FMLABGiocoController.nomeSchermoEsterno()
     @AppStorage(FMLABCopertine.chiaveAttive) private var copertine = true
@@ -670,6 +671,7 @@ struct GameEmulatorView: View {
                 Picker("Picture", selection: $filtro) {
                     Text("Sharp Pixels").tag("netti"); Text("Smooth").tag("morbido"); Text("TV (scanlines)").tag("tv"); Text("Handheld LCD").tag("lcd")
                 }
+                Toggle(isOn: $gpu) { VStack(alignment: .leading, spacing: 3) { Text("Graphics on the GPU (PSP)"); Text("The 3D is drawn by the iPhone's graphics chip: faster and sharper (2× with Enhanced Graphics). Turn it off only if a game shows broken graphics.").font(.caption).foregroundColor(.secondary) } }
                 Picker("Shape in Landscape", selection: $formato) {
                     Text("Original").tag("originale"); Text("Wide 16:9").tag("largo"); Text("Fill the Screen").tag("pieno")
                 }
@@ -921,7 +923,7 @@ final class FMLABGiocoController: UIViewController {
         accessoCartella = gioco.cartella?.startAccessingSecurityScopedResource() ?? false
         // grafica migliorata: opzioni dei core sopra a quelle dei dati (si possono spegnere nella scheda Giochi)
         let hd = UserDefaults.standard.object(forKey: "FMLAB.grafica.migliorata") as? Bool ?? true
-        FMLABEmulatore.usaOpzioniUtente(hd ? Self.opzioniHD : [:])
+        FMLABEmulatore.usaOpzioniUtente(Self.opzioniUtente(hd: hd))
         do {
             let e = try FMLABEmulatore(conCore: gioco.core, gioco: gioco.url.path)
             emulatore = e
@@ -1129,10 +1131,17 @@ final class FMLABGiocoController: UIViewController {
     /// al massimo il 15% di schermo; con Morbido resta la misura piena.
     static let opzioniHD = ["desmume_internal_resolution": "512x384", "bsnes_mode7_scale": "2x",
                             "pcsx_rearmed_neon_enhancement_enable": "enabled", "pcsx_rearmed_neon_enhancement_no_main": "enabled",
-                            "pcsx_rearmed_dithering": "disabled"]
+                            "pcsx_rearmed_dithering": "disabled", "ppsspp_internal_resolution": "960x544"]
     static let opzioniNormali = ["desmume_internal_resolution": "256x192", "bsnes_mode7_scale": "1x",
                                  "pcsx_rearmed_neon_enhancement_enable": "disabled", "pcsx_rearmed_neon_enhancement_no_main": "disabled",
-                                 "pcsx_rearmed_dithering": "enabled"]
+                                 "pcsx_rearmed_dithering": "enabled", "ppsspp_internal_resolution": "480x272"]
+    /// Opzioni scelte dall'utente: grafica migliorata e, per la PSP, il disegno sulla GPU (OpenGL ES) o in software.
+    static func opzioniUtente(hd: Bool) -> [String: String] {
+        var o = hd ? opzioniHD : ["ppsspp_internal_resolution": "480x272"]
+        let gpu = UserDefaults.standard.object(forKey: "FMLAB.grafica.gpu") as? Bool ?? true
+        o["ppsspp_backend"] = gpu ? "opengl" : "none"
+        return o
+    }
     /// Menu del gioco › Immagine…: filtro, forma e grafica migliorata cambiano subito, senza uscire dal gioco.
     private func scegliImmagine() {
         guard let e = emulatore else { return }
@@ -1152,11 +1161,11 @@ final class FMLABGiocoController: UIViewController {
                 voce(LF("Shape") + ": " + LF(t), forma == k) { d.set(k, forKey: "FMLAB.grafica.formato") }
             }
         }
-        if ["desmume", "bsnes", "pcsx_rearmed"].contains(gioco.core.nome) {
+        if ["desmume", "bsnes", "pcsx_rearmed", "ppsspp"].contains(gioco.core.nome) {
             voce(LF("Enhanced Graphics"), hd) {
                 d.set(!hd, forKey: "FMLAB.grafica.migliorata")
                 let o = !hd ? Self.opzioniHD : Self.opzioniNormali
-                FMLABEmulatore.usaOpzioniUtente(!hd ? Self.opzioniHD : [:])
+                FMLABEmulatore.usaOpzioniUtente(Self.opzioniUtente(hd: !hd))
                 for (k, v) in o where k.hasPrefix(self.gioco.core.nome.components(separatedBy: "_")[0]) { e.opzione(k, valore: v) }
             }
         }

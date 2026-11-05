@@ -17,6 +17,10 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <CommonCrypto/CommonDigest.h>
+#define GLES_SILENCE_DEPRECATION 1
+#import <OpenGLES/EAGL.h>
+#import <OpenGLES/ES3/gl.h>
+#import <Accelerate/Accelerate.h>
 
 #pragma mark - Core disponibili
 
@@ -95,6 +99,53 @@ static void fmlabLog(enum retro_log_level level, const char *fmt, ...) {
     NSLog(@"[FMLAB Emulatore] %s", riga);
 }
 
+#pragma mark - Grafica su GPU (OpenGL ES): il core disegna sulla scheda grafica, qui si legge l'immagine finita
+
+// Il core (es. PPSSPP) disegna 3D e effetti sulla GPU, a risoluzione più alta; a ogni schermata l'immagine si
+// copia nel solito buffer, così schermi DS, TV esterna, filtri e foto restano uguali.
+static struct retro_hw_render_callback G_hw;
+static bool G_hwAttivo;
+static EAGLContext *G_gl;
+static GLuint G_fbo, G_coloreRB, G_profRB;
+static unsigned G_fboW, G_fboH;
+static uint8_t *G_letti; static size_t G_lettiCap;
+static uintptr_t fmlabFBO(void) { return G_fbo; }
+static retro_proc_address_t fmlabProc(const char *nome) { return (retro_proc_address_t)dlsym(RTLD_DEFAULT, nome); }
+static void fmlabPreparaFBO(unsigned w, unsigned h) {
+    if (w <= G_fboW && h <= G_fboH && G_fbo) return;
+    w = MAX(w, G_fboW); h = MAX(h, G_fboH);
+    if (G_fbo) { glDeleteFramebuffers(1, &G_fbo); glDeleteRenderbuffers(1, &G_coloreRB); glDeleteRenderbuffers(1, &G_profRB); }
+    glGenFramebuffers(1, &G_fbo); glBindFramebuffer(GL_FRAMEBUFFER, G_fbo);
+    glGenRenderbuffers(1, &G_coloreRB); glBindRenderbuffer(GL_RENDERBUFFER, G_coloreRB);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, (GLsizei)w, (GLsizei)h);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, G_coloreRB);
+    glGenRenderbuffers(1, &G_profRB); glBindRenderbuffer(GL_RENDERBUFFER, G_profRB);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, (GLsizei)w, (GLsizei)h);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, G_profRB);
+    G_fboW = w; G_fboH = h;
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) NSLog(@"[FMLAB Emulatore] FBO incompleto %ux%u", w, h);
+}
+static void fmlabAvviaGPU(void) {
+    if (!G_hwAttivo || G_gl) return;
+    G_gl = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
+    if (!G_gl) G_gl = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    [EAGLContext setCurrentContext:G_gl];
+    fmlabPreparaFBO(MAX(G_av.geometry.max_width, 480), MAX(G_av.geometry.max_height, 272));
+    if (G_hw.context_reset) G_hw.context_reset();
+}
+static void fmlabFermaGPU(void) {
+    if (!G_gl) return;
+    [EAGLContext setCurrentContext:G_gl];
+    if (G_hw.context_destroy) G_hw.context_destroy();
+}
+static void fmlabChiudiGPU(void) {
+    if (!G_gl) return;
+    [EAGLContext setCurrentContext:G_gl];
+    if (G_fbo) { glDeleteFramebuffers(1, &G_fbo); glDeleteRenderbuffers(1, &G_coloreRB); glDeleteRenderbuffers(1, &G_profRB); }
+    G_fbo = G_coloreRB = G_profRB = 0; G_fboW = G_fboH = 0;
+    [EAGLContext setCurrentContext:nil]; G_gl = nil; G_hwAttivo = NO; memset(&G_hw, 0, sizeof G_hw);
+}
+
 static bool fmlabAmbiente(unsigned cmd, void *data) {
     switch (cmd & ~RETRO_ENVIRONMENT_EXPERIMENTAL) {
         case RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY & ~RETRO_ENVIRONMENT_EXPERIMENTAL: *(const char **)data = G_sistema; return true;
@@ -148,7 +199,18 @@ static bool fmlabAmbiente(unsigned cmd, void *data) {
         case RETRO_ENVIRONMENT_SET_MESSAGE & ~RETRO_ENVIRONMENT_EXPERIMENTAL: {
             const struct retro_message *m = data; if (m && m->msg) NSLog(@"[FMLAB Emulatore] %s", m->msg); return true;
         }
-        default: return false;   // niente GL/Vulkan, niente opzioni v1/v2: il core usa le sue scelte semplici
+        case RETRO_ENVIRONMENT_GET_PREFERRED_HW_RENDER & ~RETRO_ENVIRONMENT_EXPERIMENTAL:
+            *(unsigned *)data = RETRO_HW_CONTEXT_OPENGLES3; return true;
+        case RETRO_ENVIRONMENT_SET_HW_RENDER & ~RETRO_ENVIRONMENT_EXPERIMENTAL: {
+            // solo OpenGL ES (l'unico OpenGL dell'iPhone); Vulkan/OpenGL desktop no: il core ripiega sul software
+            struct retro_hw_render_callback *cb = data;
+            if (!cb || !(cb->context_type == RETRO_HW_CONTEXT_OPENGLES2 || cb->context_type == RETRO_HW_CONTEXT_OPENGLES3 ||
+                         cb->context_type == RETRO_HW_CONTEXT_OPENGLES_VERSION)) return false;
+            cb->get_current_framebuffer = fmlabFBO; cb->get_proc_address = fmlabProc;
+            G_hw = *cb; G_hwAttivo = true; return true;
+        }
+        case RETRO_ENVIRONMENT_SET_HW_SHARED_CONTEXT & ~RETRO_ENVIRONMENT_EXPERIMENTAL: return true;
+        default: return false;   // niente Vulkan, niente opzioni v1/v2: il core usa le sue scelte semplici
     }
 }
 
@@ -161,7 +223,25 @@ static inline uint32_t fmlab1555(uint16_t p) {
     return 0xFF000000u | ((r << 3 | r >> 2) << 16) | ((g << 3 | g >> 2) << 8) | (b << 3 | b >> 2);
 }
 
+static void fmlabVideoGPU(unsigned w, unsigned h) {
+    if (!G_gl || !G_fbo) return;
+    w = MIN(w, G_fboW); h = MIN(h, G_fboH);
+    size_t serve = (size_t)w * h * 4;
+    if (serve > G_lettiCap) { G_lettiCap = serve; G_letti = realloc(G_letti, serve); }
+    glBindFramebuffer(GL_FRAMEBUFFER, G_fbo);
+    glReadPixels(0, 0, (GLsizei)w, (GLsizei)h, GL_RGBA, GL_UNSIGNED_BYTE, G_letti);
+    os_unfair_lock_lock(&G_lockImmagine);
+    if ((size_t)w * h > G_cap) { G_cap = (size_t)w * h; G_pixel = realloc(G_pixel, G_cap * 4); }
+    vImage_Buffer da = { G_letti, h, w, w * 4 }, a = { G_pixel, h, w, w * 4 };
+    const uint8_t mappa[4] = { 2, 1, 0, 3 };   // RGBA → BGRA (come XRGB8888)
+    vImagePermuteChannels_ARGB8888(&da, &a, mappa, kvImageNoFlags);
+    if (G_hw.bottom_left_origin) vImageVerticalReflect_ARGB8888(&a, &a, kvImageNoFlags);   // GL parte dal basso
+    G_w = w; G_h = h; G_nuova = YES;
+    os_unfair_lock_unlock(&G_lockImmagine);
+}
+
 static void fmlabVideo(const void *data, unsigned w, unsigned h, size_t pitch) {
+    if (data == RETRO_HW_FRAME_BUFFER_VALID) { if (w && h) fmlabVideoGPU(w, h); return; }
     if (!data || !w || !h) return;   // stessa schermata di prima
     os_unfair_lock_lock(&G_lockImmagine);
     if ((size_t)w * h > G_cap) { G_cap = (size_t)w * h; G_pixel = realloc(G_pixel, G_cap * 4); }
@@ -514,6 +594,7 @@ static NSError *fmlabErrore(NSString *messaggio) {
     @synchronized (FMLABEmulatore.class) { for (NSString *k in G_opzioniUtente) if ([k hasPrefix:[core.nome componentsSeparatedByString:@"_"].firstObject]) G_opzioni[k] = G_opzioniUtente[k]; }
     _salvaUscita = YES;
     G_croceAnalogica = [core.nome isEqual:@"ppsspp"];
+    G_hwAttivo = NO; memset(&G_hw, 0, sizeof G_hw);
     G_formato = RETRO_PIXEL_FORMAT_0RGB1555; G_statoAudio = NULL; atomic_store(&G_vibra, 0);
     atomic_store(&G_tasti, 0); atomic_store(&G_tastiController, 0); atomic_store(&G_ptocco, 0);
     atomic_store(&G_scrivi, 0); atomic_store(&G_leggi, 0);
@@ -670,6 +751,7 @@ static uint32_t fmlabTastiera(void) {
     double secondi = (double)tb.numer / tb.denom / 1e9;
     double periodo = 1.0 / self.fps;
     uint64_t prossimo = mach_absolute_time();
+    fmlabAvviaGPU();   // se il core disegna su GPU: contesto e framebuffer su questo filo, prima del primo retro_run
     while (!atomic_load(&_ferma)) {
         os_unfair_lock_lock(&_lockLavori); NSArray *da = [_lavori copy]; [_lavori removeAllObjects]; os_unfair_lock_unlock(&_lockLavori);
         for (dispatch_block_t b in da) b();
@@ -716,7 +798,9 @@ static uint32_t fmlabTastiera(void) {
         if (n && F.ser(d.mutableBytes, n)) [d writeToURL:[self fileSalvataggio:@"auto.state"] atomically:YES];
     }
     [self scriviMemoria];
+    fmlabFermaGPU();
     F.unload(); F.deinit();
+    fmlabChiudiGPU();
     _caricato = NO;
 }
 

@@ -870,6 +870,8 @@ TR.update({
 "Changes right away. Shape applies in landscape.": "Cambia subito. La forma vale in orizzontale.",
 "Picture…": "Immagine…",
 "Shape": "Forma",
+"Graphics on the GPU (PSP)": "Grafica sulla GPU (PSP)",
+"The 3D is drawn by the iPhone's graphics chip: faster and sharper (2× with Enhanced Graphics). Turn it off only if a game shows broken graphics.": "Il 3D lo disegna il chip grafico dell'iPhone: più veloce e più nitido (2× con Grafica migliorata). Spegnila solo se un gioco ha la grafica rotta.",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

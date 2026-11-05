@@ -45,7 +45,7 @@ HEADER_SEARCH_PATHS = $(inherited) $(LINUXRUNNER_VIRGL_HEADERS_$(LINUXRUNNER_VIR
 ASSETCATALOG_COMPILER_APPICON_NAME = LinuxRunnerAppIcon
 
 // Optional public-API framebuffer presentation, not guest GPU translation.
-OTHER_LDFLAGS = $(inherited) -framework Metal -framework MetalKit -framework GameController -framework AVFoundation -framework AVKit -lc++ "$(SRCROOT)/build/shader-compiler/$(PLATFORM_NAME)/liblrshader.a" $(LINUXRUNNER_VIRGL_LDFLAGS_$(LINUXRUNNER_VIRGL))
+OTHER_LDFLAGS = $(inherited) -framework Metal -framework MetalKit -framework GameController -framework AVFoundation -framework AVKit -framework OpenGLES -framework Accelerate -lc++ "$(SRCROOT)/build/shader-compiler/$(PLATFORM_NAME)/liblrshader.a" $(LINUXRUNNER_VIRGL_LDFLAGS_$(LINUXRUNNER_VIRGL))
 
 LINUXRUNNER_LAUNCH_STORYBOARD = LinuxRunnerLaunch
 

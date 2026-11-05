@@ -646,6 +646,7 @@
 "Games Only" = "Solo giochi";
 "General" = "Generali";
 "Graphics" = "Grafica";
+"Graphics on the GPU (PSP)" = "Grafica sulla GPU (PSP)";
 "Guest Graphics Backend" = "Motore grafico di Linux";
 "Guest PID/TID (optional)" = "PID/TID in Linux (facoltativo)";
 "Guest session could not launch. See startup logs." = "La sessione Linux non è partita. Vedi i registri d'avvio.";
@@ -1292,6 +1293,7 @@
 "That Linux account already exists; choose it under Existing Accounts." = "Quell'account Linux esiste già; sceglilo in Account esistenti.";
 "That Linux account no longer exists." = "Quell'account Linux non esiste più.";
 "That name already exists. Choose a different folder or rename the source." = "Quel nome esiste già. Scegli un'altra cartella o rinomina l'originale.";
+"The 3D is drawn by the iPhone's graphics chip: faster and sharper (2× with Enhanced Graphics). Turn it off only if a game shows broken graphics." = "Il 3D lo disegna il chip grafico dell'iPhone: più veloce e più nitido (2× con Grafica migliorata). Spegnila solo se un gioco ha la grafica rotta.";
 "The Debian servers did not offer a required package. Tap Retry later." = "I server Debian non hanno dato un pacchetto necessario. Tocca Riprova più tardi.";
 "The LXQt desktop from the distribution's own packages; network needed once. The LinuxRunner Desktop stays installed as the fallback." = "Il desktop LXQt dai pacchetti della distribuzione; la rete serve una volta. Il Desktop LinuxRunner resta installato come riserva.";
 "The Linux runtime could not start this session. See diagnostics." = "Linux non è riuscito ad avviare questa sessione. Vedi la diagnostica.";
