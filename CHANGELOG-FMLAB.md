@@ -2,6 +2,22 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.10.3
+- **Tasti personalizzabili per gioco/console**: menu del gioco › *Sposta i tasti…*: il gioco va in pausa, trascini
+  croce, tasti, Menu e avanti veloce dove vuoi e li ingrandisci o rimpicciolisci pizzicando. Si salvano per console e
+  per verticale/orizzontale (*Ripristina* torna come prima, *Fine* salva).
+- **Rinomina i giochi** (tieni premuto o scorri sul gioco › *Rinomina…*): il file non cambia, salvataggi e copertine
+  restano collegati; *Nome originale* torna indietro. Di base il nome è ora il **titolo vero del gioco**: sul DS
+  quello del banner, in italiano se l'app è in italiano (es. *Pokémon Versione Perla* invece di `[PKWWF]pkdm`);
+  GBA e SNES dall'intestazione.
+- **Grafica migliorata** (Giochi › Grafica, accesa di base): 3D del DS a risoluzione doppia, PlayStation a 2×,
+  Mode 7 dello SNES in HD. Filtri dell'immagine: *Pixel netti*, *Morbido*, *TV (righe)*, *LCD portatile*, allineati
+  ai pixel del gioco.
+- **DS in verticale**: i comandi non coprono più lo schermo che si tocca (il gioco si ferma al 70% e i comandi
+  stanno sotto); in orizzontale restano sempre ai lati.
+- **AirPlay e TV anche nella scheda Giochi**, separato da quello del desktop Linux: si vede lo schermo collegato e
+  si può scegliere se usarlo per i giochi.
+
 ## 0.10.2
 - **Schermo più grande** (Giochi › Comandi e salvataggi, acceso di base): il gioco prende tutto lo spazio che può e
   i comandi gli stanno sopra, trasparenti. Sul DS in verticale gli schermi vanno a tutta larghezza, in orizzontale

@@ -31,6 +31,7 @@
 static NSDictionary<NSString *, NSArray<NSString *> *> *G_estensioni;
 static NSDictionary<NSString *, NSDictionary<NSString *, NSString *> *> *G_opzioniCore;
 static NSArray *G_tuttiCore;
+static NSDictionary<NSString *, NSString *> *G_opzioniUtente;
 static NSDictionary<NSString *, NSArray<NSString *> *> *FMLABEstensioni(void) {
     if (!G_estensioni) G_estensioni = @{ @"fceumm": @[@"nes", @"fds", @"unf", @"unif"], @"gambatte": @[@"gb", @"gbc", @"dmg"], @"mgba": @[@"gba"],
               @"bsnes": @[@"sfc", @"smc", @"bs"], @"pcsx_rearmed": @[@"cue", @"pbp", @"chd", @"m3u", @"iso", @"img", @"bin"],
@@ -298,6 +299,7 @@ static __weak FMLABEmulatore *G_attivo;
     }
 }
 
++ (void)usaOpzioniUtente:(NSDictionary<NSString *, NSString *> *)opzioni { @synchronized (self) { G_opzioniUtente = [opzioni copy]; } }
 + (void)usaDati:(NSDictionary<NSString *, NSDictionary *> *)core {
     NSMutableDictionary *est = [FMLABEstensioni() mutableCopy], *opz = [NSMutableDictionary dictionary];
     for (NSString *n in core) {
@@ -426,6 +428,7 @@ static NSError *fmlabErrore(NSString *messaggio) {
     strlcpy(G_sistema, FMLABEmulatore.cartellaBIOS.fileSystemRepresentation, sizeof G_sistema);
     strlcpy(G_salvataggi, FMLABEmulatore.cartellaSalvataggi.fileSystemRepresentation, sizeof G_salvataggi);
     G_opzioni = [FMLABOpzioniFisse(core.nome) mutableCopy];
+    @synchronized (FMLABEmulatore.class) { for (NSString *k in G_opzioniUtente) if ([k hasPrefix:[core.nome componentsSeparatedByString:@"_"].firstObject]) G_opzioni[k] = G_opzioniUtente[k]; }
     _salvaUscita = YES;
     G_formato = RETRO_PIXEL_FORMAT_0RGB1555; G_statoAudio = NULL; atomic_store(&G_vibra, 0);
     atomic_store(&G_tasti, 0); atomic_store(&G_tastiController, 0); atomic_store(&G_ptocco, 0);
@@ -468,6 +471,7 @@ static NSError *fmlabErrore(NSString *messaggio) {
     if ([_core.nome isEqual:@"mgba"]) return 1;
     return 2;
 }
+- (CGSize)misuraImmagine { os_unfair_lock_lock(&G_lockImmagine); CGSize m = CGSizeMake(G_w, G_h); os_unfair_lock_unlock(&G_lockImmagine); return m; }
 - (double)fps { return G_av.timing.fps > 1 ? G_av.timing.fps : 60; }
 - (CGFloat)rapporto {
     if (self.tocco) { os_unfair_lock_lock(&G_lockImmagine); unsigned w = G_w, h = G_h; os_unfair_lock_unlock(&G_lockImmagine); if (w && h) return (CGFloat)w / h; }

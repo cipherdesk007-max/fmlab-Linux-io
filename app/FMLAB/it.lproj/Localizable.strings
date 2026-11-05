@@ -197,6 +197,7 @@
 "Administrator (can use sudo)" = "Amministratore (può usare sudo)";
 "Advanced" = "Avanzate";
 "Advanced Command Launcher" = "Avvio comandi avanzato";
+"AirPlay and TV" = "AirPlay e TV";
 "All" = "Tutto";
 "Alpine 3.24.2 ARM64 from the verified bundled image. Debian and Ubuntu support is planned." = "Alpine 3.24.2 ARM64 dall'immagine inclusa e verificata. Il supporto a Debian e Ubuntu è in programma.";
 "Alpine Applications" = "Applicazioni Alpine";
@@ -267,6 +268,7 @@
 "Boot result: %lld" = "Esito dell'avvio: %lld";
 "Box art from the public libretro-thumbnails collection, found by file name (standard names like \"Super Mario World (USA)\")." = "Copertine dalla raccolta pubblica libretro-thumbnails, cercate col nome del file (nomi standard come \"Super Mario World (USA)\").";
 "Button released" = "Tasto lasciato";
+"Buttons saved for this console" = "Tasti salvati per questa console";
 "CPU" = "CPU";
 "CPU (100% = 1 core)" = "CPU (100% = 1 core)";
 "CPU now" = "CPU adesso";
@@ -333,12 +335,14 @@
 "Connect this device and an AirPlay-compatible TV, Apple TV or Mac to the same Wi-Fi. Open iOS Control Center → Screen Mirroring and choose the receiver. Enter any passcode in iOS.\n\nWhen iOS supplies a separate display, enable External Desktop Output in Settings → Devices and use this menu’s touchpad option. Otherwise, use full-screen mirroring: the receiver shows this device’s view. Miracast-only receivers are not supported." = "Collega questo dispositivo e una TV compatibile AirPlay, Apple TV o Mac alla stessa Wi-Fi. Apri Centro di Controllo → Duplica schermo e scegli il ricevitore. Inserisci il codice che chiede iOS.\n\nSe iOS dà uno schermo separato, accendi l'uscita del desktop su schermo esterno in Impostazioni → Dispositivi e usa l'opzione touchpad di questo menu. Altrimenti usa la duplicazione a tutto schermo: il ricevitore mostra quello che vedi qui. I ricevitori solo Miracast non sono supportati.";
 "Connect to the same Wi-Fi as an AirPlay-compatible TV, Apple TV or Mac. Open iOS Control Center → Screen Mirroring and choose it. Then open the Linux desktop. A separate display uses External Desktop Output; otherwise choose Desktop → Wireless Display → Use Full-Screen Desktop. Receiver compatibility varies. Miracast-only receivers are not supported." = "Collegati alla stessa Wi-Fi di una TV compatibile AirPlay, di una Apple TV o di un Mac. Apri il Centro di Controllo → Duplica schermo e sceglilo. Poi apri il desktop Linux. Uno schermo separato usa Desktop su schermo esterno; altrimenti scegli Desktop → Schermo senza fili → Desktop a tutto schermo. La compatibilità dipende dal ricevitore. I ricevitori solo Miracast non sono supportati.";
 "Connected" = "Collegato";
+"Connected · %.0f×%.0f" = "Collegato · %.0f×%.0f";
 "Connection" = "Connessione";
 "Consoles" = "Console";
 "Continue" = "Continua";
 "Continue in Linux Terminal" = "Continua nel terminale Linux";
 "Continue where you left off?" = "Continuare da dove eri rimasto?";
 "Control" = "Control";
+"Control Center › Screen Mirroring › your Apple TV or AirPlay TV (or a USB-C/HDMI cable). With a game open, it goes full screen on the TV and the iPhone becomes the controller (on DS the iPhone keeps the screens for touch). The Linux desktop has its own setting in Settings › Desktop." = "Centro di Controllo › Duplica schermo › la tua Apple TV o TV AirPlay (o un cavo USB-C/HDMI). Con un gioco aperto va a tutto schermo sulla TV e l'iPhone diventa il controller (sul DS l'iPhone tiene gli schermi per il tocco). Il desktop Linux ha la sua impostazione in Impostazioni › Desktop.";
 "Controls Opacity" = "Trasparenza dei comandi";
 "Controls Size" = "Dimensione dei comandi";
 "Controls and Saves" = "Comandi e salvataggi";
@@ -379,6 +383,7 @@
 "Current step: %lld" = "Passo attuale: %lld";
 "Cursor" = "Cursore";
 "DISPLAY and Xauthority are set for each GUI session. Install GUI Support before launching X11 applications." = "DISPLAY e Xauthority vengono impostati per ogni sessione grafica. Installa il supporto grafico prima delle applicazioni X11.";
+"DS 3D and PlayStation at double resolution, SNES Mode 7 in HD. Turn it off if a game slows down." = "3D del DS e PlayStation a risoluzione doppia, Mode 7 dello SNES in HD. Spegnila se un gioco rallenta.";
 "Dark" = "Scuro";
 "Debian 13.7 ARM64 · authenticated official packages" = "Debian 13.7 ARM64 · pacchetti ufficiali verificati";
 "Debian Applications" = "Applicazioni Debian";
@@ -468,6 +473,7 @@
 "Downloading/verifying %lld (%lld/%lld)" = "Download e verifica di %lld (%lld/%lld)";
 "Downloading: " = "Download: ";
 "Downloads official Debian packages from a bundled manifest authenticated against Debian's signed release and SHA-256 package index. Requires at least 1 GB free space. Alpine remains installed." = "Scarica i pacchetti ufficiali di Debian da un elenco incluso, verificato con la release firmata di Debian e l'indice SHA-256 dei pacchetti. Serve almeno 1 GB libero. Alpine resta installata.";
+"Drag to move · pinch to resize" = "Trascina per spostare · pizzica per ridimensionare";
 "Dropped to keep latency low" = "Scartato per tenere basso il ritardo";
 "Each comes from the distribution's own packages (network needed; Enlightenment is a large download, about 450 MB on Debian). The one installed last opens with Open Desktop; switch any time in Settings › Desktop Environment." = "Ognuno viene dai pacchetti della distribuzione (serve la rete; Enlightenment è grande, circa 450 MB su Debian). L'ultimo installato si apre con Apri desktop; puoi cambiare quando vuoi in Impostazioni › Ambiente desktop.";
 "Each distribution retains its own packages and files. One runtime is active at a time; switching takes effect after relaunch." = "Ogni distribuzione ha i suoi pacchetti e i suoi file. Ne gira una alla volta; il cambio vale dopo aver riaperto l'app.";
@@ -500,6 +506,7 @@
 "Engine data updated: %lf" = "Dati del motore aggiornati: %lf";
 "Engine data updated: %lld" = "Dati del motore aggiornati: %lld";
 "English" = "English";
+"Enhanced Graphics" = "Grafica migliorata";
 "Enlightenment" = "Enlightenment";
 "Enlightenment (X11 session with its own software compositor: shelf, main menu on a desktop click, Terminology terminal) from the distribution's own packages. If it is not installed, Open Desktop starts the LinuxRunner Desktop." = "Enlightenment (sessione X11 con il suo compositore software: barra, menu principale toccando il desktop, terminale Terminology) dai pacchetti della distribuzione. Se non è installato, Apri desktop avvia il Desktop LinuxRunner.";
 "Enlightenment does not start correctly on Debian yet (it stops at its splash screen). Use LXQt or the LinuxRunner Desktop, or Enlightenment on Arch Linux ARM." = "Enlightenment su Debian non parte ancora bene (si ferma alla schermata iniziale). Usa LXQt o il Desktop LinuxRunner, oppure Enlightenment su Arch Linux ARM.";
@@ -548,6 +555,7 @@
 "External output is enabled. Connect a USB-C display, or choose an AirPlay receiver in Control Center → Screen Mirroring. Trackpad controls will open when iOS provides a separate desktop output and the desktop is ready. Ordinary mirroring alone cannot show different content on the phone and receiver. Tap Cancel Trackpad Connection to cancel waiting." = "L'uscita esterna è accesa. Collega uno schermo USB-C, o scegli un ricevitore AirPlay in Centro di Controllo → Duplica schermo. I comandi del trackpad si aprono quando iOS dà un'uscita separata e il desktop è pronto. La semplice duplicazione non può mostrare cose diverse su telefono e ricevitore. Tocca Annulla collegamento trackpad per smettere di aspettare.";
 "External output is enabled. Starting or reconnecting your desktop; trackpad controls will open when its first frame arrives." = "L'uscita esterna è accesa. Avvio o ricollegamento del desktop; i comandi del trackpad si aprono al primo fotogramma.";
 "External scene" = "Schermo esterno";
+"External screen" = "Schermo esterno";
 "FMLAB" = "FMLAB";
 "FMLAB Emulatore" = "FMLAB Emulatore";
 "FMLAB Linux" = "FMLAB Linux";
@@ -573,6 +581,9 @@
 "Fast Forward" = "Avanti veloce";
 "Fast Forward Speed" = "Velocità dell'avanti veloce";
 "File Sharing" = "Condivisione file";
+"File: %@. The file is not changed: saves and covers stay linked to it." = "File: %@. Il file non viene cambiato: salvataggi e copertine restano collegati.";
+"File: %lf. The file is not changed: saves and covers stay linked to it." = "File: %lf. Il file non viene cambiato: salvataggi e copertine restano collegati.";
+"File: %lld. The file is not changed: saves and covers stay linked to it." = "File: %lld. Il file non viene cambiato: salvataggi e copertine restano collegati.";
 "Files" = "File";
 "Files & Devices" = "File e dispositivi";
 "Files could not be written in Linux" = "Non è stato possibile scrivere i file in Linux";
@@ -630,6 +641,7 @@
 "Guest PID/TID (optional)" = "PID/TID in Linux (facoltativo)";
 "Guest session could not launch. See startup logs." = "La sessione Linux non è partita. Vedi i registri d'avvio.";
 "Guest: ARM64 · " = "Linux: ARM64 · ";
+"Handheld LCD" = "LCD portatile";
 "Hide Details" = "Nascondi dettagli";
 "Hide Extra Keys with Hardware Keyboard" = "Nascondi i tasti extra con la tastiera fisica";
 "Hold a Button" = "Tieni premuto un tasto";
@@ -879,6 +891,7 @@
 "Mouse sensitivity" = "Sensibilità del mouse";
 "Mouse sensitivity: %.2g×" = "Sensibilità del mouse: %.2g×";
 "Move (instant, no extra space)" = "Sposta (istantaneo, nessuno spazio in più)";
+"Move Buttons…" = "Sposta i tasti…";
 "Move: the distribution goes to FMLAB Linux and LinuxRunner no longer has it. Copy: uses twice the space." = "Sposta: la distribuzione passa a FMLAB Linux e LinuxRunner non la avrà più. Copia: occupa il doppio dello spazio.";
 "Move: the distribution goes to FMLAB Linux and LinuxRunner no longer has it. Copy: uses twice the space. Delete: removes it from LinuxRunner's files for good." = "Sposta: la distribuzione passa a FMLAB Linux e LinuxRunner non l'ha più. Copia: occupa il doppio. Elimina: la toglie per sempre dai file di LinuxRunner.";
 "Moving %@…" = "Sposto %@…";
@@ -928,6 +941,7 @@
 "No usable JIT path" = "Nessun modo utilizzabile per il JIT";
 "No visible files in this folder." = "Nessun file visibile in questa cartella.";
 "Nominal" = "Normale";
+"None" = "Nessuno";
 "Normal" = "Normali";
 "Not a supported game file (unzip it first): %@" = "File di gioco non supportato (prima decomprimilo): %@";
 "Not a supported game file (unzip it first): %lf" = "File di gioco non supportato (prima decomprimilo): %lf";
@@ -980,6 +994,7 @@
 "Original LinuxRunner is now at %@: FMLAB Linux will catch up. When ready, it arrives here as an update." = "LinuxRunner originale è passato alla %@: FMLAB Linux la riprenderà. Quando è pronta arriva qui come aggiornamento.";
 "Original LinuxRunner is now at %lf: FMLAB Linux will catch up. When ready, it arrives here as an update." = "LinuxRunner originale è passato alla %lf: FMLAB Linux la riprenderà. Quando è pronta arriva qui come aggiornamento.";
 "Original LinuxRunner is now at %lld: FMLAB Linux will catch up. When ready, it arrives here as an update." = "LinuxRunner originale è passato alla %lld: FMLAB Linux la riprenderà. Quando è pronta arriva qui come aggiornamento.";
+"Original Name" = "Nome originale";
 "Output, dependency plans and progress open in a Linux terminal. Removal asks for confirmation there. Close the terminal when finished, then refresh the installed list. Cancellation during configuration may require Repair Center." = "Messaggi, dipendenze e avanzamento si aprono in un terminale Linux. La rimozione chiede conferma lì. Alla fine chiudi il terminale e aggiorna l'elenco degli installati. Annullare durante la configurazione può richiedere il Centro riparazioni.";
 "Overview" = "Panoramica";
 "PID" = "PID";
@@ -1011,6 +1026,7 @@
 "Phone" = "Telefono";
 "Phone reads the screen and picks the sharpest size: each Linux pixel becomes an exact square of iPhone pixels (iPhone 15 Pro Max: 1308 × 644 next to the camera, exactly 2×). If the phone is hot or in Low Power Mode it uses the lighter 540-row size." = "Telefono legge lo schermo e sceglie da solo la misura più nitida: ogni pixel di Linux diventa un quadrato preciso di pixel dell'iPhone (iPhone 15 Pro Max: 1308 × 644 accanto alla fotocamera, esattamente 2×). Se il telefono è caldo o in Risparmio energetico usa la misura più leggera da 540 righe.";
 "Phone · Full Screen" = "Telefono · tutto schermo";
+"Picture" = "Immagine";
 "Played" = "Riprodotto";
 "Plays sound from Linux programs (browsers, media players, games) through the iPhone, mixed with other apps. Applies to the next desktop or app session. Sound stops while LinuxRunner is in the background." = "Fa sentire l'audio dei programmi Linux (browser, lettori, giochi) dall'iPhone, insieme alle altre app. Vale dalla prossima sessione del desktop o dell'app. L'audio si ferma quando FMLAB Linux è in sottofondo.";
 "Please keep LinuxRunner open." = "Tieni FMLAB Linux aperta.";
@@ -1067,11 +1083,14 @@
 "Remove inactive temporary installation files?" = "Togliere i file temporanei di installazioni non attive?";
 "Removes only LinuxRunner's inactive installation staging files. User files, environments, packages and browser profiles are preserved." = "Toglie solo i file temporanei di installazione non più usati. File dell'utente, ambienti, pacchetti e profili dei browser restano.";
 "Removes temporary installation files, the app's temporary folder and caches that rebuild themselves. Linux, your files, accounts and packages are never touched. Inside Linux, RunnerKit cleans apt caches, old logs and temporary files, never personal files." = "Toglie i file temporanei di installazione, la cartella temporanea dell'app e le cache che si ricreano da sole. Linux, i tuoi file, gli account e i pacchetti non vengono mai toccati. Dentro Linux, RunnerKit pulisce cache di apt, registri vecchi e file temporanei, mai i file personali.";
+"Rename" = "Rinomina";
+"Rename…" = "Rinomina…";
 "Rendered on the CPU (no GPU acceleration yet); blur is off. Network needed once. The LinuxRunner Desktop stays installed as the fallback." = "Disegnato dal processore (ancora senza GPU); sfocatura spenta. La rete serve una volta. Il Desktop LinuxRunner resta installato come riserva.";
 "Renderer" = "Motore grafico";
 "Repair Center" = "Centro riparazioni";
 "Repair runs native maintainer scripts and keeps a package-database metadata checkpoint inside Linux. It is not a full snapshot or automatic rollback. APT dependency repair asks for confirmation before changing packages. Safe diagnostic mode: use Diagnose and Check Dependencies before repair." = "La riparazione usa gli script originali dei pacchetti e salva un punto di controllo dell'archivio dei pacchetti dentro Linux. Non è una copia completa né un ripristino automatico. La riparazione delle dipendenze APT chiede conferma prima di cambiare pacchetti. Modo sicuro: usa Analizza e Controlla dipendenze prima di riparare.";
 "Report copied: paste it in a message to FMLAB" = "Rapporto copiato: incollalo in un messaggio a FMLAB";
+"Reset" = "Ripristina";
 "Reset Font Size" = "Testo normale";
 "Reset GUI Sessions" = "Azzera le sessioni grafiche";
 "Resolution" = "Risoluzione";
@@ -1166,6 +1185,8 @@
 "Shared at " = "Condivisa in ";
 "Shared folder: /home/mobile/Downloads" = "Cartella condivisa: /home/mobile/Downloads";
 "Shared mappings" = "Mappature condivise";
+"Sharp Pixels" = "Pixel netti";
+"Sharp Pixels is the most faithful; TV draws the lines of an old television, LCD the grid of a Game Boy screen. Valid from the next game you open." = "Pixel netti è il più fedele; TV disegna le righe di un vecchio televisore, LCD la griglia dello schermo di un Game Boy. Vale dal prossimo gioco che apri.";
 "Show Desktop Controls" = "Mostra i comandi del desktop";
 "Show Desktop on This Device" = "Mostra il desktop su questo dispositivo";
 "Show Details" = "Mostra dettagli";
@@ -1173,6 +1194,7 @@
 "Slide to move, tap to click, hold and slide to drag; two fingers scroll or tap for right click in touchpad mode. Clipboard text is sent only when requested." = "Scorri per muovere, tocca per cliccare, tieni premuto e scorri per trascinare; con due dita scorri o tocchi per il tasto destro in modalità touchpad. Il testo copiato si manda solo quando lo chiedi.";
 "Slot %ld" = "Posto %ld";
 "Small" = "Piccoli";
+"Smooth" = "Morbido";
 "Software" = "Software";
 "Software (Mesa)" = "Software (Mesa)";
 "Software (fallback)" = "Software (riserva)";
@@ -1233,6 +1255,7 @@
 "System path" = "Percorso di sistema";
 "System users without a login shell are omitted. Removing an account preserves its home and files; their numeric ownership remains. System accounts and the default login are protected." = "Gli utenti di sistema senza shell di accesso non compaiono. Rimuovendo un account la sua cartella e i suoi file restano, con la proprietà numerica di prima. Gli account di sistema e l'accesso predefinito sono protetti.";
 "TRACE records successful calls and has substantial overhead. Logs rotate at 1 MiB." = "TRACE registra anche le chiamate riuscite e rallenta parecchio. I registri ricominciano ogni 1 MiB.";
+"TV (scanlines)" = "TV (righe)";
 "Take %@ from LinuxRunner?" = "Prendere %@ da LinuxRunner?";
 "Take %lf from LinuxRunner?" = "Prendere %lf da LinuxRunner?";
 "Take %lld from LinuxRunner?" = "Prendere %lld da LinuxRunner?";
@@ -1412,6 +1435,7 @@
 "Use iPhone as Trackpad" = "Usa l'iPhone come trackpad";
 "Use it on next launch to install or open FMLAB Retro." = "Usala al prossimo avvio per installare o aprire FMLAB Retro.";
 "Use on Next Launch" = "Usa al prossimo avvio";
+"Use the External Screen for Games" = "Usa lo schermo esterno per i giochi";
 "User ID" = "ID utente";
 "Username" = "Nome utente";
 "Uses the existing environment, accounts and files. Switching environments takes effect after relaunch." = "Usa l'ambiente, gli account e i file che ci sono già. Il cambio di ambiente vale dopo aver riaperto l'app.";

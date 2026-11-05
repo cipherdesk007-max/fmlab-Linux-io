@@ -6,7 +6,7 @@ Real Linux on the iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), the FMLAB e
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. No jailbreak, no virtual machine: ARM64 Linux programs
 run inside the app through an interpreter and a layer that translates system calls.
 
-> **Status: 0.10.2.** LinuxRunner 1.1.0 (build 900), same engine (ARM64 interpreter, JIT, Metal GPU), with the FMLAB
+> **Status: 0.10.3.** LinuxRunner 1.1.0 (build 900), same engine (ARM64 interpreter, JIT, Metal GPU), with the FMLAB
 > name, logo and red-and-black colours, its own identifier (`dev.fmlab.linux`, so it installs **next to**
 > LinuxRunner without touching its data), in-app updates and the improvements listed below.
 
@@ -17,6 +17,12 @@ refresh by themselves on every release in [docs/screenshots/ultima-versione](doc
 
 <p align="center">
   <img src="docs/images/0.9.5/desktop-orizzontale.png" width="100%" alt="Desktop in landscape (0.9.5)">
+</p>
+<p align="center">
+  <img src="docs/images/0.10.2/giochi.png" width="24%" alt="Games tab (games blurred)">
+  <img src="docs/images/0.10.2/gioco-ds-verticale.png" width="24%" alt="DS in portrait, controls below (game blurred)">
+  <img src="docs/images/0.10.2/comandi.png" width="24%" alt="Controls and saves">
+  <img src="docs/images/0.10.2/distribuzioni.png" width="24%" alt="Distributions without the emulator">
 </p>
 <p align="center">
   <img src="docs/images/0.9.5/home.png" width="24%" alt="Home">
@@ -66,7 +72,7 @@ Base: LinuxRunner 1.1.0 (build 900) with the same engine (ARM64 interpreter, JIT
 
 | Improvement | Original LinuxRunner |
 |---|---|
-| **Native Game Emulator**: NES, Game Boy/Color, GBA, SNES, PlayStation, DS inside the app, no Linux, no JIT; on-screen controls that follow rotation and fit every iPhone and iPad, controllers and keyboards, saves, fast forward, your own game folders (iCloud too) sorted by console, *Games Only* mode, resume where you left off, checked BIOS files; extensions, options and notes come from fmlab-retro without a new app; you add your own games — cores from [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) (0.9.0) | No emulator |
+| **Native Game Emulator**: NES, Game Boy/Color, GBA, SNES, PlayStation, DS inside the app, no Linux, no JIT; on-screen controls that follow rotation and fit every iPhone and iPad, controllers and keyboards, saves, fast forward, your own game folders (iCloud too) sorted by console, *Games Only* mode, resume where you left off, checked BIOS files; extensions, options and notes come from fmlab-retro without a new app; buttons you can move and resize per console, rename with the real game title, HD graphics and TV/LCD filters (0.10.3); you add your own games — cores from [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) (0.9.0) | No emulator |
 | **One-tap distribution switch from Home**: tap the one you want in *Installed Distributions*, confirm, close and reopen; it shows which one is running and which starts next (0.8.7) | You go to Distributions → distribution → Use on Next Launch |
 | **Every distribution can be deleted**, even the built-in Alpine, and shows how much space it uses | Alpine is inside the app and can't be removed |
 | **Cleanup** (Settings → Cleanup): installation temp files, the app's temp folder and caches, with the space freed | — |

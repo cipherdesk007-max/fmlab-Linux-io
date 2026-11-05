@@ -23,6 +23,8 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 /// Dati del motore (da fmlab-retro, dati/emulatore.json): per ogni core "estensioni" e "opzioni".
 /// Si possono cambiare mentre l'app gira: valgono dal prossimo gioco aperto.
 + (void)usaDati:(NSDictionary<NSString *, NSDictionary *> *)core NS_SWIFT_NAME(usaDati(_:));
+/// Opzioni scelte dall'utente (es. grafica migliorata): valgono sopra a quelle dei dati, dal prossimo gioco aperto.
++ (void)usaOpzioniUtente:(NSDictionary<NSString *, NSString *> *)opzioni NS_SWIFT_NAME(usaOpzioniUtente(_:));
 /// Core presenti nell'app (Frameworks/FMLAB*.framework).
 + (NSArray<FMLABCore *> *)core NS_SWIFT_NAME(core());
 /// Il core giusto per un file, dall'estensione (nil se nessuno).
@@ -48,6 +50,8 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 /// Il gioco usa il tocco sullo schermo (Nintendo DS).
 @property (readonly) BOOL tocco;
 @property (readonly) double fps;
+/// Misura in pixel dell'ultima immagine del gioco (per i filtri scanline/LCD).
+@property (readonly) CGSize misuraImmagine;
 @property (nonatomic) BOOL inPausa;
 /// Avanti veloce (circa 3 volte) finché è attivo.
 @property (nonatomic) BOOL veloce;
