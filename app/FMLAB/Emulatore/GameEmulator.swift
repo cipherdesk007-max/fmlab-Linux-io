@@ -903,6 +903,8 @@ final class FMLABGiocoController: UIViewController {
     private var scambiati = false            // DS: schermo di sotto sopra (o a sinistra)
     private let filtroVista = UIView()       // scanline / griglia LCD sopra l'immagine
     private let etichettaFPS = UILabel()
+    /// Con la TV: in alto sul telefono "Gioco sulla TV" e il tasto delle impostazioni (immagine, tasti, salvataggi)
+    private let barraTV = UIStackView()
     private var giroFPS: Timer?
     // DS in orizzontale: un'immagine sola (schermi uno sopra l'altro) divisa in due viste, così ognuno va dove serve
     private let secondoSchermo = UIView()
@@ -964,6 +966,17 @@ final class FMLABGiocoController: UIViewController {
         for nome in [UIScene.didActivateNotification, UIScene.didDisconnectNotification, UIScene.willConnectNotification, Notification.Name("LRExternalDisplayChanged")] {
             osservatori.append(NotificationCenter.default.addObserver(forName: nome, object: nil, queue: .main) { [weak self] _ in
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { self?.collegaEsterno() } })
+        }
+        do {
+            let icona = UIImageView(image: UIImage(systemName: "tv")); icona.tintColor = .white
+            let t = UILabel(); t.text = LF("Game on the TV"); t.textColor = .white; t.font = .preferredFont(forTextStyle: .headline)
+            var c = UIButton.Configuration.filled(); c.image = UIImage(systemName: "gearshape.fill"); c.title = LF("Settings")
+            c.imagePadding = 6; c.cornerStyle = .capsule; c.baseBackgroundColor = UIColor(white: 1, alpha: 0.18); c.baseForegroundColor = .white
+            let b = UIButton(configuration: c); b.addAction(UIAction { [weak self] _ in self?.apriMenu() }, for: .touchUpInside)
+            let spazio = UIView()
+            for v in [icona, t, spazio, b] { barraTV.addArrangedSubview(v) }
+            barraTV.spacing = 10; barraTV.alignment = .center; barraTV.isHidden = true
+            view.addSubview(barraTV)
         }
         etichettaFPS.font = .monospacedDigitSystemFont(ofSize: 12, weight: .semibold); etichettaFPS.textColor = .white
         etichettaFPS.backgroundColor = UIColor(white: 0, alpha: 0.55); etichettaFPS.layer.cornerRadius = 6; etichettaFPS.clipsToBounds = true
@@ -1058,9 +1071,20 @@ final class FMLABGiocoController: UIViewController {
         guard let e = esterno, let l = specchio, let v = emulatore?.vista else { return }
         CATransaction.begin(); CATransaction.setDisableActions(true)
         l.contents = v.layer.contents
-        let r = max(0.3, emulatore?.rapporto ?? 4.0 / 3.0), b = e.bounds
+        let d = UserDefaults.standard, forma = d.string(forKey: "FMLAB.grafica.formato") ?? "originale"
+        let filtro = d.string(forKey: "FMLAB.grafica.filtro") ?? "netti"
+        l.magnificationFilter = filtro == "morbido" ? .linear : .nearest
+        let ds = emulatore?.tocco == true, b = e.bounds
+        var r = max(0.3, emulatore?.rapporto ?? 4.0 / 3.0)
+        if !ds && forma == "largo" { r = max(r, 16.0 / 9.0) } else if !ds && forma == "pieno" { r = b.width / max(1, b.height) }
         var w = b.width, h = w / r; if h > b.height { h = b.height; w = h * r }
-        l.frame = CGRect(x: (b.width - w) / 2, y: (b.height - h) / 2, width: w, height: h)
+        // pixel tutti uguali anche sulla TV (es. 240 righe × 4 = 960 su una TV 1080p), se si perde al massimo il 15%
+        if !ds && forma == "originale" && filtro != "morbido", let righe = emulatore?.misuraImmagine.height, righe >= 100 {
+            let base = righe >= 400 ? righe / 2 : righe, sc = e.window?.screen.scale ?? 1
+            let n = floor(h * sc / base)
+            if n >= 1, n * base / sc >= h * 0.85 { h = n * base / sc; w = h * r }
+        }
+        l.frame = CGRect(x: ((b.width - w) / 2).rounded(), y: ((b.height - h) / 2).rounded(), width: w, height: h)
         CATransaction.commit()
     }
 
@@ -1070,6 +1094,11 @@ final class FMLABGiocoController: UIViewController {
         let sopra = UserDefaults.standard.object(forKey: "FMLAB.comandi.sopra") as? Bool ?? true
         let ds = emulatore?.tocco == true
         pad.sopra = false
+        barraTV.isHidden = esterno == nil
+        if esterno != nil {
+            barraTV.frame = CGRect(x: s.minX + 16, y: s.minY + 6, width: s.width - 32, height: 44)
+            view.bringSubviewToFront(barraTV)
+        }
         // con lo schermo esterno il gioco è lì: sul telefono solo i comandi, grandi (il DS tiene gli schermi per il tocco)
         if esterno != nil && !ds {
             emulatore?.vista.isHidden = true
@@ -1079,6 +1108,8 @@ final class FMLABGiocoController: UIViewController {
             pad.areaSicura = UIEdgeInsets(top: s.minY, left: s.minX, bottom: b.maxY - s.maxY, right: b.maxX - s.maxX)
             pad.spazioLato = b.width / 3
             if pad.modo == .verticale { pad.frame = CGRect(x: 0, y: b.height * 0.25, width: b.width, height: b.height * 0.75) }
+            else { pad.areaSicura.top = s.minY + 50 }
+            view.bringSubviewToFront(barraTV)
             pad.setNeedsLayout(); return
         }
         // DS con la TV: sulla TV i due schermi, sul telefono SOLO lo schermo da toccare (serve per il pennino) e i tasti
@@ -1089,8 +1120,8 @@ final class FMLABGiocoController: UIViewController {
             avviso.frame = .zero
             let v = b.height >= b.width
             var w: CGFloat, h: CGFloat, q: CGRect
-            if v { w = s.width; h = w * 0.75; if h > b.height * 0.42 { h = b.height * 0.42; w = h / 0.75 }; q = CGRect(x: s.midX - w / 2, y: s.minY + 8, width: w, height: h) }
-            else { h = s.height * 0.8; w = h / 0.75; q = CGRect(x: s.midX - w / 2, y: s.midY - h / 2, width: w, height: h) }
+            if v { w = s.width; h = w * 0.75; if h > b.height * 0.40 { h = b.height * 0.40; w = h / 0.75 }; q = CGRect(x: s.midX - w / 2, y: s.minY + 56, width: w, height: h) }
+            else { h = s.height - 60; w = h / 0.75; q = CGRect(x: s.midX - w / 2, y: s.minY + 54, width: w, height: h) }
             e.vista.frame = aiPixel(q); toccoDS.frame = e.vista.frame
             pad.modo = v ? .verticale : .orizzontale
             pad.frame = v ? CGRect(x: 0, y: q.maxY, width: b.width, height: b.maxY - q.maxY) : b

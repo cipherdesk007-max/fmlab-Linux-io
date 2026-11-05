@@ -900,6 +900,7 @@ TR.update({
 "The TV gets the picture only with Screen Mirroring.": "La TV riceve l'immagine solo con Duplica schermo.",
 "iOS does not let any app start Screen Mirroring by itself: it is only in Control Center. The iPhone and the TV must be on the same Wi-Fi. A USB-C/HDMI cable works too, with nothing to tap.": "iOS non lascia a nessuna app avviare Duplica schermo da sola: è solo nel Centro di Controllo. iPhone e TV devono essere sulla stessa Wi-Fi. Va bene anche un cavo USB-C/HDMI, senza toccare niente.",
 "FMLAB Linux opens straight into the Game Emulator and Linux does not start, even with Start Runtime on Launch: all the power goes to the games. The Linux button brings back everything else and starts Linux if it should.": "FMLAB Linux si apre direttamente nel Game Emulator e Linux non parte, anche con Avvia runtime all'apertura: tutta la potenza va ai giochi. Il tasto Linux riporta tutto il resto e avvia Linux se deve.",
+"Game on the TV": "Gioco sulla TV",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

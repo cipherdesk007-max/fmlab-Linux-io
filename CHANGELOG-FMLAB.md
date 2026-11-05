@@ -2,6 +2,13 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.11.8
+- **Telefono come controller con la TV**: in alto *Gioco sulla TV* e il tasto **Impostazioni** (immagine, tasti,
+  salvataggi, velocità); sotto solo i tasti, grandi. Il gioco si vede solo sulla TV (sul DS il telefono tiene solo
+  lo schermo da toccare).
+- **Sulla TV valgono le scelte di Immagine…**: forma (Originale, 16:9, Tutto lo schermo), Morbido o Pixel netti, e
+  pixel tutti uguali anche lì (es. 240 righe × 4 = 960 su una TV Full HD).
+
 ## 0.11.7
 - **Con la TV il gioco si vede solo sulla TV** anche sul DS: sulla TV i due schermi, sul telefono solo lo schermo
   da toccare (serve per il pennino) e i tasti. Le altre console sul telefono mostrano solo i tasti, grandi.
