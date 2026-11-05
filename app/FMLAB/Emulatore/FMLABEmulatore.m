@@ -209,7 +209,6 @@ static bool fmlabAmbiente(unsigned cmd, void *data) {
             cb->get_current_framebuffer = fmlabFBO; cb->get_proc_address = fmlabProc;
             G_hw = *cb; G_hwAttivo = true; return true;
         }
-        case RETRO_ENVIRONMENT_SET_HW_SHARED_CONTEXT & ~RETRO_ENVIRONMENT_EXPERIMENTAL: return true;
         default: return false;   // niente Vulkan, niente opzioni v1/v2: il core usa le sue scelte semplici
     }
 }
