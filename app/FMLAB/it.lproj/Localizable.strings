@@ -574,6 +574,7 @@
 "FMLAB Linux %lf available" = "FMLAB Linux %lf disponibile";
 "FMLAB Linux %lld available" = "FMLAB Linux %lld disponibile";
 "FMLAB Linux is based on LinuxRunner by Leminos, derived from iSH and ios-linuxkit. GPL-3.0 license." = "FMLAB Linux è basata su LinuxRunner di Leminos, che deriva da iSH e ios-linuxkit. Licenza GPL-3.0.";
+"FMLAB Linux opens straight into the Game Emulator and Linux does not start, even with Start Runtime on Launch: all the power goes to the games. The Linux button brings back everything else and starts Linux if it should." = "FMLAB Linux si apre direttamente nel Game Emulator e Linux non parte, anche con Avvia runtime all'apertura: tutta la potenza va ai giochi. Il tasto Linux riporta tutto il resto e avvia Linux se deve.";
 "FMLAB Linux opens straight into the Game Emulator. The Linux button brings back everything else." = "FMLAB Linux si apre direttamente nel Game Emulator. Il tasto Linux riporta tutto il resto.";
 "FMLAB Linux · Game Emulator\n\n" = "FMLAB Linux · Game Emulator\n\n";
 "FMLAB Linux › Giochi" = "FMLAB Linux › Giochi";

@@ -2,6 +2,11 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.11.6
+- **In "Solo giochi" Linux non parte da solo**, anche con *Avvia runtime all'apertura* acceso (impostazione da
+  sviluppatore): niente processore e memoria rubati ai giochi. Toccando *Linux* per tornare al resto dell'app,
+  Linux parte subito se doveva partire all'apertura.
+
 ## 0.11.5
 - **TV a tutto schermo e telefono controller su iOS 27**: su iOS 27 la TV (Duplica schermo o cavo) arriva all'app
   come schermo separato solo se l'app registra un "accessorio" di iOS 27. Il codice c'era ma l'app si compila con

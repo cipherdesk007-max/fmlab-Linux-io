@@ -379,6 +379,10 @@ struct ManagerView: View {
         }
         .overlay(alignment: .bottom) { InstallProgressCard() }
         // FMLAB: modalità "Solo giochi" (Game Emulator a tutto schermo; il tasto Linux torna qui)
+        .onChange(of: fmlabSoloGiochi) { soloGiochi in
+            // uscendo da "Solo giochi": se Linux doveva partire all'apertura, parte adesso
+            if !soloGiochi, LRRuntimeBridge.autoStart(), !LRRuntimeBridge.isRunning() { startRuntime() }
+        }
         .fullScreenCover(isPresented: $fmlabSoloGiochi) { GameEmulatorSoloGiochi().accentColor(Color(red: 0xBF / 255, green: 0x6D / 255, blue: 0x6F / 255)).preferredColorScheme(appearance == "system" ? nil : appearance == "light" ? .light : .dark) }
         .accentColor(Color(red: 0xBF / 255, green: 0x6D / 255, blue: 0x6F / 255))
         .preferredColorScheme(appearance == "system" ? nil : appearance == "light" ? .light : .dark)

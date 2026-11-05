@@ -693,7 +693,7 @@ struct GameEmulatorView: View {
                 Text("A folder with your game saves, states, BIOS, covers and Game Emulator settings, to keep in Files or iCloud or to move to another iPhone. Games are not included.")
             }
             Section {
-                Toggle(isOn: $modoSoloGiochi) { VStack(alignment: .leading, spacing: 3) { Text("Games Only"); Text("FMLAB Linux opens straight into the Game Emulator. The Linux button brings back everything else.").font(.caption).foregroundColor(.secondary) } }
+                Toggle(isOn: $modoSoloGiochi) { VStack(alignment: .leading, spacing: 3) { Text("Games Only"); Text("FMLAB Linux opens straight into the Game Emulator and Linux does not start, even with Start Runtime on Launch: all the power goes to the games. The Linux button brings back everything else and starts Linux if it should.").font(.caption).foregroundColor(.secondary) } }
             }
             Section {
                 ForEach(FMLABEmulatore.core(), id: \.nome) { c in

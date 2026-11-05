@@ -471,6 +471,9 @@ static void configureGuestHostAlias(void) {
 #ifdef LINUXRUNNER
     LRBootEvent("application delegate initialized");
     if (![LRRuntimeBridge autoStart]) { LRBootEvent("runtime auto start OFF: native workspace available before boot"); return YES; }
+    // FMLAB: in "Solo giochi" Linux non parte da solo (niente processore e memoria rubati ai giochi);
+    // parte quando si tocca "Linux" per tornare al resto dell'app.
+    if ([NSUserDefaults.standardUserDefaults boolForKey:@"FMLAB.soloGiochi"]) { LRBootEvent("runtime auto start deferred: FMLAB Games Only"); return YES; }
     [self startLinuxRuntime];
 #else
     CFAbsoluteTime bootStart = CFAbsoluteTimeGetCurrent();
