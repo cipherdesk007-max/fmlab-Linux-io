@@ -888,6 +888,7 @@
 "Metal draws are guest OpenGL draws executed by the GPU. Mesa draws were rasterised in software. Presenting the desktop through Metal is not counted as acceleration." = "I disegni Metal sono disegni OpenGL di Linux fatti dalla GPU. I disegni Mesa sono fatti in software. Mostrare il desktop tramite Metal non conta come accelerazione.";
 "Metal framebuffer presenter" = "Visualizzazione con Metal";
 "Microphone" = "Microfono";
+"Mirroring: open a game" = "Duplicazione attiva: apri un gioco";
 "Missing after installation: %@. Check the network and tap Retry; Details shows the installer log." = "Mancano dopo l'installazione: %@. Controlla la rete e tocca Riprova; Dettagli mostra il registro dell'installazione.";
 "Missing after installation: %lf. Check the network and tap Retry; Details shows the installer log." = "Mancano dopo l'installazione: %lf. Controlla la rete e tocca Riprova; Dettagli mostra il registro dell'installazione.";
 "Missing after installation: %lld. Check the network and tap Retry; Details shows the installer log." = "Mancano dopo l'installazione: %lld. Controlla la rete e tocca Riprova; Dettagli mostra il registro dell'installazione.";

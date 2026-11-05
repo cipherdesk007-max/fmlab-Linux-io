@@ -600,7 +600,10 @@ enum { LRStartIdle, LRStartChecking, LRStartRepairing, LRStartSession, LRStartFa
 NSNotificationName const LRExternalDisplayChangedNotification = @"LRExternalDisplayChanged";
 NSString *const LRExternalDisplayEnabledKey = @"LinuxRunnerDesktop.externalDisplay";
 static BOOL LRExternalOutputEnabled(void) {
-    id value=[NSUserDefaults.standardUserDefaults objectForKey:LRExternalDisplayEnabledKey];
+    // FMLAB: con un gioco aperto (Game Emulator) lo schermo esterno serve al gioco anche se l'uscita del desktop è spenta
+    NSUserDefaults *d=NSUserDefaults.standardUserDefaults;
+    if([d boolForKey:@"FMLAB.giochi.inCorso"]){id g=[d objectForKey:@"FMLAB.giochi.esterno"];if(!g||[g boolValue])return YES;}
+    id value=[d objectForKey:LRExternalDisplayEnabledKey];
     return !value || [value boolValue]; // Preserve the existing automatic output default.
 }
 @interface LRExternalDisplayController : UIViewController

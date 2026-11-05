@@ -2,6 +2,14 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.10.6
+- **AirPlay con i giochi, come per Linux**: con un gioco aperto l'app chiede a iOS lo schermo esterno separato
+  (lo stesso meccanismo del desktop Linux) anche se l'*Uscita desktop esterna* è spenta. Con Duplica schermo attiva
+  la TV mostra solo il gioco e il telefono diventa **solo il controller** (sul DS il telefono tiene gli schermi per
+  il tocco). Se colleghi la TV mentre giochi, o si stacca, se ne accorge da solo entro un secondo e mezzo.
+- Scheda Giochi › AirPlay e TV: con la sola duplicazione attiva scrive *Duplicazione attiva: apri un gioco*.
+- *Copia rapporto* dice anche se lo schermo esterno c'è e se il gioco lo sta usando.
+
 ## 0.10.5
 - **Cerca TV AirPlay dall'app**: nella scheda Giochi (AirPlay e TV), in Impostazioni › Dispositivi e nel menu del
   gioco (*TV AirPlay…*) si apre l'elenco di sistema dei dispositivi AirPlay vicini; sceglierne uno manda lì il suono.

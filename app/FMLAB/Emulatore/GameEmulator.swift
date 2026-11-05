@@ -923,7 +923,7 @@ final class FMLABGiocoController: UIViewController {
                        NotificationCenter.default.addObserver(forName: .GCControllerDidDisconnect, object: nil, queue: .main, using: controller)]
         controller(Notification(name: .GCControllerDidConnect))
         view.addSubview(pad)
-        for nome in [UIScene.didActivateNotification, UIScene.didDisconnectNotification, UIScene.willConnectNotification] {
+        for nome in [UIScene.didActivateNotification, UIScene.didDisconnectNotification, UIScene.willConnectNotification, Notification.Name("LRExternalDisplayChanged")] {
             osservatori.append(NotificationCenter.default.addObserver(forName: nome, object: nil, queue: .main) { [weak self] _ in
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { self?.collegaEsterno() } })
         }
@@ -934,7 +934,8 @@ final class FMLABGiocoController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         guard !avviato else { return }; avviato = true
-        collegaEsterno()
+        segnaInCorso(true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in self?.collegaEsterno() }
         guard let e = emulatore else { apriMenu(); return }
         let riprendi = UserDefaults.standard.object(forKey: "FMLAB.riprendi") as? Bool ?? true
         e.salvaUscita = riprendi
@@ -946,7 +947,7 @@ final class FMLABGiocoController: UIViewController {
         present(m, animated: true)
     }
     override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated); emulatore?.ferma(); staccaEsterno(); giroDS?.invalidate(); giroDS = nil
+        super.viewWillDisappear(animated); emulatore?.ferma(); staccaEsterno(); segnaInCorso(false); giroDS?.invalidate(); giroDS = nil
         if accessoCartella { gioco.cartella?.stopAccessingSecurityScopedResource(); accessoCartella = false }
     }
 
@@ -959,13 +960,22 @@ final class FMLABGiocoController: UIViewController {
     }
     /// Nome dello schermo esterno collegato (AirPlay/cavo), per la scheda Giochi.
     static func nomeSchermoEsterno() -> String? {
-        guard let s = scenaEsterna() else { return nil }
+        guard let s = scenaEsterna() else {
+            // solo duplicazione (nessuna scena separata finché non apri un gioco): si vede che c'è uno schermo in più
+            return UIScreen.screens.count > 1 ? LF("Mirroring: open a game") : nil
+        }
         let m = s.screen.bounds.size, k = s.screen.scale
         return String(format: LF("Connected · %.0f×%.0f"), m.width * k, m.height * k)
     }
+    private var finestraPropria: UIWindow?
+    private var controlloEsterno: Timer?
     private func finestraEsterna() -> UIWindow? {
-        guard UserDefaults.standard.object(forKey: "FMLAB.giochi.esterno") as? Bool ?? true else { return nil }
-        return Self.scenaEsterna()?.windows.first
+        guard UserDefaults.standard.object(forKey: "FMLAB.giochi.esterno") as? Bool ?? true, let sc = Self.scenaEsterna() else { return nil }
+        // di solito la finestra c'è già (quella del desktop Linux, che si copre); se no se ne fa una
+        if let w = sc.windows.first(where: { $0 !== finestraPropria }) ?? finestraPropria { return w }
+        let w = UIWindow(windowScene: sc); w.rootViewController = UIViewController(); w.rootViewController?.view.backgroundColor = .black
+        w.isHidden = false; finestraPropria = w
+        return w
     }
     private func collegaEsterno() {
         guard emulatore != nil else { return }
@@ -983,6 +993,20 @@ final class FMLABGiocoController: UIViewController {
     private func staccaEsterno() {
         giroEsterno?.invalidate(); giroEsterno = nil
         esterno?.removeFromSuperview(); esterno = nil; specchio = nil
+        finestraPropria?.isHidden = true; finestraPropria = nil
+    }
+    /// Gioco aperto: lo schermo esterno (AirPlay Duplica schermo o cavo) lo prende il gioco.
+    private func segnaInCorso(_ si: Bool) {
+        UserDefaults.standard.set(si, forKey: "FMLAB.giochi.inCorso")
+        controlloEsterno?.invalidate(); controlloEsterno = nil
+        guard si else { return }
+        // iOS può collegare lo schermo esterno qualche istante dopo (o mentre si gioca): si ricontrolla ogni 1,5 s
+        controlloEsterno = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            let c = Self.scenaEsterna() != nil && (UserDefaults.standard.object(forKey: "FMLAB.giochi.esterno") as? Bool ?? true)
+            if c && (self.esterno == nil || self.esterno?.window == nil) { self.staccaEsterno(); self.collegaEsterno() }
+            else if !c && self.esterno != nil { self.staccaEsterno(); self.view.setNeedsLayout() }
+        }
     }
     @objc private func copiaSuEsterno() {
         guard let e = esterno, let l = specchio, let v = emulatore?.vista else { return }
@@ -1241,6 +1265,7 @@ final class FMLABGiocoController: UIViewController {
         Console: \(gioco.core.console) · core \(gioco.core.nome)
         File: .\(gioco.url.pathExtension) · \(dim) · \(gioco.cartella == nil ? "Giochi" : "cartella collegata")
         Dati del motore: \(FMLABDati.versione)
+        Schermo esterno: \(Self.nomeSchermoEsterno() ?? "nessuno") · usato: \(esterno != nil ? "sì" : "no")
         Errore: \(avviso.text ?? "-")
         """
     }
