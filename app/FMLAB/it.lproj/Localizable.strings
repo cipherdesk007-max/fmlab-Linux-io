@@ -489,6 +489,12 @@
 "Engine data already up to date (%@)" = "Dati del motore già aggiornati (%@)";
 "Engine data already up to date (%lf)" = "Dati del motore già aggiornati (%lf)";
 "Engine data already up to date (%lld)" = "Dati del motore già aggiornati (%lld)";
+"Engine data update available: %@" = "Aggiornamento dei dati del motore disponibile: %@";
+"Engine data update available: %lf" = "Aggiornamento dei dati del motore disponibile: %lf";
+"Engine data update available: %lld" = "Aggiornamento dei dati del motore disponibile: %lld";
+"Engine data updated. Freed %@." = "Dati del motore aggiornati. Liberati %@.";
+"Engine data updated. Freed %lf." = "Dati del motore aggiornati. Liberati %lf.";
+"Engine data updated. Freed %lld." = "Dati del motore aggiornati. Liberati %lld.";
 "Engine data updated: %@" = "Dati del motore aggiornati: %@";
 "Engine data updated: %lf" = "Dati del motore aggiornati: %lf";
 "Engine data updated: %lld" = "Dati del motore aggiornati: %lld";
@@ -532,6 +538,7 @@
 "Export failed. Use regular files or directories without links/special files, up to 512 MiB, 4096 entries and 32 directory levels." = "Esportazione non riuscita. Usa file o cartelle normali senza collegamenti o file speciali, fino a 512 MiB, 4096 elementi e 32 livelli di cartelle.";
 "Export includes redacted diagnostic records and recent display logs. Browser profiles, cookies, keys, input payloads and arbitrary application output are excluded." = "L'esportazione include dati diagnostici ripuliti e i registri recenti dello schermo. Profili dei browser, cookie, chiavi, testo digitato e messaggi delle applicazioni sono esclusi.";
 "Extensions, emulator options, BIOS list and notices come from fmlab-retro (dati/emulatore.json) and update by themselves, without a new app. The emulators themselves arrive with app updates." = "Estensioni, opzioni degli emulatori, elenco dei BIOS e avvisi arrivano da fmlab-retro (dati/emulatore.json) e si aggiornano da soli, senza nuova app. Gli emulatori veri arrivano con gli aggiornamenti dell'app.";
+"Extensions, emulator options, BIOS list and notices come from fmlab-retro (dati/emulatore.json), without a new app: when there is something new FMLAB asks before using it, then cleans up files that are no longer needed. The emulators themselves arrive with app updates." = "Estensioni, opzioni degli emulatori, elenco dei BIOS e avvisi arrivano da fmlab-retro (dati/emulatore.json), senza nuova app: quando c'è qualcosa di nuovo FMLAB chiede prima di usarlo, poi pulisce i file che non servono più. Gli emulatori veri arrivano con gli aggiornamenti dell'app.";
 "External Desktop Output" = "Desktop su schermo esterno";
 "External Desktop Touchpad\nSlide: move · Tap: click · Hold and slide: drag\nTwo fingers: scroll or tap to right-click\nUse Keyboard below to type." = "Touchpad del desktop esterno\nScorri: muovi · Tocca: clic · Tieni premuto e scorri: trascina\nDue dita: scorri o tocca per il clic destro\nPer scrivere usa Tastiera qui sotto.";
 "External Monitor · USB-C or AirPlay" = "Monitor esterno · USB-C o AirPlay";
@@ -662,6 +669,9 @@
 "Importing isolated Arch Linux ARM filesystem" = "Importazione dei file di Arch Linux ARM";
 "Importing isolated Debian filesystem" = "Importazione dei file di Debian";
 "In iCloud: tap to download" = "In iCloud: tocca per scaricarlo";
+"In use now: %@. Only settings, no code: nothing else changes. Old files that are no longer needed are cleaned up." = "In uso adesso: %@. Solo impostazioni, niente codice: il resto non cambia. I file vecchi che non servono più vengono puliti.";
+"In use now: %lf. Only settings, no code: nothing else changes. Old files that are no longer needed are cleaned up." = "In uso adesso: %lf. Solo impostazioni, niente codice: il resto non cambia. I file vecchi che non servono più vengono puliti.";
+"In use now: %lld. Only settings, no code: nothing else changes. Old files that are no longer needed are cleaned up." = "In uso adesso: %lld. Solo impostazioni, niente codice: il resto non cambia. I file vecchi che non servono più vengono puliti.";
 "Increase Font Size" = "Testo più grande";
 "Input" = "Comandi";
 "Inspection" = "Ispezione";
@@ -886,6 +896,10 @@
 "New Environment" = "Nuovo ambiente";
 "New Folder" = "Nuova cartella";
 "New data" = "Dati nuovi";
+"New data ready: tap Update Now above" = "Dati nuovi pronti: tocca Aggiorna ora qui sopra";
+"New engine data found: %@" = "Trovati dati del motore nuovi: %@";
+"New engine data found: %lf" = "Trovati dati del motore nuovi: %lf";
+"New engine data found: %lld" = "Trovati dati del motore nuovi: %lld";
 "New ordinary terminals log in as the selected user using the distribution's su. Existing terminals, managed desktops and administrative/package launches retain their identity." = "I nuovi terminali entrano con l'utente scelto tramite su della distribuzione. Terminali già aperti, desktop gestiti e avvii di amministrazione o pacchetti mantengono la loro identità.";
 "New password" = "Nuova password";
 "Next Desktop Start" = "Prossimo avvio del desktop";
@@ -1378,9 +1392,11 @@
 "Underruns" = "Interruzioni";
 "Unknown" = "Sconosciuto";
 "Unpacking Alpine Linux…" = "Estrazione di Alpine Linux…";
+"Update Now" = "Aggiorna ora";
 "Update RunnerKit" = "Aggiorna RunnerKit";
 "Updated from fmlab-retro" = "Aggiornati da fmlab-retro";
 "Updates: in the terminal, sudo apt update && sudo apt upgrade (Debian and FMLAB together). Put your games in Files › FMLAB Linux › Shared › Giochi, then run rk-giochi importa." = "Aggiornamenti: nel terminale sudo apt update && sudo apt upgrade (Debian e FMLAB insieme). Metti i tuoi giochi in File › FMLAB Linux › Shared › Giochi, poi lancia rk-giochi importa.";
+"Updating engine data and cleaning up…" = "Aggiorno i dati del motore e pulisco…";
 "Use %@?" = "Usare %@?";
 "Use %lf?" = "Usare %lf?";
 "Use %lld?" = "Usare %lld?";

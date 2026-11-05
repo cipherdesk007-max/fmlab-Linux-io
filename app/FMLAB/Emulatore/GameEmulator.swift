@@ -201,13 +201,13 @@ struct FMLABRiquadroGioco: View {
 /// Cosa sta facendo l'aggiornamento dei dati del motore, per la barra (Game Emulator e Distribuzioni).
 final class FMLABStatoDati: ObservableObject {
     static let shared = FMLABStatoDati()
-    enum Fase { case controllo, scarico, verifico, aggiornati, giaAggiornati, errore }
+    enum Fase { case controllo, scarico, verifico, disponibili, applico, aggiornati, giaAggiornati, errore }
     @Published var fase: Fase?
     @Published var frazione: Double = 0
     private var chiudi: DispatchWorkItem?
     func imposta(_ f: Fase?, _ x: Double) {
         chiudi?.cancel(); fase = f; frazione = x
-        if let f, [.aggiornati, .giaAggiornati, .errore].contains(f) {   // l'esito resta qualche secondo, poi la barra sparisce
+        if let f, [.aggiornati, .giaAggiornati, .errore, .disponibili].contains(f) {   // l'esito resta qualche secondo, poi la barra sparisce
             let w = DispatchWorkItem { [weak self] in self?.fase = nil }
             chiudi = w; DispatchQueue.main.asyncAfter(deadline: .now() + (f == .aggiornati ? 6 : 3), execute: w)
         }
@@ -217,6 +217,8 @@ final class FMLABStatoDati: ObservableObject {
         case .controllo: return LF("Checking engine data on fmlab-retro…")
         case .scarico: return LF("Downloading engine data…")
         case .verifico: return LF("Verifying engine data…")
+        case .disponibili: return String(format: LF("New engine data found: %@"), FMLABDati.inAttesaVersione ?? "?")
+        case .applico: return LF("Updating engine data and cleaning up…")
         case .aggiornati: return String(format: LF("Engine data updated: %@"), FMLABDati.versione)
         case .giaAggiornati: return String(format: LF("Engine data already up to date (%@)"), FMLABDati.versione)
         case .errore: return LF("Could not check engine data: using the saved copy")
@@ -232,7 +234,7 @@ struct FMLABBarraDati: View {
         if let f = stato.fase {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) {
-                    Image(systemName: f == .aggiornati || f == .giaAggiornati ? "checkmark.circle.fill" : f == .errore ? "exclamationmark.triangle.fill" : "arrow.down.circle")
+                    Image(systemName: f == .aggiornati || f == .giaAggiornati ? "checkmark.circle.fill" : f == .errore ? "exclamationmark.triangle.fill" : f == .disponibili ? "sparkles" : "arrow.down.circle")
                         .foregroundColor(f == .errore ? .orange : f == .aggiornati || f == .giaAggiornati ? .green : .accentColor)
                     Text(stato.testo).font(.caption.weight(.semibold)).lineLimit(2)
                 }
@@ -254,6 +256,41 @@ enum FMLABDati {
         return d.appendingPathComponent("emulatore.json")
     }
     private(set) static var attuali: [String: Any] = [:]
+    /// Dati nuovi già scaricati e controllati, in attesa del sì dell'utente.
+    private static var attesa: URL { copia.deletingLastPathComponent().appendingPathComponent("emulatore.nuovo.json") }
+    private static var datiInAttesa: [String: Any]? { (try? Data(contentsOf: attesa)).flatMap(valido) }
+    static var inAttesaVersione: String? { datiInAttesa?["versione"] as? String }
+    static var inAttesaNovita: String? {
+        let t = (datiInAttesa?["novita"] as? [String: String])?[lingua]; return (t?.isEmpty == false) ? t : nil
+    }
+    /// Sì: usa i dati nuovi e pulisce quello che non serve più (copia in attesa, giochi estratti dagli archivi,
+    /// copie di sicurezza temporanee). Dà quanto spazio ha liberato.
+    @discardableResult static func applica() -> Int64 {
+        guard let data = try? Data(contentsOf: attesa), let d = valido(data) else { try? FileManager.default.removeItem(at: attesa); return 0 }
+        FMLABStatoDati.shared.imposta(.applico, 0.9)
+        try? data.write(to: copia, options: .atomic); usa(d)
+        try? FileManager.default.removeItem(at: attesa)
+        UserDefaults.standard.set("nuovi", forKey: "FMLAB.dati.esito")
+        UserDefaults.standard.set(versione, forKey: chiaveNuovi)
+        let liberati = pulisci()
+        FMLABStatoDati.shared.imposta(.aggiornati, 1)
+        return liberati
+    }
+    /// File inutili del Game Emulator: estratti degli archivi nella cache, copie di sicurezza temporanee.
+    static func pulisci() -> Int64 {
+        let fm = FileManager.default; var liberati: Int64 = 0
+        func peso(_ u: URL) -> Int64 {
+            var t: Int64 = 0
+            if let e = fm.enumerator(at: u, includingPropertiesForKeys: [.totalFileAllocatedSizeKey]) { for case let f as URL in e { t += Int64((try? f.resourceValues(forKeys: [.totalFileAllocatedSizeKey]).totalFileAllocatedSize) ?? 0) } }
+            return t + Int64((try? u.resourceValues(forKeys: [.totalFileAllocatedSizeKey]).totalFileAllocatedSize) ?? 0)
+        }
+        var via: [URL] = []
+        if let c = fm.urls(for: .cachesDirectory, in: .userDomainMask).first { via.append(c.appendingPathComponent("FMLAB-Giochi")) }
+        via += ((try? fm.contentsOfDirectory(at: fm.temporaryDirectory, includingPropertiesForKeys: nil)) ?? []).filter { $0.lastPathComponent.hasPrefix("FMLAB Game Emulator ") }
+        for u in via where fm.fileExists(atPath: u.path) { let p = peso(u); if (try? fm.removeItem(at: u)) != nil { liberati += p } }
+        UserDefaults.standard.removeObject(forKey: "FMLAB.copertine.mancanti")   // con dati nuovi si riprova a cercare le copertine
+        return liberati
+    }
     /// Ultimo controllo su GitHub e com'è andato (si vede nella sezione Console).
     static var ultimoControllo: Date? { let t = UserDefaults.standard.double(forKey: "FMLAB.dati.ultimoTentativo"); return t > 0 ? Date(timeIntervalSince1970: t) : nil }
     static var esito: String { UserDefaults.standard.string(forKey: "FMLAB.dati.esito") ?? "" }
@@ -326,11 +363,12 @@ enum FMLABDati {
                 }
                 UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: chiave)
                 if (d["versione"] as? String) != versione {
-                    try? data.write(to: copia, options: .atomic); usa(d)
-                    UserDefaults.standard.set("nuovi", forKey: "FMLAB.dati.esito")
-                    UserDefaults.standard.set(versione, forKey: chiaveNuovi)   // avviso e pallino finché non li guardi
-                    stato.imposta(.aggiornati, 1)
+                    // non si cambia niente da soli: si tiene da parte e si chiede
+                    try? data.write(to: attesa, options: .atomic)
+                    UserDefaults.standard.set("disponibili", forKey: "FMLAB.dati.esito")
+                    stato.imposta(.disponibili, 1)
                 } else {
+                    try? FileManager.default.removeItem(at: attesa)   // niente in attesa se è già quella in uso
                     UserDefaults.standard.set("uguali", forKey: "FMLAB.dati.esito")
                     stato.imposta(.giaAggiornati, 1)
                 }
@@ -424,6 +462,8 @@ struct GameEmulatorView: View {
     @State private var statoBIOS: [String: Bool] = [:]     // file -> impronta giusta
     @State private var controllando = false
     @State private var estraendo: String?
+    @State private var inAttesa: String? = FMLABDati.inAttesaVersione
+    @State private var rimandato = false
     @Environment(\.scenePhase) private var fase
     @State private var versioneDati = FMLABDati.versione
     @AppStorage(FMLABDati.chiaveNuovi) private var nuovi = ""
@@ -456,6 +496,19 @@ struct GameEmulatorView: View {
             }
             if let n = estraendo { Section { HStack(spacing: 12) { ProgressView(); Text(String(format: LF("Opening the archive of %@…"), n)) } } }
             if stato.fase != nil { Section { FMLABBarraDati() } }
+            if let nuova = inAttesa, !rimandato {
+                Section {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label(String(format: LF("Engine data update available: %@"), nuova), systemImage: "arrow.down.circle.fill").font(.callout.weight(.semibold))
+                        if let n = FMLABDati.inAttesaNovita { Text(n).font(.callout) }
+                        Text(String(format: LF("In use now: %@. Only settings, no code: nothing else changes. Old files that are no longer needed are cleaned up."), versioneDati)).font(.caption).foregroundColor(.secondary)
+                    }.padding(.vertical, 4)
+                    Button { let l = FMLABDati.applica(); versioneDati = FMLABDati.versione; inAttesa = nil
+                        if l > 0 { errore = String(format: LF("Engine data updated. Freed %@."), ByteCountFormatter.string(fromByteCount: l, countStyle: .file)) }
+                        aggiorna() } label: { Label("Update Now", systemImage: "checkmark.circle") }
+                    Button("Later") { rimandato = true }
+                }
+            }
             if !nuovi.isEmpty {
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
@@ -549,16 +602,17 @@ struct GameEmulatorView: View {
                 }
                 if !FMLABDati.esito.isEmpty {
                     let e = FMLABDati.esito
-                    Label(LF(e == "nuovi" ? "Updated from fmlab-retro" : e == "uguali" ? "Already up to date" : e == "scartati" ? "The downloaded data was not valid and was ignored" : "No connection: using the saved copy"),
-                          systemImage: e == "nuovi" || e == "uguali" ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                        .foregroundColor(e == "nuovi" || e == "uguali" ? .green : .orange).font(.callout)
+                    Label(LF(e == "nuovi" ? "Updated from fmlab-retro" : e == "uguali" ? "Already up to date" : e == "disponibili" ? "New data ready: tap Update Now above" : e == "scartati" ? "The downloaded data was not valid and was ignored" : "No connection: using the saved copy"),
+                          systemImage: e == "nuovi" || e == "uguali" ? "checkmark.circle.fill" : e == "disponibili" ? "sparkles" : "exclamationmark.triangle.fill")
+                        .foregroundColor(e == "nuovi" || e == "uguali" ? .green : e == "disponibili" ? .accentColor : .orange).font(.callout)
                 }
                 Button {
                     controllando = true
-                    FMLABDati.aggiorna(forza: true) { controllando = false; versioneDati = FMLABDati.versione; aggiorna() }
+                    rimandato = false
+                    FMLABDati.aggiorna(forza: true) { controllando = false; inAttesa = FMLABDati.inAttesaVersione }
                 } label: { HStack { Label("Check Now", systemImage: "arrow.triangle.2.circlepath"); if controllando { Spacer(); ProgressView() } } }.disabled(controllando)
             } header: { Text("Engine Data") } footer: {
-                Text("Extensions, emulator options, BIOS list and notices come from fmlab-retro (dati/emulatore.json) and update by themselves, without a new app. The emulators themselves arrive with app updates.")
+                Text("Extensions, emulator options, BIOS list and notices come from fmlab-retro (dati/emulatore.json), without a new app: when there is something new FMLAB asks before using it, then cleans up files that are no longer needed. The emulators themselves arrive with app updates.")
             }
         }
         .listStyle(.insetGrouped)
@@ -567,9 +621,9 @@ struct GameEmulatorView: View {
             Button { FMLABSceltaFile.apri(cartella: true) { aggiungiCartella($0.first) } } label: { Label("Choose Games Folder…", systemImage: "folder.badge.plus") }
             Button { FMLABSceltaFile.apri(cartella: false) { importaFile($0) } } label: { Label("Import Games…", systemImage: "square.and.arrow.down") }
         } label: { Image(systemName: "plus") }.accessibilityLabel(LF("Add Games")) } }
-        .onAppear { aggiorna(); controllaBIOS(); FMLABDati.aggiorna { versioneDati = FMLABDati.versione; aggiorna() } }
-        .onChange(of: fase) { f in if f == .active { FMLABDati.aggiorna { versioneDati = FMLABDati.versione } } }
-        .refreshable { FMLABDati.aggiorna(forza: true) { versioneDati = FMLABDati.versione; aggiorna() }; aggiorna(); controllaBIOS() }
+        .onAppear { aggiorna(); controllaBIOS(); inAttesa = FMLABDati.inAttesaVersione; FMLABDati.aggiorna { inAttesa = FMLABDati.inAttesaVersione } }
+        .onChange(of: fase) { f in if f == .active { FMLABDati.aggiorna { inAttesa = FMLABDati.inAttesaVersione } } }
+        .refreshable { rimandato = false; FMLABDati.aggiorna(forza: true) { inAttesa = FMLABDati.inAttesaVersione }; aggiorna(); controllaBIOS() }
         .fullScreenCover(item: $inGioco) { gioco in FMLABGiocoSchermo(gioco: gioco).ignoresSafeArea() }
         .alert(String(format: LF("Delete %@?"), daTogliere?.nome ?? ""), isPresented: Binding(get: { daTogliere != nil }, set: { if !$0 { daTogliere = nil } })) {
             Button("Delete", role: .destructive) { if let g = daTogliere { try? FileManager.default.removeItem(at: g.url) }; daTogliere = nil; aggiorna() }

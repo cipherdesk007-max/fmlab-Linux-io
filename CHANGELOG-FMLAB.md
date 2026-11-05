@@ -2,6 +2,14 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.10.1
+- **Dati del motore: prima si chiede**. Nella scheda Giochi FMLAB controlla, scarica e verifica i dati nuovi, ma
+  non li usa da solo: compare *Aggiornamento dei dati del motore disponibile* con la versione, le novità e quella in
+  uso, e i tasti **Aggiorna ora** / **Più tardi**. Con *Più tardi* resta tutto com'è e lo richiede la volta dopo.
+- **Dopo l'aggiornamento si pulisce**: via la copia in attesa, i giochi estratti dagli archivi nella cache e le
+  copie di sicurezza temporanee; si vede quanto spazio è stato liberato. Le copertine non trovate si ricercano.
+- Tutto questo succede solo nella scheda Giochi.
+
 ## 0.10.0
 - **Scheda Giochi** nella barra in basso (Home · Distribuzioni · Giochi · Sessioni · Impostazioni): il Game Emulator
   non sta più dentro Distribuzioni. I dati del motore (barra, avviso, controllo) si vedono solo lì dentro; si

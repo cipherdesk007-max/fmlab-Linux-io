@@ -816,6 +816,14 @@ TR.update({
 "Take Screenshot": "Fai una foto",
 "The button stays pressed until you release it from the menu (e.g. run in platform games).": "Il tasto resta premuto finché non lo lasci dal menu (es. per correre nei giochi di piattaforme).",
 "empty": "vuoto",
+"Engine data update available: %@": "Aggiornamento dei dati del motore disponibile: %@",
+"Engine data updated. Freed %@.": "Dati del motore aggiornati. Liberati %@.",
+"Extensions, emulator options, BIOS list and notices come from fmlab-retro (dati/emulatore.json), without a new app: when there is something new FMLAB asks before using it, then cleans up files that are no longer needed. The emulators themselves arrive with app updates.": "Estensioni, opzioni degli emulatori, elenco dei BIOS e avvisi arrivano da fmlab-retro (dati/emulatore.json), senza nuova app: quando c'è qualcosa di nuovo FMLAB chiede prima di usarlo, poi pulisce i file che non servono più. Gli emulatori veri arrivano con gli aggiornamenti dell'app.",
+"In use now: %@. Only settings, no code: nothing else changes. Old files that are no longer needed are cleaned up.": "In uso adesso: %@. Solo impostazioni, niente codice: il resto non cambia. I file vecchi che non servono più vengono puliti.",
+"New data ready: tap Update Now above": "Dati nuovi pronti: tocca Aggiorna ora qui sopra",
+"New engine data found: %@": "Trovati dati del motore nuovi: %@",
+"Update Now": "Aggiorna ora",
+"Updating engine data and cleaning up…": "Aggiorno i dati del motore e pulisco…",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo
