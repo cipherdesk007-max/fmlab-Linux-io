@@ -2,6 +2,13 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.11.5
+- **TV a tutto schermo e telefono controller su iOS 27**: su iOS 27 la TV (Duplica schermo o cavo) arriva all'app
+  come schermo separato solo se l'app registra un "accessorio" di iOS 27. Il codice c'era ma l'app si compila con
+  l'SDK di iOS 26, quindi quella parte restava fuori: iOS duplicava e basta (TV con il telefono dritto, gioco anche
+  sul telefono). Ora la stessa funzione di iOS 27 si chiama mentre l'app gira, quindi la TV diventa uno schermo
+  vero: il gioco (o il desktop Linux) a tutto schermo sulla TV e il telefono solo controller.
+
 ## 0.11.4
 - **TV nera con il gioco (solo suono)**: il gioco si metteva dentro la finestra della TV del desktop Linux, che
   può essere nascosta (per esempio con l'uscita del desktop spenta): così sulla TV non si vedeva niente. Ora il gioco

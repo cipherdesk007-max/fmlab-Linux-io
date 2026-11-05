@@ -9,6 +9,7 @@
 #import "LinuxRunner-Swift.h"
 #import <GameController/GameController.h>
 #import <objc/runtime.h>
+#import <objc/message.h>
 #import "../SceneDelegate.h"
 #include <Security/Security.h>
 #include <CommonCrypto/CommonDigest.h>
@@ -765,6 +766,28 @@ static NSString *DesktopDegradedNotice(NSString *state);
             LRExternalAccessoryOwner *owner=[[LRExternalAccessoryOwner alloc]initWithController:controller];
             objc_setAssociatedObject(controller,&LRExternalAccessoryKey,owner,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         }
+    }
+#else
+    // FMLAB: l'app si compila con un SDK più vecchio di iOS 27, ma gira su iOS 27, dove la TV (Duplica schermo o
+    // cavo) arriva come schermo separato solo se l'app registra questo "accessorio". Senza, iOS duplica e basta:
+    // la TV mostra il telefono dritto e il telefono non diventa controller. Si chiama la stessa API a runtime.
+    if(@available(iOS 27.0,*)) {
+        if(objc_getAssociatedObject(controller,&LRExternalAccessoryKey))return;
+        Class accessorio=NSClassFromString(@"UISceneAccessory");
+        SEL crea=NSSelectorFromString(@"externalNonInteractiveSceneAccessoryWithConfiguration:"), registra=NSSelectorFromString(@"registerSceneAccessory:");
+        if(!accessorio||![accessorio respondsToSelector:crea]||![controller respondsToSelector:registra]){
+            [LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 accessory API not found at runtime"];return;}
+        UISceneConfiguration *configuration=[[UISceneConfiguration alloc]initWithName:@"Linux Desktop" sessionRole:UIWindowSceneSessionRoleExternalDisplayNonInteractive];
+        configuration.delegateClass=LRExternalDisplaySceneDelegate.class;
+        id acc=((id(*)(id,SEL,id))objc_msgSend)(accessorio,crea,configuration);
+        id reg=acc?((id(*)(id,SEL,id))objc_msgSend)(controller,registra,acc):nil;
+        if(!reg){[LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 accessory registration failed"];return;}
+        SEL abilita=NSSelectorFromString(@"setEnabled:");
+        if([reg respondsToSelector:abilita])((void(*)(id,SEL,BOOL))objc_msgSend)(reg,abilita,LRExternalOutputEnabled());
+        id osservatore=[NSNotificationCenter.defaultCenter addObserverForName:NSUserDefaultsDidChangeNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note){
+            if([reg respondsToSelector:abilita])((void(*)(id,SEL,BOOL))objc_msgSend)(reg,abilita,LRExternalOutputEnabled());}];
+        objc_setAssociatedObject(controller,&LRExternalAccessoryKey,@[reg,osservatore],OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        [LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 external-display accessory registered at runtime (older SDK)"];
     }
 #endif
 }
