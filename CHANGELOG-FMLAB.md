@@ -2,6 +2,14 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.10.7
+- **Pixel tutti uguali** (Pixel netti, TV, LCD): l'altezza del gioco diventa un multiplo esatto delle sue righe
+  (PlayStation e NES 240 righe → 1200 pixel veri in orizzontale, 960 in verticale; GBA 160 → 1280), con i bordi sui
+  pixel veri dello schermo. Prima l'immagine era stirata di poco e alcune righe venivano più grosse di altre: scritte
+  e bordi "tremavano" mentre il gioco scorreva. Si usa solo se si perde al massimo il 15% di schermo.
+- **PlayStation**: la misura non salta più quando il gioco passa da un filmato (320×240) al 3D in HD (640×480);
+  con *Grafica migliorata* niente retinatura (il rumore a quadretti sui colori), sfumature pulite.
+
 ## 0.10.6
 - **AirPlay con i giochi, come per Linux**: con un gioco aperto l'app chiede a iOS lo schermo esterno separato
   (lo stesso meccanismo del desktop Linux) anche se l'*Uscita desktop esterna* è spenta. Con Duplica schermo attiva

@@ -888,7 +888,8 @@ final class FMLABGiocoController: UIViewController {
         // grafica migliorata: opzioni dei core sopra a quelle dei dati (si possono spegnere nella scheda Giochi)
         let hd = UserDefaults.standard.object(forKey: "FMLAB.grafica.migliorata") as? Bool ?? true
         FMLABEmulatore.usaOpzioniUtente(hd ? ["desmume_internal_resolution": "512x384", "bsnes_mode7_scale": "2x",
-                                              "pcsx_rearmed_neon_enhancement_enable": "enabled", "pcsx_rearmed_neon_enhancement_no_main": "enabled"] : [:])
+                                              "pcsx_rearmed_neon_enhancement_enable": "enabled", "pcsx_rearmed_neon_enhancement_no_main": "enabled",
+                                              "pcsx_rearmed_dithering": "disabled"] : [:])
         do {
             let e = try FMLABEmulatore(conCore: gioco.core, gioco: gioco.url.path)
             emulatore = e
@@ -1051,7 +1052,8 @@ final class FMLABGiocoController: UIViewController {
             // DS: lo schermo di sotto si tocca, quindi i comandi non ci vanno mai sopra; si lascia loro il 30%
             let massimo = ds ? (b.height * 0.70 - s.minY - 8) : s.height * (r < 1 ? 0.7 : 0.5)
             if h > massimo { h = massimo; w = h * r }
-            let gioco = CGRect(x: s.midX - w / 2, y: s.minY + 8, width: w, height: h).integral
+            h = altezzaIntera(h); w = h * r
+            let gioco = aiPixel(CGRect(x: s.midX - w / 2, y: s.minY + 8, width: w, height: h))
             emulatore?.vista.frame = gioco
             pad.modo = .verticale
             // i comandi si prendono almeno un terzo dello schermo: se il gioco arriva lì, ci stanno sopra trasparenti
@@ -1066,7 +1068,8 @@ final class FMLABGiocoController: UIViewController {
             // DS affiancati: lo schermo di destra si tocca, i comandi restano ai lati e non lo coprono
             let laterale: CGFloat = ds ? 128 : 0
             if w > s.width - 2 * laterale { w = s.width - 2 * laterale; h = w / r }
-            emulatore?.vista.frame = CGRect(x: s.midX - w / 2, y: s.midY - h / 2, width: w, height: h).integral
+            h = altezzaIntera(h); w = h * r
+            emulatore?.vista.frame = aiPixel(CGRect(x: s.midX - w / 2, y: s.midY - h / 2, width: w, height: h))
             pad.modo = .orizzontale
             pad.frame = b
             pad.areaSicura = UIEdgeInsets(top: s.minY, left: s.minX, bottom: b.maxY - s.maxY, right: b.maxX - s.maxX)
@@ -1075,6 +1078,29 @@ final class FMLABGiocoController: UIViewController {
         pad.chiavePosizioni = "FMLAB.tasti.\(gioco.core.nome).\(b.height >= b.width ? "v" : "o")"
         aggiornaFiltro()
         pad.setNeedsLayout()
+    }
+
+    /// Pixel tutti uguali: l'altezza diventa un multiplo esatto delle righe del gioco (es. 240 × 5 = 1200 pixel veri),
+    /// così nessuna riga è più grossa delle altre e le scritte non "tremano" mentre scorre. Si usa solo se si perde
+    /// al massimo il 15% di schermo; con Morbido resta la misura piena.
+    /// Bordi sui pixel veri dello schermo (non sui punti), così la misura intera resta esatta.
+    private func aiPixel(_ r: CGRect) -> CGRect {
+        let sc = view.window?.screen.scale ?? UIScreen.main.scale
+        func t(_ v: CGFloat) -> CGFloat { (v * sc).rounded() / sc }
+        return CGRect(x: t(r.minX), y: t(r.minY), width: t(r.width), height: t(r.height))
+    }
+    private func altezzaIntera(_ h: CGFloat) -> CGFloat {
+        guard let e = emulatore, !e.tocco else { return h }
+        let f = UserDefaults.standard.string(forKey: "FMLAB.grafica.filtro") ?? "netti"
+        var righe = e.misuraImmagine.height; let sc = view.window?.screen.scale ?? UIScreen.main.scale
+        // immagini doppie (PlayStation in HD o in alta risoluzione): si misura sulla base, così la misura non salta
+        // quando il gioco passa da un filmato 320×240 al 3D 640×480
+        if righe >= 400 { righe /= 2 }
+        guard f != "morbido", righe >= 100 else { return h }
+        let n = floor(h * sc / righe)
+        guard n >= 1 else { return h }
+        let nuova = n * righe / sc
+        return nuova >= h * 0.85 ? nuova : h
     }
 
     /// Disposizione DS in orizzontale (menu del gioco › Schermi DS):
