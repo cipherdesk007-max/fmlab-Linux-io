@@ -71,6 +71,7 @@ static struct retro_system_av_info G_av;
 static BOOL G_avCambiato;
 static _Atomic bool G_varNuove;   // un'opzione è cambiata mentre il gioco gira
 static retro_audio_buffer_status_callback_t G_statoAudio;   // il core vuole sapere quanto suono c'è in coda (salto fotogrammi automatico)
+static _Atomic uint32_t G_fotogrammi;              // fotogrammi emulati (per la velocità vera a schermo)
 static _Atomic uint32_t G_vibra;                    // ultima forza di vibrazione chiesta dal core (0-65535)
 
 // immagine: l'ultima schermata in BGRX 32 bit, presa dalla vista a ogni giro dello schermo
@@ -225,7 +226,11 @@ static int16_t fmlabStato(unsigned port, unsigned device, unsigned index, unsign
     [_giro invalidate]; _giro = nil;
     if (self.window) {
         _giro = [CADisplayLink displayLinkWithTarget:self selector:@selector(aggiorna)];
-        if (@available(iOS 15.0, *)) _giro.preferredFrameRateRange = CAFrameRateRangeMake(30, 60, 60);
+        // ProMotion: i giochi a 50 Hz (PAL) su uno schermo a 60 alternano 1 e 2 giri (scatti); a 120 Hz alternano 2 e 3,
+        // molto più regolare. 60 Hz (NTSC) resta a 60 esatti; con l'avanti veloce si chiede 120.
+        double f = self.emulatore.fps;
+        BOOL esatto = fabs(f - 60) < 0.6 || fabs(f - 30) < 0.4;
+        if (@available(iOS 15.0, *)) _giro.preferredFrameRateRange = esatto && !self.emulatore.veloce ? CAFrameRateRangeMake(30, 120, 60) : CAFrameRateRangeMake(60, 120, 120);
         [_giro addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
     }
 }
@@ -473,6 +478,13 @@ static NSError *fmlabErrore(NSString *messaggio) {
 }
 - (CGSize)misuraImmagine { os_unfair_lock_lock(&G_lockImmagine); CGSize m = CGSizeMake(G_w, G_h); os_unfair_lock_unlock(&G_lockImmagine); return m; }
 - (double)fps { return G_av.timing.fps > 1 ? G_av.timing.fps : 60; }
+- (double)fpsVeri {
+    static uint64_t prima; static uint32_t contati; static double ultimo;
+    uint64_t ora = mach_absolute_time(); mach_timebase_info_data_t tb; mach_timebase_info(&tb);
+    double dt = (double)(ora - prima) * tb.numer / tb.denom / 1e9;
+    if (dt >= 0.5) { uint32_t n = atomic_load(&G_fotogrammi); if (prima) ultimo = (n - contati) / dt; contati = n; prima = ora; }
+    return ultimo;
+}
 - (CGFloat)rapporto {
     if (self.tocco) { os_unfair_lock_lock(&G_lockImmagine); unsigned w = G_w, h = G_h; os_unfair_lock_unlock(&G_lockImmagine); if (w && h) return (CGFloat)w / h; }
     struct retro_game_geometry g = G_av.geometry;
@@ -593,6 +605,7 @@ static uint32_t fmlabTastiera(void) {
             G_statoAudio(true, occ, occ < 25);
         }
         @autoreleasepool { F.run(); }
+        atomic_fetch_add(&G_fotogrammi, 1);
         uint32_t forza = atomic_exchange(&G_vibra, 0);
         NSUserDefaults *preferenze = NSUserDefaults.standardUserDefaults;
         if (forza > 8000 && ([preferenze objectForKey:@"FMLAB.comandi.vibra"] ? [preferenze boolForKey:@"FMLAB.comandi.vibra"] : YES)) {
@@ -606,7 +619,10 @@ static uint32_t fmlabTastiera(void) {
         // se il suono è molto avanti, si aspetta un po' di più (resta in pari con l'audio)
         // ritmo legato al suono: troppo avanti si aspetta un po' di più, quasi vuoto si va un filo più svelti
         uint32_t coda = atomic_load(&G_scrivi) - atomic_load(&G_leggi);
-        double extra = coda > (uint32_t)(hz * 0.15) ? periodo * 0.5 : coda < (uint32_t)(hz * 0.03) ? -periodo * 0.05 : 0;
+        // correzione dolce (come il "dynamic rate control" di RetroArch): al massimo ±1,5% per fotogramma, così ogni
+        // fotogramma dura quasi uguale e il movimento resta fluido; solo con il suono molto avanti si frena di più
+        double scarto = coda / hz - 0.06;
+        double extra = coda > (uint32_t)(hz * 0.3) ? periodo * 0.25 : periodo * MAX(-0.015, MIN(0.015, scarto * 0.4));
         if (self.veloce) { double v = self.velocita >= 1.5 ? MIN(self.velocita, 8) : 3; extra = -periodo * (1 - 1 / v); }   // avanti veloce (il suono in più si scarta)
         prossimo += (uint64_t)((periodo + extra) / secondi);
         uint64_t ora = mach_absolute_time();

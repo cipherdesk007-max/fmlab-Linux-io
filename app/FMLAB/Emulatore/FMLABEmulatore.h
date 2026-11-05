@@ -50,6 +50,8 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 /// Il gioco usa il tocco sullo schermo (Nintendo DS).
 @property (readonly) BOOL tocco;
 @property (readonly) double fps;
+/// Fotogrammi emulati al secondo davvero (media di mezzo secondo): per "Mostra velocità".
+@property (readonly) double fpsVeri;
 /// Misura in pixel dell'ultima immagine del gioco (per i filtri scanline/LCD).
 @property (readonly) CGSize misuraImmagine;
 @property (nonatomic) BOOL inPausa;

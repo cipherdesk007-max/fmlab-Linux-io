@@ -860,6 +860,13 @@ TR.update({
 "Drag a button to move it, pinch it to make it bigger or smaller. Saved for this console, separately for portrait and landscape.": "Trascina un tasto per spostarlo, pizzicalo per ingrandirlo o rimpicciolirlo. Si salva per questa console, a parte per verticale e orizzontale.",
 "Find AirPlay TVs lists the devices nearby and sends the sound there. For the picture: Control Center › Screen Mirroring › your Apple TV or AirPlay TV (iOS lets only Control Center start it), or a USB-C/HDMI cable. With a game open, it goes full screen on the TV and the iPhone becomes the controller (on DS the iPhone keeps the screens for touch). The Linux desktop has its own setting in Settings › Devices.": "Cerca TV AirPlay mostra i dispositivi vicini e manda lì il suono. Per l'immagine: Centro di Controllo › Duplica schermo › la tua Apple TV o TV AirPlay (iOS lascia avviarla solo dal Centro di Controllo), o un cavo USB-C/HDMI. Con un gioco aperto va a tutto schermo sulla TV e l'iPhone diventa il controller (sul DS l'iPhone tiene gli schermi per il tocco). Il desktop Linux ha la sua impostazione in Impostazioni › Dispositivi.",
 "Mirroring: open a game": "Duplicazione attiva: apri un gioco",
+"Fill the Screen": "Tutto lo schermo",
+"Hide Speed": "Nascondi velocità",
+"Original": "Originale",
+"Shape in Landscape": "Forma in orizzontale",
+"Show Speed (FPS)": "Mostra velocità (FPS)",
+"Wide 16:9": "Larga 16:9",
+"Sharp Pixels is the most faithful; TV draws the lines of an old television, LCD the grid of a Game Boy screen. Valid from the next game you open. Original keeps the real shape of the console; Wide and Fill stretch the picture in landscape (no black bars, round things look a bit oval).": "Pixel netti è il più fedele; TV disegna le righe di un vecchio televisore, LCD la griglia dello schermo di un Game Boy. Vale dal prossimo gioco che apri. Originale tiene la forma vera della console; Larga e Tutto lo schermo allargano l'immagine in orizzontale (niente bande nere, le cose rotonde vengono un po' ovali).",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

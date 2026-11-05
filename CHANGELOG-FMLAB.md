@@ -2,6 +2,17 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.10.8
+- **Più fluido**: il ritmo del gioco non fa più "strappi" per stare dietro al suono (prima un fotogramma poteva
+  durare il 50% in più): ora la correzione è dolce, al massimo ±1,5%, come il controllo dinamico di RetroArch.
+- **ProMotion 120 Hz**: i giochi europei a 50 Hz (PAL, es. Hercules SCES) su uno schermo a 60 alternavano 1 e 2 giri
+  per fotogramma (scatti nello scorrimento); ora l'iPhone va a 120 Hz e li alterna 2 e 3, molto più regolare. I giochi
+  a 60 Hz restano a 60 esatti.
+- **Forma in orizzontale** (Giochi › Grafica): *Originale* (forma vera, 4:3), *Larga 16:9* o *Tutto lo schermo*
+  (niente bande nere ai lati).
+- **Mostra velocità (FPS)** dal menu del gioco: fotogrammi veri / quelli della console (es. 50 / 50); arancione se il
+  telefono resta indietro.
+
 ## 0.10.7
 - **Pixel tutti uguali** (Pixel netti, TV, LCD): l'altezza del gioco diventa un multiplo esatto delle sue righe
   (PlayStation e NES 240 righe → 1200 pixel veri in orizzontale, 960 in verticale; GBA 160 → 1280), con i bordi sui

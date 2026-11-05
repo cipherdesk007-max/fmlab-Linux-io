@@ -138,5 +138,7 @@
 	</array>
 	<key>fuc</key>
 	<string>ICON_STUFF</string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 </dict>
 </plist>

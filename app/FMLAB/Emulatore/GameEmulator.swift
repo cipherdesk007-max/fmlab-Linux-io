@@ -529,6 +529,7 @@ struct GameEmulatorView: View {
     @AppStorage("FMLAB.comandi.sopra") private var sopra = true
     @AppStorage("FMLAB.grafica.migliorata") private var graficaMigliorata = true
     @AppStorage("FMLAB.grafica.filtro") private var filtro = "netti"
+    @AppStorage("FMLAB.grafica.formato") private var formato = "originale"
     @AppStorage("FMLAB.giochi.esterno") private var usaEsterno = true
     @State private var schermoEsterno = FMLABGiocoController.nomeSchermoEsterno()
     @AppStorage(FMLABCopertine.chiaveAttive) private var copertine = true
@@ -641,7 +642,10 @@ struct GameEmulatorView: View {
                 Picker("Picture", selection: $filtro) {
                     Text("Sharp Pixels").tag("netti"); Text("Smooth").tag("morbido"); Text("TV (scanlines)").tag("tv"); Text("Handheld LCD").tag("lcd")
                 }
-            } header: { Text("Graphics") } footer: { Text("Sharp Pixels is the most faithful; TV draws the lines of an old television, LCD the grid of a Game Boy screen. Valid from the next game you open.") }
+                Picker("Shape in Landscape", selection: $formato) {
+                    Text("Original").tag("originale"); Text("Wide 16:9").tag("largo"); Text("Fill the Screen").tag("pieno")
+                }
+            } header: { Text("Graphics") } footer: { Text("Sharp Pixels is the most faithful; TV draws the lines of an old television, LCD the grid of a Game Boy screen. Valid from the next game you open. Original keeps the real shape of the console; Wide and Fill stretch the picture in landscape (no black bars, round things look a bit oval).") }
             Section {
                 Toggle("Use the External Screen for Games", isOn: $usaEsterno)
                 HStack { Label("External screen", systemImage: "tv"); Spacer(); Text(schermoEsterno ?? LF("None")).foregroundColor(schermoEsterno == nil ? .secondary : .green) }
@@ -865,6 +869,8 @@ final class FMLABGiocoController: UIViewController {
     private var accessoCartella = false
     private var scambiati = false            // DS: schermo di sotto sopra (o a sinistra)
     private let filtroVista = UIView()       // scanline / griglia LCD sopra l'immagine
+    private let etichettaFPS = UILabel()
+    private var giroFPS: Timer?
     // DS in orizzontale: un'immagine sola (schermi uno sopra l'altro) divisa in due viste, così ognuno va dove serve
     private let secondoSchermo = UIView()
     private let toccoDS = FMLABToccoDS()
@@ -928,6 +934,11 @@ final class FMLABGiocoController: UIViewController {
             osservatori.append(NotificationCenter.default.addObserver(forName: nome, object: nil, queue: .main) { [weak self] _ in
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { self?.collegaEsterno() } })
         }
+        etichettaFPS.font = .monospacedDigitSystemFont(ofSize: 12, weight: .semibold); etichettaFPS.textColor = .white
+        etichettaFPS.backgroundColor = UIColor(white: 0, alpha: 0.55); etichettaFPS.layer.cornerRadius = 6; etichettaFPS.clipsToBounds = true
+        etichettaFPS.textAlignment = .center; etichettaFPS.isHidden = true
+        view.addSubview(etichettaFPS)
+        mostraVelocita(UserDefaults.standard.bool(forKey: "FMLAB.mostraFPS"))
         avviso.textColor = .white; avviso.numberOfLines = 0; avviso.textAlignment = .center; avviso.font = .preferredFont(forTextStyle: .body)
         view.addSubview(avviso)
     }
@@ -948,7 +959,7 @@ final class FMLABGiocoController: UIViewController {
         present(m, animated: true)
     }
     override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated); emulatore?.ferma(); staccaEsterno(); segnaInCorso(false); giroDS?.invalidate(); giroDS = nil
+        super.viewWillDisappear(animated); giroFPS?.invalidate(); giroFPS = nil; emulatore?.ferma(); staccaEsterno(); segnaInCorso(false); giroDS?.invalidate(); giroDS = nil
         if accessoCartella { gioco.cartella?.stopAccessingSecurityScopedResource(); accessoCartella = false }
     }
 
@@ -1067,8 +1078,15 @@ final class FMLABGiocoController: UIViewController {
             // DS affiancati: ai lati resta lo spazio giusto per croce e tasti, così non coprono gli schermi
             // DS affiancati: lo schermo di destra si tocca, i comandi restano ai lati e non lo coprono
             let laterale: CGFloat = ds ? 128 : 0
-            if w > s.width - 2 * laterale { w = s.width - 2 * laterale; h = w / r }
-            h = altezzaIntera(h); w = h * r
+            let formato = UserDefaults.standard.string(forKey: "FMLAB.grafica.formato") ?? "originale"
+            if !ds && formato != "originale" {
+                // allargato: niente bande nere ai lati (16:9 o tutto lo schermo sicuro)
+                let rr = formato == "pieno" ? s.width / s.height : max(r, 16.0 / 9.0)
+                h = s.height; w = min(s.width, h * rr)
+            } else {
+                if w > s.width - 2 * laterale { w = s.width - 2 * laterale; h = w / r }
+                h = altezzaIntera(h); w = h * r
+            }
             emulatore?.vista.frame = aiPixel(CGRect(x: s.midX - w / 2, y: s.midY - h / 2, width: w, height: h))
             pad.modo = .orizzontale
             pad.frame = b
@@ -1083,6 +1101,22 @@ final class FMLABGiocoController: UIViewController {
     /// Pixel tutti uguali: l'altezza diventa un multiplo esatto delle righe del gioco (es. 240 × 5 = 1200 pixel veri),
     /// così nessuna riga è più grossa delle altre e le scritte non "tremano" mentre scorre. Si usa solo se si perde
     /// al massimo il 15% di schermo; con Morbido resta la misura piena.
+    /// "Mostra velocità": fotogrammi veri al secondo / quelli della console (es. 50/50 PAL, 60/60 NTSC).
+    private func mostraVelocita(_ si: Bool) {
+        UserDefaults.standard.set(si, forKey: "FMLAB.mostraFPS")
+        giroFPS?.invalidate(); giroFPS = nil; etichettaFPS.isHidden = !si
+        guard si else { return }
+        giroFPS = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            guard let self, let e = self.emulatore else { return }
+            let v = e.fpsVeri, f = e.fps
+            self.etichettaFPS.text = String(format: " %.0f / %.0f FPS ", v, f)
+            self.etichettaFPS.textColor = v < f * 0.9 && !e.inPausa ? .systemOrange : .white
+            let sa = self.view.safeAreaLayoutGuide.layoutFrame, m = self.etichettaFPS.intrinsicContentSize
+            self.etichettaFPS.frame = CGRect(x: e.vista.frame.minX + 6, y: max(sa.minY, e.vista.frame.minY) + 6, width: m.width, height: m.height + 4)
+            self.view.bringSubviewToFront(self.etichettaFPS)
+        }
+    }
+
     /// Bordi sui pixel veri dello schermo (non sui punti), così la misura intera resta esatta.
     private func aiPixel(_ r: CGRect) -> CGRect {
         let sc = view.window?.screen.scale ?? UIScreen.main.scale
@@ -1206,6 +1240,9 @@ final class FMLABGiocoController: UIViewController {
             m.addAction(UIAlertAction(title: LF("Take Screenshot"), style: .default) { [weak self] _ in e.inPausa = false; self?.fotografa() })
             m.addAction(UIAlertAction(title: tenuto == nil ? LF("Hold a Button…") : String(format: LF("Release %@"), nomeTasto(tenuto!)), style: .default) { [weak self] _ in self?.scegliTenuto() })
             m.addAction(UIAlertAction(title: LF("Move Buttons…"), style: .default) { [weak self] _ in self?.pad.modifica = true })
+            let fpsSi = UserDefaults.standard.bool(forKey: "FMLAB.mostraFPS")
+            m.addAction(UIAlertAction(title: fpsSi ? LF("Hide Speed") : LF("Show Speed (FPS)"), style: .default) { [weak self] _ in
+                e.inPausa = false; self?.mostraVelocita(!fpsSi) })
             m.addAction(UIAlertAction(title: LF("AirPlay TV…"), style: .default) { [weak self] _ in
                 guard let self else { return }; e.inPausa = false; FMLABAirPlay.apri(da: self.view) })
             if e.tocco {
