@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFoundation
 import Combine
 import UIKit
 import UniformTypeIdentifiers
@@ -559,6 +560,7 @@ struct GameEmulatorView: View {
     @AppStorage("FMLAB.grafica.filtro") private var filtro = "netti"
     @AppStorage("FMLAB.grafica.formato") private var formato = "originale"
     @AppStorage("FMLAB.grafica.gpu") private var gpu = true
+    @AppStorage("FMLAB.suono.mischia") private var mischia = false
     @AppStorage("FMLAB.giochi.esterno") private var usaEsterno = true
     @State private var schermoEsterno = FMLABGiocoController.nomeSchermoEsterno()
     @AppStorage(FMLABCopertine.chiaveAttive) private var copertine = true
@@ -647,6 +649,7 @@ struct GameEmulatorView: View {
                 Toggle("Vibration", isOn: $vibra)
                 Picker("Fast Forward Speed", selection: $velocita) { Text("2×").tag(2.0); Text("3×").tag(3.0); Text("4×").tag(4.0) }
                 Toggle(isOn: $copertine) { VStack(alignment: .leading, spacing: 3) { Text("Automatic Covers"); Text("Box art from the public libretro-thumbnails collection, found by file name (standard names like \"Super Mario World (USA)\").").font(.caption).foregroundColor(.secondary) } }
+                Toggle(isOn: $mischia) { VStack(alignment: .leading, spacing: 3) { Text("Keep Music from Other Apps"); Text("Off: opening a game pauses Spotify and other music, like a real game does.").font(.caption).foregroundColor(.secondary) } }
                 Toggle(isOn: $riprendi) { VStack(alignment: .leading, spacing: 3) { Text("Resume Where I Left Off"); Text("When you quit a game it is saved; next time you can continue from there.").font(.caption).foregroundColor(.secondary) } }
             } header: { Text("Controls and Saves") }
             if !FMLABDati.bios.isEmpty {
@@ -679,9 +682,15 @@ struct GameEmulatorView: View {
             Section {
                 Toggle("Use the External Screen for Games", isOn: $usaEsterno)
                 HStack { Label("External screen", systemImage: "tv"); Spacer(); Text(schermoEsterno ?? LF("None")).foregroundColor(schermoEsterno == nil ? .secondary : .green) }
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("See the Game on the TV", systemImage: "rectangle.on.rectangle").font(.headline)
+                    Text("1. Open Control Center (swipe down from the top right).").font(.callout)
+                    Text("2. Tap Screen Mirroring (the two rectangles) and choose your Apple TV or AirPlay TV.").font(.callout)
+                    Text("3. Open a game: the TV shows only the game and the iPhone becomes the controller.").font(.callout)
+                }.padding(.vertical, 4)
                 FMLABRigaAirPlay()
             } header: { Text("AirPlay and TV") } footer: {
-                Text("Find AirPlay TVs lists the devices nearby and sends the sound there. For the picture: Control Center › Screen Mirroring › your Apple TV or AirPlay TV (iOS lets only Control Center start it), or a USB-C/HDMI cable. With a game open, it goes full screen on the TV and the iPhone becomes the controller (on DS the iPhone keeps the screens for touch). The Linux desktop has its own setting in Settings › Devices.")
+                Text("The AirPlay button (sound only) sends just the audio, like music: the picture stays on the iPhone. iOS lets only Screen Mirroring in Control Center send the picture, or a USB-C/HDMI cable. On DS the iPhone keeps the screens for touch. The Linux desktop has its own setting in Settings › Devices.")
             }
             Section {
                 Button { FMLABCopia.esporta { errore = $0 } } label: { Label("Export Backup…", systemImage: "square.and.arrow.up") }
@@ -975,6 +984,8 @@ final class FMLABGiocoController: UIViewController {
         super.viewDidAppear(animated)
         guard !avviato else { return }; avviato = true
         segnaInCorso(true)
+        NotificationCenter.default.addObserver(self, selector: #selector(controllaSuonoTV), name: AVAudioSession.routeChangeNotification, object: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in self?.controllaSuonoTV() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in self?.collegaEsterno() }
         guard let e = emulatore else { apriMenu(); return }
         let riprendi = UserDefaults.standard.object(forKey: "FMLAB.riprendi") as? Bool ?? true
@@ -1318,8 +1329,7 @@ final class FMLABGiocoController: UIViewController {
             let fpsSi = UserDefaults.standard.bool(forKey: "FMLAB.mostraFPS")
             m.addAction(UIAlertAction(title: fpsSi ? LF("Hide Speed") : LF("Show Speed (FPS)"), style: .default) { [weak self] _ in
                 e.inPausa = false; self?.mostraVelocita(!fpsSi) })
-            m.addAction(UIAlertAction(title: LF("AirPlay TV…"), style: .default) { [weak self] _ in
-                guard let self else { return }; e.inPausa = false; FMLABAirPlay.apri(da: self.view) })
+            m.addAction(UIAlertAction(title: LF("Play on the TV…"), style: .default) { [weak self] _ in self?.spiegaTV() })
             if e.tocco {
                 m.addAction(UIAlertAction(title: LF("Swap Screens"), style: .default) { [weak self] _ in
                     guard let self else { return }; e.inPausa = false; self.scambiati.toggle(); self.view.setNeedsLayout()
@@ -1407,6 +1417,36 @@ final class FMLABGiocoController: UIViewController {
         Schermo esterno: \(Self.nomeSchermoEsterno() ?? "nessuno") · usato: \(esterno != nil ? "sì" : "no")
         Errore: \(avviso.text ?? "-")
         """
+    }
+
+    /// Come mandare il gioco sulla TV: Duplica schermo (immagine) è solo nel Centro di Controllo; qui solo il suono.
+    private func spiegaTV() {
+        guard let e = emulatore else { return }
+        let collegata = esterno != nil
+        let m = UIAlertController(title: LF(collegata ? "The Game Is on the TV" : "Play on the TV"),
+                                  message: LF(collegata ? "The TV shows the game and the iPhone is the controller. To stop: Control Center › Screen Mirroring › Stop Mirroring." :
+                                                "1. Open Control Center (swipe down from the top right).\n2. Tap Screen Mirroring and choose your Apple TV or AirPlay TV.\n3. Come back here: the TV shows only the game and the iPhone becomes the controller.\n\nThe AirPlay sound button sends only the audio."),
+                                  preferredStyle: .alert)
+        m.addAction(UIAlertAction(title: LF("Sound Only to AirPlay…"), style: .default) { [weak self] _ in
+            guard let self else { return }; e.inPausa = false; FMLABAirPlay.apri(da: self.view) })
+        m.addAction(UIAlertAction(title: LF("OK"), style: .cancel) { _ in e.inPausa = false })
+        present(m, animated: true)
+    }
+    /// Il suono è andato su una TV AirPlay ma l'immagine no (manca Duplica schermo): lo si dice, una volta.
+    private var avvisatoSoloSuono = false
+    @objc private func controllaSuonoTV() {
+        let airplay = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.portType == .airPlay }
+        guard airplay, esterno == nil, !avvisatoSoloSuono else { return }
+        avvisatoSoloSuono = true
+        let l = UILabel(); l.numberOfLines = 0; l.textAlignment = .center; l.textColor = .white
+        l.font = .preferredFont(forTextStyle: .footnote); l.backgroundColor = UIColor.black.withAlphaComponent(0.85)
+        l.text = LF("The sound is on the TV, the picture is not: Control Center › Screen Mirroring › your TV.")
+        l.layer.cornerRadius = 12; l.clipsToBounds = true
+        let sa = view.safeAreaLayoutGuide.layoutFrame, w = min(sa.width - 24, 420)
+        let h = l.sizeThatFits(CGSize(width: w - 20, height: 200)).height + 18
+        l.frame = CGRect(x: sa.midX - w / 2, y: sa.minY + 8, width: w, height: h)
+        view.addSubview(l)
+        UIView.animate(withDuration: 0.4, delay: 6, options: []) { l.alpha = 0 } completion: { _ in l.removeFromSuperview() }
     }
 
     private func mostra(_ testo: String) {

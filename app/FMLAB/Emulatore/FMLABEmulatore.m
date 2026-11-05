@@ -671,7 +671,9 @@ static NSError *fmlabErrore(NSString *messaggio) {
 
 - (void)avviaSuono {
     double hz = G_av.timing.sample_rate > 1000 ? G_av.timing.sample_rate : 44100;
-    [AVAudioSession.sharedInstance setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionMixWithOthers error:nil];
+    // di base il gioco ferma la musica delle altre app (come un gioco vero); si può lasciare in Giochi › Comandi
+    BOOL mischia = [NSUserDefaults.standardUserDefaults boolForKey:@"FMLAB.suono.mischia"];
+    [AVAudioSession.sharedInstance setCategory:AVAudioSessionCategoryPlayback withOptions:mischia ? AVAudioSessionCategoryOptionMixWithOthers : 0 error:nil];
     [AVAudioSession.sharedInstance setActive:YES error:nil];
     AVAudioFormat *formato = [[AVAudioFormat alloc] initWithCommonFormat:AVAudioPCMFormatFloat32 sampleRate:hz channels:2 interleaved:NO];
     AVAudioSourceNode *fonte = [[AVAudioSourceNode alloc] initWithFormat:formato renderBlock:^OSStatus(BOOL *silenzio, const AudioTimeStamp *t, AVAudioFrameCount n, AudioBufferList *out) {

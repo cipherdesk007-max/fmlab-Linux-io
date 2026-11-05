@@ -2,6 +2,14 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.11.2
+- **AirPlay chiaro**: il tasto AirPlay dell'app manda **solo il suono** (è il limite di iOS: l'immagine la manda solo
+  Duplica schermo del Centro di Controllo). Ora si chiama *Solo il suono su AirPlay…*, e la scheda Giochi spiega in 3
+  passi come vedere il gioco sulla TV. Nel menu del gioco *Gioca sulla TV…* dice cosa fare (o che il gioco è già
+  sulla TV). Se il suono va su una TV AirPlay ma l'immagine no, il gioco lo avvisa una volta in alto.
+- **Il gioco ferma la musica delle altre app** (Spotify ecc.), come un gioco vero; si può lasciare in Giochi ›
+  *Lascia la musica delle altre app*.
+
 ## 0.11.1
 - **Grafica sulla GPU** nel Game Emulator (primo passo): l'emulatore ora sa dare ai core un contesto OpenGL ES
   (il chip grafico dell'iPhone). La **PSP** disegna il 3D sulla GPU invece che col processore: più veloce, e con

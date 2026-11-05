@@ -872,6 +872,20 @@ TR.update({
 "Shape": "Forma",
 "Graphics on the GPU (PSP)": "Grafica sulla GPU (PSP)",
 "The 3D is drawn by the iPhone's graphics chip: faster and sharper (2× with Enhanced Graphics). Turn it off only if a game shows broken graphics.": "Il 3D lo disegna il chip grafico dell'iPhone: più veloce e più nitido (2× con Grafica migliorata). Spegnila solo se un gioco ha la grafica rotta.",
+"1. Open Control Center (swipe down from the top right).": "1. Apri il Centro di Controllo (scorri giù dall'angolo in alto a destra).",
+"1. Open Control Center (swipe down from the top right).\\n2. Tap Screen Mirroring and choose your Apple TV or AirPlay TV.\\n3. Come back here: the TV shows only the game and the iPhone becomes the controller.\\n\\nThe AirPlay sound button sends only the audio.": "1. Apri il Centro di Controllo (scorri giù dall'angolo in alto a destra).\\n2. Tocca Duplica schermo e scegli la tua Apple TV o TV AirPlay.\\n3. Torna qui: la TV mostra solo il gioco e l'iPhone diventa il controller.\\n\\nIl tasto AirPlay del suono manda solo l'audio.",
+"2. Tap Screen Mirroring (the two rectangles) and choose your Apple TV or AirPlay TV.": "2. Tocca Duplica schermo (i due rettangoli) e scegli la tua Apple TV o TV AirPlay.",
+"3. Open a game: the TV shows only the game and the iPhone becomes the controller.": "3. Apri un gioco: la TV mostra solo il gioco e l'iPhone diventa il controller.",
+"Keep Music from Other Apps": "Lascia la musica delle altre app",
+"Off: opening a game pauses Spotify and other music, like a real game does.": "Spento: aprendo un gioco si ferma Spotify o altra musica, come fa un gioco vero.",
+"Play on the TV": "Gioca sulla TV",
+"Play on the TV…": "Gioca sulla TV…",
+"See the Game on the TV": "Vedere il gioco sulla TV",
+"Sound Only to AirPlay…": "Solo il suono su AirPlay…",
+"The AirPlay button (sound only) sends just the audio, like music: the picture stays on the iPhone. iOS lets only Screen Mirroring in Control Center send the picture, or a USB-C/HDMI cable. On DS the iPhone keeps the screens for touch. The Linux desktop has its own setting in Settings › Devices.": "Il tasto AirPlay (solo suono) manda solo l'audio, come la musica: l'immagine resta sull'iPhone. iOS lascia mandare l'immagine solo a Duplica schermo nel Centro di Controllo, o a un cavo USB-C/HDMI. Sul DS l'iPhone tiene gli schermi per il tocco. Il desktop Linux ha la sua impostazione in Impostazioni › Dispositivi.",
+"The Game Is on the TV": "Il gioco è sulla TV",
+"The TV shows the game and the iPhone is the controller. To stop: Control Center › Screen Mirroring › Stop Mirroring.": "La TV mostra il gioco e l'iPhone è il controller. Per smettere: Centro di Controllo › Duplica schermo › Interrompi duplicazione.",
+"The sound is on the TV, the picture is not: Control Center › Screen Mirroring › your TV.": "Il suono è sulla TV, l'immagine no: Centro di Controllo › Duplica schermo › la tua TV.",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

@@ -157,7 +157,11 @@
 "%lld. CLI remains available. GUI Logs includes application stdout/stderr." = "%lld. Il terminale resta disponibile. I registri grafica contengono l'uscita dell'applicazione.";
 "..." = "...";
 "1 game" = "1 gioco";
+"1. Open Control Center (swipe down from the top right)." = "1. Apri il Centro di Controllo (scorri giù dall'angolo in alto a destra).";
+"1. Open Control Center (swipe down from the top right).\\n2. Tap Screen Mirroring and choose your Apple TV or AirPlay TV.\\n3. Come back here: the TV shows only the game and the iPhone becomes the controller.\\n\\nThe AirPlay sound button sends only the audio." = "1. Apri il Centro di Controllo (scorri giù dall'angolo in alto a destra).\\n2. Tocca Duplica schermo e scegli la tua Apple TV o TV AirPlay.\\n3. Torna qui: la TV mostra solo il gioco e l'iPhone diventa il controller.\\n\\nIl tasto AirPlay del suono manda solo l'audio.";
 "1024 × 768" = "1024 × 768";
+"2. Tap Screen Mirroring (the two rectangles) and choose your Apple TV or AirPlay TV." = "2. Tocca Duplica schermo (i due rettangoli) e scegli la tua Apple TV o TV AirPlay.";
+"3. Open a game: the TV shows only the game and the iPhone becomes the controller." = "3. Apri un gioco: la TV mostra solo il gioco e l'iPhone diventa il controller.";
 "640 × 480" = "640 × 480";
 "800 × 600" = "800 × 600";
 "960 × 540 · Wide" = "960 × 540 · Larga";
@@ -792,6 +796,7 @@
 "KDE Plasma installed" = "KDE Plasma installato";
 "KDE Plasma · Experimental" = "KDE Plasma · Sperimentale";
 "Keep LinuxRunner in the foreground until installation finishes. Package installation alone does not finish compiling and verifying Browser Support." = "Tieni FMLAB Linux aperta finché l'installazione non finisce. L'installazione dei pacchetti da sola non completa la preparazione del supporto browser.";
+"Keep Music from Other Apps" = "Lascia la musica delle altre app";
 "Keep Screen Awake During Operations" = "Schermo sempre acceso durante le operazioni";
 "Keeps the latest 20 failures across restarts. Handled guest signals are not crashes. Nonzero exits are labeled separately. Reports omit arbitrary application output and webpage contents." = "Tiene gli ultimi 20 arresti anche dopo i riavvii. I segnali gestiti non sono arresti. Le uscite con errore sono indicate a parte. I rapporti non includono i messaggi delle applicazioni né il contenuto delle pagine web.";
 "Keyboard" = "Tastiera";
@@ -975,6 +980,7 @@
 "Now close FMLAB Linux: swipe up from the bottom, hold, then swipe the app away. Open it again and it starts with the new distribution." = "Ora chiudi FMLAB Linux: scorri dal basso verso l'alto, tieni premuto, poi butta via l'app verso l'alto. Riaprila e parte con la nuova distribuzione.";
 "OK" = "OK";
 "Off in Settings" = "Spento nelle Impostazioni";
+"Off: opening a game pauses Spotify and other music, like a real game does." = "Spento: aprendo un gioco si ferma Spotify o altra musica, come fa un gioco vero.";
 "Official Debian 13 with RetroArch, emulators tuned for the iPhone and rk-giochi, from the signed FMLAB repository. It updates with apt together with Debian. No games are included: you add your own." = "Debian 13 ufficiale con RetroArch, emulatori regolati per l'iPhone e rk-giochi, dall'archivio FMLAB firmato. Si aggiorna con apt insieme a Debian. Nessun gioco incluso: li metti tu.";
 "Official Debian packages, checked against Debian's signed index. The desktop, sound and account tools are added in the next steps." = "Pacchetti ufficiali Debian, controllati con l'indice firmato di Debian. Desktop, audio e strumenti per gli account si aggiungono nei passi successivi.";
 "Official signed Arch Linux ARM packages. Verified downloads are kept for retry. First-start configuration finishes before desktop packages are installed." = "Pacchetti ufficiali firmati di Arch Linux ARM. I file scaricati e verificati restano per riprovare. La prima configurazione finisce prima di installare i pacchetti del desktop.";
@@ -1042,6 +1048,8 @@
 "Phone · Full Screen" = "Telefono · tutto schermo";
 "Picture" = "Immagine";
 "Picture…" = "Immagine…";
+"Play on the TV" = "Gioca sulla TV";
+"Play on the TV…" = "Gioca sulla TV…";
 "Played" = "Riprodotto";
 "Plays sound from Linux programs (browsers, media players, games) through the iPhone, mixed with other apps. Applies to the next desktop or app session. Sound stops while LinuxRunner is in the background." = "Fa sentire l'audio dei programmi Linux (browser, lettori, giochi) dall'iPhone, insieme alle altre app. Vale dalla prossima sessione del desktop o dell'app. L'audio si ferma quando FMLAB Linux è in sottofondo.";
 "Please keep LinuxRunner open." = "Tieni FMLAB Linux aperta.";
@@ -1168,6 +1176,7 @@
 "Search" = "Cerca";
 "Search messages" = "Cerca nei messaggi";
 "Search name or PID" = "Cerca nome o PID";
+"See the Game on the TV" = "Vedere il gioco sulla TV";
 "Select File or Folder to Export" = "Scegli file o cartella da esportare";
 "Select a shared file and Save to Files, or export a folder as ZIP. The native picker selects the iOS destination." = "Scegli un file condiviso e Salva in File, oppure esporta una cartella come ZIP. La destinazione su iOS si sceglie dal selettore di sistema.";
 "Select this environment for the next launch, then reopen LinuxRunner." = "Scegli questo ambiente per il prossimo avvio, poi riapri FMLAB Linux.";
@@ -1221,6 +1230,7 @@
 "Software Rendering" = "Disegno software";
 "Software rendering selected" = "Disegno software scelto";
 "Sort" = "Ordina";
+"Sound Only to AirPlay…" = "Solo il suono su AirPlay…";
 "Sound support not installed (Desktop › Install Desktop Support adds it)" = "Audio non installato (Desktop › Installa supporto desktop lo aggiunge)";
 "Source Code and Reports (GitHub)" = "Codice sorgente e segnalazioni (GitHub)";
 "Source: " = "Sorgente: ";
@@ -1294,9 +1304,12 @@
 "That Linux account no longer exists." = "Quell'account Linux non esiste più.";
 "That name already exists. Choose a different folder or rename the source." = "Quel nome esiste già. Scegli un'altra cartella o rinomina l'originale.";
 "The 3D is drawn by the iPhone's graphics chip: faster and sharper (2× with Enhanced Graphics). Turn it off only if a game shows broken graphics." = "Il 3D lo disegna il chip grafico dell'iPhone: più veloce e più nitido (2× con Grafica migliorata). Spegnila solo se un gioco ha la grafica rotta.";
+"The AirPlay button (sound only) sends just the audio, like music: the picture stays on the iPhone. iOS lets only Screen Mirroring in Control Center send the picture, or a USB-C/HDMI cable. On DS the iPhone keeps the screens for touch. The Linux desktop has its own setting in Settings › Devices." = "Il tasto AirPlay (solo suono) manda solo l'audio, come la musica: l'immagine resta sull'iPhone. iOS lascia mandare l'immagine solo a Duplica schermo nel Centro di Controllo, o a un cavo USB-C/HDMI. Sul DS l'iPhone tiene gli schermi per il tocco. Il desktop Linux ha la sua impostazione in Impostazioni › Dispositivi.";
 "The Debian servers did not offer a required package. Tap Retry later." = "I server Debian non hanno dato un pacchetto necessario. Tocca Riprova più tardi.";
+"The Game Is on the TV" = "Il gioco è sulla TV";
 "The LXQt desktop from the distribution's own packages; network needed once. The LinuxRunner Desktop stays installed as the fallback." = "Il desktop LXQt dai pacchetti della distribuzione; la rete serve una volta. Il Desktop LinuxRunner resta installato come riserva.";
 "The Linux runtime could not start this session. See diagnostics." = "Linux non è riuscito ad avviare questa sessione. Vedi la diagnostica.";
+"The TV shows the game and the iPhone is the controller. To stop: Control Center › Screen Mirroring › Stop Mirroring." = "La TV mostra il gioco e l'iPhone è il controller. Per smettere: Centro di Controllo › Duplica schermo › Interrompi duplicazione.";
 "The account could not be created. Details are in Runtime Diagnostics (ACCOUNT)." = "Non è stato possibile creare l'account. I dettagli sono nella diagnostica (ACCOUNT).";
 "The account is not a login account in the active guest /etc/passwd. Refresh the list." = "L'account non è un account di accesso in /etc/passwd dell'ambiente attivo. Aggiorna l'elenco.";
 "The account tools were installed but do not run. Export the Open Desktop Report and send it." = "Gli strumenti per gli account sono installati ma non partono. Esporta il rapporto di apertura del desktop e mandalo.";
@@ -1354,6 +1367,7 @@
 "The selected Linux user also gets ~/Shared when that name is free. In iOS Files: On My iPhone/iPad → LinuxRunner → Shared → %lld. Each environment has its own folder." = "Anche l'utente Linux scelto ha ~/Shared, se quel nome è libero. In File di iOS: Sul mio iPhone/iPad → FMLAB Linux → Shared → %lld. Ogni ambiente ha la sua cartella.";
 "The selected item changed during export. Close applications writing to it and retry." = "L'elemento è cambiato durante l'esportazione. Chiudi le applicazioni che lo stanno scrivendo e riprova.";
 "The selected login changed. Save work and stop this desktop before launching applications under the new user." = "L'utente di accesso è cambiato. Salva il lavoro e ferma questo desktop prima di aprire applicazioni con il nuovo utente.";
+"The sound is on the TV, the picture is not: Control Center › Screen Mirroring › your TV." = "Il suono è sulla TV, l'immagine no: Centro di Controllo › Duplica schermo › la tua TV.";
 "The source changed during copying. Close its editor and retry." = "L'originale è cambiato durante la copia. Chiudi il programma che lo modifica e riprova.";
 "The terminal's key bar provides Esc, Tab, Ctrl, Alt and arrow keys on screen. Changes apply to open terminals." = "La barra dei tasti del terminale ha Esc, Tab, Ctrl, Alt e le frecce sullo schermo. Le modifiche valgono anche per i terminali aperti.";
 "The verified rootfs could not be imported." = "Non è stato possibile importare i file di sistema verificati.";

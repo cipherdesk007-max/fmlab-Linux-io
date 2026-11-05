@@ -463,7 +463,7 @@ struct FMLABSceltaAirPlay: UIViewRepresentable {
 struct FMLABRigaAirPlay: View {
     var body: some View {
         ZStack {
-            HStack { Label("Find AirPlay TVs…", systemImage: "airplayvideo"); Spacer(); Image(systemName: "chevron.right").font(.caption).foregroundColor(.secondary) }
+            HStack { Label("Sound Only to AirPlay…", systemImage: "airplayaudio"); Spacer(); Image(systemName: "chevron.right").font(.caption).foregroundColor(.secondary) }
             FMLABSceltaAirPlay()
         }
     }
