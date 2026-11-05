@@ -188,8 +188,14 @@ static size_t fmlabSuoni(const int16_t *data, size_t frames) {
 }
 static void fmlabSuono(int16_t l, int16_t r) { int16_t c[2] = { l, r }; fmlabSuoni(c, 1); }
 static void fmlabPoll(void) {}
+static bool G_croceAnalogica;   // PSP: la croce muove anche la levetta analogica (molti giochi camminano solo con quella)
 static int16_t fmlabStato(unsigned port, unsigned device, unsigned index, unsigned id) {
     if (port != 0) return 0;
+    if (device == RETRO_DEVICE_ANALOG && G_croceAnalogica && index == RETRO_DEVICE_INDEX_ANALOG_LEFT) {
+        uint32_t t = atomic_load(&G_tasti) | atomic_load(&G_tastiController);
+        if (id == RETRO_DEVICE_ID_ANALOG_X) return (int16_t)(((t >> RETRO_DEVICE_ID_JOYPAD_RIGHT) & 1) * 32767 - ((t >> RETRO_DEVICE_ID_JOYPAD_LEFT) & 1) * 32767);
+        if (id == RETRO_DEVICE_ID_ANALOG_Y) return (int16_t)(((t >> RETRO_DEVICE_ID_JOYPAD_DOWN) & 1) * 32767 - ((t >> RETRO_DEVICE_ID_JOYPAD_UP) & 1) * 32767);
+    }
     if (device == RETRO_DEVICE_JOYPAD) {
         uint32_t t = atomic_load(&G_tasti) | atomic_load(&G_tastiController);
         if (id == RETRO_DEVICE_ID_JOYPAD_MASK) return (int16_t)t;
@@ -507,6 +513,7 @@ static NSError *fmlabErrore(NSString *messaggio) {
     G_opzioni = [FMLABOpzioniFisse(core.nome) mutableCopy];
     @synchronized (FMLABEmulatore.class) { for (NSString *k in G_opzioniUtente) if ([k hasPrefix:[core.nome componentsSeparatedByString:@"_"].firstObject]) G_opzioni[k] = G_opzioniUtente[k]; }
     _salvaUscita = YES;
+    G_croceAnalogica = [core.nome isEqual:@"ppsspp"];
     G_formato = RETRO_PIXEL_FORMAT_0RGB1555; G_statoAudio = NULL; atomic_store(&G_vibra, 0);
     atomic_store(&G_tasti, 0); atomic_store(&G_tastiController, 0); atomic_store(&G_ptocco, 0);
     atomic_store(&G_scrivi, 0); atomic_store(&G_leggi, 0);
@@ -546,6 +553,7 @@ static NSError *fmlabErrore(NSString *messaggio) {
 - (NSInteger)disposizione {
     if ([@[@"fceumm", @"gambatte"] containsObject:_core.nome]) return 0;
     if ([_core.nome isEqual:@"mgba"]) return 1;
+    if ([@[@"pcsx_rearmed", @"ppsspp"] containsObject:_core.nome]) return 3;   // simboli PlayStation
     return 2;
 }
 - (CGSize)misuraImmagine { os_unfair_lock_lock(&G_lockImmagine); CGSize m = CGSizeMake(G_w, G_h); os_unfair_lock_unlock(&G_lockImmagine); return m; }

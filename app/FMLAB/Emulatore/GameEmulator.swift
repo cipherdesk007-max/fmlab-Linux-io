@@ -1510,14 +1510,24 @@ final class FMLABPad: UIView {
 
     private func costruisci() {
         pulsanti.forEach { $0.vista.removeFromSuperview() }
-        var lista: [(FMLABTasto, String)] = [(.a, "A"), (.b, "B")]
-        if disposizione >= 2 { lista += [(.x, "X"), (.y, "Y")] }
+        let ps = disposizione == 3   // PlayStation/PSP: ○ ✕ △ □ al posto di A B X Y (stesse posizioni)
+        var lista: [(FMLABTasto, String)] = [(.a, ps ? "○" : "A"), (.b, ps ? "✕" : "B")]
+        if disposizione >= 2 { lista += [(.x, ps ? "△" : "X"), (.y, ps ? "□" : "Y")] }
         if disposizione >= 1 { lista += [(.l, "L"), (.r, "R")] }
         lista += [(.select, "SELECT"), (.start, "START")]
         pulsanti = lista.map { t, testo in
             let l = UILabel(); l.text = testo; l.textAlignment = .center; l.textColor = .white
             l.font = .systemFont(ofSize: testo.count > 1 ? 11 : 22, weight: .bold)
             l.clipsToBounds = true; addSubview(l)
+            if ps {
+                switch t {
+                case .a: l.textColor = UIColor(red: 1, green: 0.42, blue: 0.45, alpha: 1)
+                case .b: l.textColor = UIColor(red: 0.5, green: 0.68, blue: 1, alpha: 1)
+                case .x: l.textColor = UIColor(red: 0.35, green: 0.85, blue: 0.7, alpha: 1)
+                case .y: l.textColor = UIColor(red: 0.95, green: 0.55, blue: 0.85, alpha: 1)
+                default: break
+                }
+            }
             return Pulsante(tasto: t, vista: l)
         }
         setNeedsLayout()

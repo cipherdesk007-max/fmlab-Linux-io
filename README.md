@@ -6,7 +6,7 @@ Linux vero sull'iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), versione FMLA
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. Niente jailbreak, niente macchina virtuale:
 i programmi Linux ARM64 girano dentro l'app grazie a un interprete e a uno strato che traduce le chiamate di sistema.
 
-> **Stato: 0.10.9.** È LinuxRunner 1.1.0 (build 900) con nome, logo e colori FMLAB (rosso e nero), identificativo
+> **Stato: 0.11.0.** È LinuxRunner 1.1.0 (build 900) con nome, logo e colori FMLAB (rosso e nero), identificativo
 > proprio (`dev.fmlab.linux`, si installa **accanto** a LinuxRunner senza toccarne i dati), aggiornamenti dall'app
 > come FMLAB Cleaner e avviso quando esce un LinuxRunner originale più nuovo. Le altre migliorie arrivano una alla
 > volta, ognuna misurata contro l'originale.
@@ -78,7 +78,7 @@ Base: LinuxRunner 1.1.0 (build 900), con lo stesso motore (interprete ARM64, JIT
 
 | Miglioria | Com'è in LinuxRunner originale |
 |---|---|
-| **Game Emulator nativo**: NES, Game Boy/Color, GBA, SNES, PlayStation, DS dentro l'app, senza Linux e senza JIT; comandi a schermo che seguono la rotazione e si adattano a ogni iPhone e iPad, controller e tastiera, salvataggi, avanti veloce, cartelle di giochi tue (anche iCloud) divise per console, modalità *Solo giochi*, riprendi da dove eri, BIOS controllati; estensioni, opzioni e note arrivano da fmlab-retro senza nuova app; tasti spostabili e ingranditi per console, rinomina con il titolo vero del gioco, grafica HD e filtri TV/LCD (0.10.3); i giochi li metti tu — core da [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) (0.9.0) | Nessun emulatore |
+| **Game Emulator nativo**: NES, Game Boy/Color, GBA, SNES, PlayStation, DS, PSP dentro l'app, senza Linux e senza JIT; comandi a schermo che seguono la rotazione e si adattano a ogni iPhone e iPad, controller e tastiera, salvataggi, avanti veloce, cartelle di giochi tue (anche iCloud) divise per console, modalità *Solo giochi*, riprendi da dove eri, BIOS controllati; estensioni, opzioni e note arrivano da fmlab-retro senza nuova app; tasti spostabili e ingranditi per console, rinomina con il titolo vero del gioco, grafica HD e filtri TV/LCD (0.10.3); i giochi li metti tu — core da [fmlab-retro](https://github.com/cipherdesk007-max/fmlab-retro) (0.9.0) | Nessun emulatore |
 | **Cambio distribuzione con un tocco dalla Home**: tocchi quella che vuoi in *Distribuzioni installate*, confermi, chiudi e riapri; si vede quale è in funzione e quale partirà al prossimo avvio (0.8.7) | Bisogna andare in Distribuzioni → distribuzione → Usa al prossimo avvio |
 | **Ogni distribuzione si elimina**, anche Alpine di base, e mostra quanto occupa | Alpine è dentro l'app e non si toglie |
 | **Pulizia** (Impostazioni → Pulizia): file temporanei di installazione, cartella temporanea e cache dell'app, con lo spazio liberato | — |

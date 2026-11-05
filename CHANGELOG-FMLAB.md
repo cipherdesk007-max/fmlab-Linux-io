@@ -2,6 +2,17 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.11.0
+- **PSP** (PlayStation Portable) nel Game Emulator: PPSSPP, la versione più recente, compilata per iPhone **senza
+  JIT** (processore con l'interprete IR, grafica in software). Giochi .iso, .cso, .pbp (anche in .zip/.7z/.rar): .iso
+  e .pbp si riconoscono guardando dentro il file, quindi PlayStation e PSP non si confondono. I file di sistema di
+  PPSSPP (font del firmware, compat.ini) viaggiano dentro il core e si copiano da soli; niente BIOS da cercare.
+  Sulla PSP la croce muove anche la levetta analogica (molti giochi camminano solo con quella).
+  Senza JIT i giochi 2D e leggeri vanno bene; quelli 3D pesanti possono restare sotto la velocità piena
+  (*Mostra velocità* lo dice).
+- **Tasti PlayStation veri** su PS1 e PSP: ○ ✕ △ □ colorati al posto di A B X Y (stesse posizioni).
+- Disco emulatore **core-9** (7 core).
+
 ## 0.10.9
 - **Immagine… dentro il gioco**: dal menu del gioco si cambiano filtro (Pixel netti, Morbido, TV, LCD), forma
   (Originale, 16:9, Tutto lo schermo) e Grafica migliorata, e si vede subito, senza chiudere e riaprire.
