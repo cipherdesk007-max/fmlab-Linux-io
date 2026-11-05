@@ -1942,8 +1942,7 @@ private struct DevicesView: View {
             } header: { Text("Mouse and Pointer") } footer: { Text("Live input sources of the open desktop. Open the desktop, use the mouse, return here (or export the Open Desktop report) to see which events iOS delivered.") }
             Section {
                 Toggle("External Desktop Output", isOn: $externalOutput)
-                Button("Connect Wirelessly with AirPlay…") { wirelessHelp = true }
-                FMLABRigaAirPlay()
+                NavigationLink { FMLABGuidaTV(perGiochi: false) } label: { Label("Connect Wirelessly with AirPlay…", systemImage: "airplayvideo") }
                 Text("Shows the Linux desktop in a separate connected-display window. Keyboard, mouse and touch input stay on this device. Closing the viewer keeps output running while LinuxRunner stays in the foreground. Disconnecting returns control to this device; it does not stop Linux.").font(.caption).foregroundStyle(.secondary)
                 Text("Display resolution is selected when a session starts. Stop and restart the desktop with Fit Screen selected to size it for a newly connected monitor. Software rendering is capped at 1600 × 1200.").font(.caption).foregroundStyle(.secondary)
                 Text("For a connected separate display, choose Desktop → Use This Device as Touchpad. AirPlay mirroring alone shows the same screen on both devices.").font(.caption).foregroundStyle(.secondary)

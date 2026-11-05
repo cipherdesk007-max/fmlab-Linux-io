@@ -886,6 +886,19 @@ TR.update({
 "The Game Is on the TV": "Il gioco è sulla TV",
 "The TV shows the game and the iPhone is the controller. To stop: Control Center › Screen Mirroring › Stop Mirroring.": "La TV mostra il gioco e l'iPhone è il controller. Per smettere: Centro di Controllo › Duplica schermo › Interrompi duplicazione.",
 "The sound is on the TV, the picture is not: Control Center › Screen Mirroring › your TV.": "Il suono è sulla TV, l'immagine no: Centro di Controllo › Duplica schermo › la tua TV.",
+"Choose your Apple TV or AirPlay TV and come back here.": "Scegli la tua Apple TV o TV AirPlay e torna qui.",
+"Linux Desktop on the TV": "Desktop Linux sulla TV",
+"Open a game: the TV shows only the game, the iPhone is the controller.": "Apri un gioco: la TV mostra solo il gioco, l'iPhone è il controller.",
+"Open the Linux desktop: it goes on the TV.": "Apri il desktop Linux: va sulla TV.",
+"Picture on the TV": "Immagine sulla TV",
+"Screen Mirroring is off": "Duplica schermo è spenta",
+"Screen Mirroring is on": "Duplica schermo è attiva",
+"Sends only the sound (like music from Spotify): the picture stays on the iPhone.": "Manda solo il suono (come la musica di Spotify): l'immagine resta sull'iPhone.",
+"Sound": "Suono",
+"Swipe down from the top-right corner to open Control Center.": "Scorri giù dall'angolo in alto a destra per aprire il Centro di Controllo.",
+"Tap Screen Mirroring: the two overlapping rectangles. If it is missing, hold on Control Center › + › Screen Mirroring.": "Tocca Duplica schermo: i due rettangoli sovrapposti. Se manca, tieni premuto nel Centro di Controllo › + › Duplica schermo.",
+"The TV gets the picture only with Screen Mirroring.": "La TV riceve l'immagine solo con Duplica schermo.",
+"iOS does not let any app start Screen Mirroring by itself: it is only in Control Center. The iPhone and the TV must be on the same Wi-Fi. A USB-C/HDMI cable works too, with nothing to tap.": "iOS non lascia a nessuna app avviare Duplica schermo da sola: è solo nel Centro di Controllo. iPhone e TV devono essere sulla stessa Wi-Fi. Va bene anche un cavo USB-C/HDMI, senza toccare niente.",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

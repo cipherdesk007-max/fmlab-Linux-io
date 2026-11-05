@@ -2,6 +2,12 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.11.3
+- **Gioca sulla TV / Desktop Linux sulla TV**: una scheda sola, uguale per giochi e Linux (Giochi › AirPlay e TV,
+  Impostazioni › Dispositivi › *Connect Wirelessly with AirPlay…*, menu del gioco). Dice **dal vivo** se Duplica
+  schermo è attiva e dove va il suono, con i 3 passi per avviarla e il tasto per il solo suono. Appena la
+  duplicazione parte diventa verde; chiudendola dal gioco, il gioco va subito sulla TV.
+
 ## 0.11.2
 - **AirPlay chiaro**: il tasto AirPlay dell'app manda **solo il suono** (è il limite di iOS: l'immagine la manda solo
   Duplica schermo del Centro di Controllo). Ora si chiama *Solo il suono su AirPlay…*, e la scheda Giochi spiega in 3

@@ -4,6 +4,7 @@
 import SwiftUI
 import UIKit
 import AVKit
+import AVFoundation
 
 // MARK: - FMLAB: lingua
 /// Testo tradotto (it.lproj) per le stringhe che non passano da Text("...")
@@ -466,5 +467,51 @@ struct FMLABRigaAirPlay: View {
             HStack { Label("Sound Only to AirPlay…", systemImage: "airplayaudio"); Spacer(); Image(systemName: "chevron.right").font(.caption).foregroundColor(.secondary) }
             FMLABSceltaAirPlay()
         }
+    }
+}
+
+
+// MARK: Guida "Usa la TV": Duplica schermo (immagine) contro AirPlay del suono, con lo stato dal vivo
+/// iOS lascia mandare l'immagine solo a Duplica schermo del Centro di Controllo (nessuna app può avviarla):
+/// questa scheda lo spiega e si accorge da sola quando la duplicazione parte.
+struct FMLABGuidaTV: View {
+    var perGiochi = true
+    var chiudi: (() -> Void)? = nil
+    @State private var duplica = false
+    @State private var suono = ""
+    private let giro = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    private func aggiorna() {
+        duplica = UIScreen.screens.count > 1 || UIApplication.shared.connectedScenes.contains { ($0.session.role.rawValue).contains("ExternalDisplay") }
+        suono = AVAudioSession.sharedInstance().currentRoute.outputs.map { $0.portName }.joined(separator: ", ")
+    }
+    var body: some View {
+        List {
+            Section {
+                HStack(spacing: 12) {
+                    Image(systemName: duplica ? "checkmark.circle.fill" : "rectangle.on.rectangle").font(.title2).foregroundColor(duplica ? .green : .accentColor)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(duplica ? "Screen Mirroring is on" : "Screen Mirroring is off").font(.headline)
+                        Text(duplica ? (perGiochi ? "Open a game: the TV shows only the game, the iPhone is the controller." : "Open the Linux desktop: it goes on the TV.") : "The TV gets the picture only with Screen Mirroring.").font(.callout).foregroundColor(.secondary)
+                    }
+                }.padding(.vertical, 4)
+                if !suono.isEmpty { HStack { Label("Sound", systemImage: "speaker.wave.2"); Spacer(); Text(suono).foregroundColor(.secondary) } }
+            }
+            if !duplica {
+                Section {
+                    Label("Swipe down from the top-right corner to open Control Center.", systemImage: "1.circle.fill")
+                    Label("Tap Screen Mirroring: the two overlapping rectangles. If it is missing, hold on Control Center › + › Screen Mirroring.", systemImage: "2.circle.fill")
+                    Label("Choose your Apple TV or AirPlay TV and come back here.", systemImage: "3.circle.fill")
+                } header: { Text("Picture on the TV") } footer: {
+                    Text("iOS does not let any app start Screen Mirroring by itself: it is only in Control Center. The iPhone and the TV must be on the same Wi-Fi. A USB-C/HDMI cable works too, with nothing to tap.")
+                }
+            }
+            Section {
+                FMLABRigaAirPlay()
+            } footer: { Text("Sends only the sound (like music from Spotify): the picture stays on the iPhone.") }
+        }
+        .navigationTitle(perGiochi ? LF("Play on the TV") : LF("Linux Desktop on the TV"))
+        .toolbar { if let chiudi { ToolbarItem(placement: .confirmationAction) { Button("Done") { chiudi() } } } }
+        .onAppear(perform: aggiorna)
+        .onReceive(giro) { _ in aggiorna() }
     }
 }

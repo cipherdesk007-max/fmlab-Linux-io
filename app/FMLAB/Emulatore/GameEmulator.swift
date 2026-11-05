@@ -682,13 +682,7 @@ struct GameEmulatorView: View {
             Section {
                 Toggle("Use the External Screen for Games", isOn: $usaEsterno)
                 HStack { Label("External screen", systemImage: "tv"); Spacer(); Text(schermoEsterno ?? LF("None")).foregroundColor(schermoEsterno == nil ? .secondary : .green) }
-                VStack(alignment: .leading, spacing: 6) {
-                    Label("See the Game on the TV", systemImage: "rectangle.on.rectangle").font(.headline)
-                    Text("1. Open Control Center (swipe down from the top right).").font(.callout)
-                    Text("2. Tap Screen Mirroring (the two rectangles) and choose your Apple TV or AirPlay TV.").font(.callout)
-                    Text("3. Open a game: the TV shows only the game and the iPhone becomes the controller.").font(.callout)
-                }.padding(.vertical, 4)
-                FMLABRigaAirPlay()
+                NavigationLink { FMLABGuidaTV(perGiochi: true) } label: { Label("Play on the TV…", systemImage: "airplayvideo") }
             } header: { Text("AirPlay and TV") } footer: {
                 Text("The AirPlay button (sound only) sends just the audio, like music: the picture stays on the iPhone. iOS lets only Screen Mirroring in Control Center send the picture, or a USB-C/HDMI cable. On DS the iPhone keeps the screens for touch. The Linux desktop has its own setting in Settings › Devices.")
             }
@@ -1422,15 +1416,11 @@ final class FMLABGiocoController: UIViewController {
     /// Come mandare il gioco sulla TV: Duplica schermo (immagine) è solo nel Centro di Controllo; qui solo il suono.
     private func spiegaTV() {
         guard let e = emulatore else { return }
-        let collegata = esterno != nil
-        let m = UIAlertController(title: LF(collegata ? "The Game Is on the TV" : "Play on the TV"),
-                                  message: LF(collegata ? "The TV shows the game and the iPhone is the controller. To stop: Control Center › Screen Mirroring › Stop Mirroring." :
-                                                "1. Open Control Center (swipe down from the top right).\n2. Tap Screen Mirroring and choose your Apple TV or AirPlay TV.\n3. Come back here: the TV shows only the game and the iPhone becomes the controller.\n\nThe AirPlay sound button sends only the audio."),
-                                  preferredStyle: .alert)
-        m.addAction(UIAlertAction(title: LF("Sound Only to AirPlay…"), style: .default) { [weak self] _ in
-            guard let self else { return }; e.inPausa = false; FMLABAirPlay.apri(da: self.view) })
-        m.addAction(UIAlertAction(title: LF("OK"), style: .cancel) { _ in e.inPausa = false })
-        present(m, animated: true)
+        var nav: UINavigationController?
+        let guida = UIHostingController(rootView: FMLABGuidaTV(perGiochi: true, chiudi: { [weak self] in
+            nav?.dismiss(animated: true); e.inPausa = false; self?.staccaEsterno(); self?.collegaEsterno(); self?.view.setNeedsLayout() }))
+        nav = UINavigationController(rootViewController: guida)
+        if let n = nav { n.modalPresentationStyle = .pageSheet; present(n, animated: true) }
     }
     /// Il suono è andato su una TV AirPlay ma l'immagine no (manca Duplica schermo): lo si dice, una volta.
     private var avvisatoSoloSuono = false

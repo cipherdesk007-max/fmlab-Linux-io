@@ -316,6 +316,7 @@
 "Choose a single folder name." = "Scegli un solo nome di cartella.";
 "Choose an application first." = "Prima scegli un'applicazione.";
 "Choose the folder where you keep your games (On My iPhone, iCloud Drive, a USB drive…): FMLAB reads them from there and sorts them by console. Or import single files, or put them in Files › FMLAB Linux › Giochi. Zipped games (.zip, .7z, .rar) work as they are." = "Scegli la cartella dove tieni i tuoi giochi (Sul mio iPhone, iCloud Drive, una chiavetta…): FMLAB li legge da lì e li divide per console. Oppure importa singoli file, o mettili in File › FMLAB Linux › Giochi. I giochi zippati (.zip, .7z, .rar) vanno bene così.";
+"Choose your Apple TV or AirPlay TV and come back here." = "Scegli la tua Apple TV o TV AirPlay e torna qui.";
 "Classic" = "Classico";
 "Clean Temporary Files" = "Pulisci file temporanei";
 "Clean Up" = "Pulisci";
@@ -825,6 +826,7 @@
 "Linux App Manager" = "Gestione app Linux";
 "Linux Applications" = "Applicazioni Linux";
 "Linux Desktop" = "Desktop Linux";
+"Linux Desktop on the TV" = "Desktop Linux sulla TV";
 "Linux GPU Device" = "GPU di Linux";
 "Linux GUI display" = "Schermo grafico Linux";
 "Linux GUI viewer" = "Visore grafico Linux";
@@ -997,7 +999,9 @@
 "Open Shared Folder" = "Apri cartella condivisa";
 "Open Terminal" = "Apri terminale";
 "Open a destination subfolder, then Import File Here to select a file from iOS Files." = "Apri una cartella di destinazione, poi Importa file qui per scegliere un file dall'app File.";
+"Open a game: the TV shows only the game, the iPhone is the controller." = "Apri un gioco: la TV mostra solo il gioco, l'iPhone è il controller.";
 "Open in" = "Apri in";
+"Open the Linux desktop: it goes on the TV." = "Apri il desktop Linux: va sulla TV.";
 "OpenGL Processes" = "Processi OpenGL";
 "Openbox window manager, panel and file manager: the lightest and most tested desktop." = "Gestore finestre Openbox, pannello e gestore file: il desktop più leggero e più provato.";
 "Opening the archive of %@…" = "Apro l'archivio di %@…";
@@ -1047,6 +1051,7 @@
 "Phone reads the screen and picks the sharpest size: each Linux pixel becomes an exact square of iPhone pixels (iPhone 15 Pro Max: 1308 × 644 next to the camera, exactly 2×). If the phone is hot or in Low Power Mode it uses the lighter 540-row size." = "Telefono legge lo schermo e sceglie da solo la misura più nitida: ogni pixel di Linux diventa un quadrato preciso di pixel dell'iPhone (iPhone 15 Pro Max: 1308 × 644 accanto alla fotocamera, esattamente 2×). Se il telefono è caldo o in Risparmio energetico usa la misura più leggera da 540 righe.";
 "Phone · Full Screen" = "Telefono · tutto schermo";
 "Picture" = "Immagine";
+"Picture on the TV" = "Immagine sulla TV";
 "Picture…" = "Immagine…";
 "Play on the TV" = "Gioca sulla TV";
 "Play on the TV…" = "Gioca sulla TV…";
@@ -1170,6 +1175,8 @@
 "Save to Files…" = "Salva in File…";
 "Saved Linux applications" = "Applicazioni Linux salvate";
 "Saved in slot %ld" = "Salvato nel posto %ld";
+"Screen Mirroring is off" = "Duplica schermo è spenta";
+"Screen Mirroring is on" = "Duplica schermo è attiva";
 "Screenshot saved in Giochi › Foto" = "Foto salvata in Giochi › Foto";
 "Scrolling sensitivity" = "Sensibilità dello scorrimento";
 "Scrolling sensitivity: %.2g×" = "Sensibilità dello scorrimento: %.2g×";
@@ -1182,6 +1189,7 @@
 "Select this environment for the next launch, then reopen LinuxRunner." = "Scegli questo ambiente per il prossimo avvio, poi riapri FMLAB Linux.";
 "Select this environment for the next launch, then reopen LinuxRunner. Its installed packages and files are preserved." = "Scegli questo ambiente per il prossimo avvio, poi riapri FMLAB Linux. Pacchetti e file installati restano.";
 "Selected for next launch" = "Scelta per il prossimo avvio";
+"Sends only the sound (like music from Spotify): the picture stays on the iPhone." = "Manda solo il suono (come la musica di Spotify): l'immagine resta sull'iPhone.";
 "Serious" = "Caldo";
 "Session" = "Sessione";
 "Sessions" = "Sessioni";
@@ -1230,6 +1238,7 @@
 "Software Rendering" = "Disegno software";
 "Software rendering selected" = "Disegno software scelto";
 "Sort" = "Ordina";
+"Sound" = "Suono";
 "Sound Only to AirPlay…" = "Solo il suono su AirPlay…";
 "Sound support not installed (Desktop › Install Desktop Support adds it)" = "Audio non installato (Desktop › Installa supporto desktop lo aggiunge)";
 "Source Code and Reports (GitHub)" = "Codice sorgente e segnalazioni (GitHub)";
@@ -1279,6 +1288,7 @@
 "Support installation failed or was interrupted. Open GUI Logs for the exact package/compiler failure, then retry installation." = "Installazione non riuscita o interrotta. Apri Registri grafica per l'errore preciso, poi riprova.";
 "Support installation verified. You can launch the Linux applications." = "Installazione verificata. Puoi avviare le applicazioni Linux.";
 "Swap Screens" = "Scambia schermi";
+"Swipe down from the top-right corner to open Control Center." = "Scorri giù dall'angolo in alto a destra per aprire il Centro di Controllo.";
 "Syscall number (optional)" = "Numero della syscall (facoltativo)";
 "System" = "Sistema";
 "System accounts and the default login cannot be removed. Select a different default login first." = "Gli account di sistema e l'accesso predefinito non si possono togliere. Prima scegli un altro accesso predefinito.";
@@ -1294,6 +1304,7 @@
 "Takes effect after LinuxRunner restarts." = "Vale dopo aver riaperto FMLAB Linux.";
 "Tap Retry; Details shows the installer log." = "Tocca Riprova; Dettagli mostra il registro dell'installazione.";
 "Tap Retry; if it repeats, the Debian servers may be updating." = "Tocca Riprova; se si ripete, forse i server Debian si stanno aggiornando.";
+"Tap Screen Mirroring: the two overlapping rectangles. If it is missing, hold on Control Center › + › Screen Mirroring." = "Tocca Duplica schermo: i due rettangoli sovrapposti. Se manca, tieni premuto nel Centro di Controllo › + › Duplica schermo.";
 "Tap a distribution to use it: close the app from the app switcher and open it again. Files are preserved." = "Tocca una distribuzione per usarla: poi chiudi l'app dal multitasking e riaprila. I file restano.";
 "Tap a file to save it to Files or delete it. Swipe left to delete files and folders." = "Tocca un file per salvarlo in File o eliminarlo. Scorri verso sinistra per eliminare file e cartelle.";
 "Tap to use" = "Tocca per usarla";
@@ -1309,6 +1320,7 @@
 "The Game Is on the TV" = "Il gioco è sulla TV";
 "The LXQt desktop from the distribution's own packages; network needed once. The LinuxRunner Desktop stays installed as the fallback." = "Il desktop LXQt dai pacchetti della distribuzione; la rete serve una volta. Il Desktop LinuxRunner resta installato come riserva.";
 "The Linux runtime could not start this session. See diagnostics." = "Linux non è riuscito ad avviare questa sessione. Vedi la diagnostica.";
+"The TV gets the picture only with Screen Mirroring." = "La TV riceve l'immagine solo con Duplica schermo.";
 "The TV shows the game and the iPhone is the controller. To stop: Control Center › Screen Mirroring › Stop Mirroring." = "La TV mostra il gioco e l'iPhone è il controller. Per smettere: Centro di Controllo › Duplica schermo › Interrompi duplicazione.";
 "The account could not be created. Details are in Runtime Diagnostics (ACCOUNT)." = "Non è stato possibile creare l'account. I dettagli sono nella diagnostica (ACCOUNT).";
 "The account is not a login account in the active guest /etc/passwd. Refresh the list." = "L'account non è un account di accesso in /etc/passwd dell'ambiente attivo. Aggiorna l'elenco.";
@@ -1523,6 +1535,7 @@
 "iOS Network Path" = "Rete di iOS";
 "iOS Screen Modes · Read Only" = "Modalità dello schermo iOS · solo lettura";
 "iOS allows one Linux runtime per app launch, so this restart is needed once." = "iOS permette un solo Linux per ogni apertura dell'app, quindi questo riavvio serve una volta.";
+"iOS does not let any app start Screen Mirroring by itself: it is only in Control Center. The iPhone and the TV must be on the same Wi-Fi. A USB-C/HDMI cable works too, with nothing to tap." = "iOS non lascia a nessuna app avviare Duplica schermo da sola: è solo nel Centro di Controllo. iPhone e TV devono essere sulla stessa Wi-Fi. Va bene anche un cavo USB-C/HDMI, senza toccare niente.";
 "iOS screen capability: up to %@ Hz. This is not measured Linux frame rate." = "Lo schermo iOS arriva fino a %@ Hz. Non è la velocità misurata di Linux.";
 "iOS screen capability: up to %lf Hz. This is not measured Linux frame rate." = "Lo schermo iOS arriva fino a %lf Hz. Non è la velocità misurata di Linux.";
 "iOS screen capability: up to %lld Hz. This is not measured Linux frame rate." = "Lo schermo iOS arriva fino a %lld Hz. Non è la velocità misurata di Linux.";
