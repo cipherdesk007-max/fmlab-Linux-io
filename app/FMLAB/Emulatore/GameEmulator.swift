@@ -864,6 +864,10 @@ final class FMLABGiocoController: UIViewController {
     private var accessoCartella = false
     private var scambiati = false            // DS: schermo di sotto sopra (o a sinistra)
     private let filtroVista = UIView()       // scanline / griglia LCD sopra l'immagine
+    // DS in orizzontale: un'immagine sola (schermi uno sopra l'altro) divisa in due viste, così ognuno va dove serve
+    private let secondoSchermo = UIView()
+    private let toccoDS = FMLABToccoDS()
+    private var giroDS: CADisplayLink?
     private var filtroPer: CGSize = .zero
     private var tenuto: FMLABTasto?          // "tieni premuto": un tasto sempre giù (es. correre)
     deinit { osservatori.forEach { NotificationCenter.default.removeObserver($0) } }
@@ -890,6 +894,10 @@ final class FMLABGiocoController: UIViewController {
             view.addSubview(e.vista)
             view.addSubview(filtroVista)
             filtroVista.isUserInteractionEnabled = false
+            secondoSchermo.isUserInteractionEnabled = false; secondoSchermo.isHidden = true; secondoSchermo.backgroundColor = .black
+            view.addSubview(secondoSchermo)
+            toccoDS.emulatore = e; toccoDS.isHidden = true
+            view.addSubview(toccoDS)
             pad.disposizione = e.disposizione
             pad.nomeCore = gioco.core.nome
             pad.tasto = { [weak e, weak self] t, giu in
@@ -937,7 +945,7 @@ final class FMLABGiocoController: UIViewController {
         present(m, animated: true)
     }
     override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated); emulatore?.ferma(); staccaEsterno()
+        super.viewWillDisappear(animated); emulatore?.ferma(); staccaEsterno(); giroDS?.invalidate(); giroDS = nil
         if accessoCartella { gioco.cartella?.stopAccessingSecurityScopedResource(); accessoCartella = false }
     }
 
@@ -1005,11 +1013,13 @@ final class FMLABGiocoController: UIViewController {
         emulatore?.vista.isHidden = false
         let r = max(0.3, emulatore?.rapporto ?? 4.0 / 3.0)
         avviso.frame = s.insetBy(dx: 24, dy: 80)
-        // Nintendo DS: in verticale gli schermi uno sopra l'altro, in orizzontale affiancati (molto più grandi)
-        if emulatore?.tocco == true {
+        // Nintendo DS: il core dà sempre gli schermi uno sopra l'altro; in orizzontale l'app li divide
+        if ds {
             let v = b.height >= b.width
-            emulatore?.opzione("desmume_screens_layout", valore: v ? (scambiati ? "bottom/top" : "top/bottom") : (scambiati ? "right/left" : "left/right"))
+            emulatore?.opzione("desmume_screens_layout", valore: v && scambiati ? "bottom/top" : "top/bottom")
+            if !v { dsOrizzontale(b, s); return }
         }
+        dividiDS(false)
         if b.height >= b.width {
             // verticale: gioco in alto, comandi sotto (come una console portatile)
             var w = s.width, h = w / r
@@ -1042,15 +1052,70 @@ final class FMLABGiocoController: UIViewController {
         pad.setNeedsLayout()
     }
 
+    /// Disposizione DS in orizzontale (menu del gioco › Schermi DS):
+    /// "grande" = schermo principale a tutta altezza e l'altro più piccolo accanto; "affiancati" = uguali, da bordo a bordo.
+    private var modoDS: String { UserDefaults.standard.string(forKey: "FMLAB.ds.orizzontale") ?? "grande" }
+    private func dsOrizzontale(_ b: CGRect, _ s: CGRect) {
+        guard let e = emulatore else { return }
+        dividiDS(true)
+        let q: CGFloat = 4.0 / 3.0, m: CGFloat = 6
+        var grande: CGRect, piccolo: CGRect
+        if modoDS == "affiancati" {
+            let w = (s.width - m) / 2, h = min(s.height, w / q), ww = h * q
+            let y = s.midY - h / 2, x0 = s.midX - ww - m / 2
+            grande = CGRect(x: x0, y: y, width: ww, height: h); piccolo = CGRect(x: s.midX + m / 2, y: y, width: ww, height: h)
+        } else {
+            // principale a tutta altezza; l'altro nello spazio che resta a destra (in alto, sotto L/R: sotto ci vanno i tasti)
+            var h = s.height, w = h * q
+            let restoMin: CGFloat = min(220, s.width * 0.3)
+            if s.width - w < restoMin { w = s.width - restoMin; h = w / q }
+            grande = CGRect(x: s.minX, y: s.midY - h / 2, width: w, height: h)
+            let pw = s.maxX - grande.maxX - m, ph = pw / q
+            piccolo = CGRect(x: grande.maxX + m, y: max(s.minY + 52, s.midY - ph / 2 - ph * 0.35), width: pw, height: ph)
+        }
+        // "Scambia gli schermi": il touch va in grande
+        let alto = scambiati ? piccolo : grande, basso = scambiati ? grande : piccolo
+        e.vista.frame = alto.integral
+        secondoSchermo.frame = basso.integral
+        toccoDS.frame = basso.integral
+        pad.modo = .orizzontale
+        pad.frame = b
+        pad.areaSicura = UIEdgeInsets(top: s.minY, left: s.minX, bottom: b.maxY - s.maxY, right: b.maxX - s.maxX)
+        pad.spazioLato = max(0, grande.minX - s.minX)
+        pad.sopra = true
+        pad.chiavePosizioni = "FMLAB.tasti.\(gioco.core.nome).o.\(modoDS)"
+        aggiornaFiltro()
+        pad.setNeedsLayout()
+    }
+    private func dividiDS(_ attivo: Bool) {
+        guard let v = emulatore?.vista else { return }
+        v.layer.contentsRect = attivo ? CGRect(x: 0, y: 0, width: 1, height: 0.5) : CGRect(x: 0, y: 0, width: 1, height: 1)
+        v.isUserInteractionEnabled = !attivo          // il tocco lo prende toccoDS, sopra lo schermo di sotto
+        secondoSchermo.isHidden = !attivo; toccoDS.isHidden = !attivo
+        secondoSchermo.layer.contentsRect = CGRect(x: 0, y: 0.5, width: 1, height: 0.5)
+        secondoSchermo.layer.magnificationFilter = v.layer.magnificationFilter
+        if attivo, giroDS == nil {
+            let g = CADisplayLink(target: FMLABDebole(self), selector: #selector(FMLABDebole.giro)); g.add(to: .main, forMode: .common); giroDS = g
+        } else if !attivo { giroDS?.invalidate(); giroDS = nil }
+    }
+    @objc fileprivate func copiaSecondo() {
+        guard let v = emulatore?.vista, v.layer.contents != nil else { return }
+        CATransaction.begin(); CATransaction.setDisableActions(true)
+        secondoSchermo.layer.contents = v.layer.contents
+        CATransaction.commit()
+    }
+
     /// Filtri dell'immagine: pixel netti, morbido, scanline da TV, griglia LCD (allineati ai pixel del gioco).
     private func aggiornaFiltro() {
         guard let e = emulatore else { return }
         let f = UserDefaults.standard.string(forKey: "FMLAB.grafica.filtro") ?? "netti"
         e.vista.layer.magnificationFilter = f == "morbido" ? .linear : .nearest
+        secondoSchermo.layer.magnificationFilter = e.vista.layer.magnificationFilter
         filtroVista.frame = e.vista.frame
         let m = e.misuraImmagine
         guard (f == "tv" || f == "lcd"), m.width > 0, m.height > 0, e.vista.bounds.height > 0 else { filtroVista.backgroundColor = .clear; return }
-        let px = e.vista.bounds.height / m.height, py = px
+        let divisa = !secondoSchermo.isHidden
+        let px = e.vista.bounds.height / (divisa ? m.height / 2 : m.height), py = px
         let chiave = CGSize(width: px * (f == "lcd" ? 1 : 0), height: py)
         if chiave == filtroPer { return }
         filtroPer = chiave
@@ -1063,6 +1128,17 @@ final class FMLABGiocoController: UIViewController {
             if f == "lcd" { c.fill(CGRect(x: cella.width - max(1 / scala, cella.width * 0.18), y: 0, width: max(1 / scala, cella.width * 0.18), height: cella.height)) }
         }
         filtroVista.backgroundColor = UIColor(patternImage: img)
+    }
+    private func scegliModoDS() {
+        let m = UIAlertController(title: LF("DS Screens in Landscape"), message: nil, preferredStyle: .actionSheet)
+        for (k, t) in [("grande", LF("Big Main Screen")), ("affiancati", LF("Side by Side"))] {
+            m.addAction(UIAlertAction(title: (modoDS == k ? "✓ " : "") + t, style: .default) { [weak self] _ in
+                UserDefaults.standard.set(k, forKey: "FMLAB.ds.orizzontale"); self?.emulatore?.inPausa = false; self?.view.setNeedsLayout() })
+        }
+        m.addAction(UIAlertAction(title: LF("Cancel"), style: .cancel) { [weak self] _ in self?.emulatore?.inPausa = false })
+        m.popoverPresentationController?.sourceView = view
+        m.popoverPresentationController?.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 1, height: 1)
+        present(m, animated: true)
     }
 
     private func apriMenu() {
@@ -1082,6 +1158,9 @@ final class FMLABGiocoController: UIViewController {
                 m.addAction(UIAlertAction(title: LF("Swap Screens"), style: .default) { [weak self] _ in
                     guard let self else { return }; e.inPausa = false; self.scambiati.toggle(); self.view.setNeedsLayout()
                 })
+                if view.bounds.width > view.bounds.height {
+                    m.addAction(UIAlertAction(title: LF("DS Screens in Landscape…"), style: .default) { [weak self] _ in self?.scegliModoDS() })
+                }
             }
         }
         if e == nil {
@@ -1444,4 +1523,26 @@ final class FMLABPad: UIView {
         if modifica { trascinato = nil; return }
         for x in t { tocchi[ObjectIdentifier(x)] = nil }; aggiornaTocchi(e) }
     override func touchesCancelled(_ t: Set<UITouch>, with e: UIEvent?) { for x in t { tocchi[ObjectIdentifier(x)] = nil }; aggiornaTocchi(e) }
+}
+
+
+/// Evita che il CADisplayLink tenga in vita il gioco chiuso.
+final class FMLABDebole: NSObject {
+    weak var c: FMLABGiocoController?
+    init(_ c: FMLABGiocoController) { self.c = c }
+    @objc func giro() { c?.copiaSecondo() }
+}
+
+/// DS in orizzontale: superficie trasparente sopra lo schermo di sotto, che manda il tocco al gioco
+/// (nell'immagine del core lo schermo di sotto è la metà bassa).
+final class FMLABToccoDS: UIView {
+    weak var emulatore: FMLABEmulatore?
+    private func manda(_ t: Set<UITouch>, _ giu: Bool) {
+        guard let x = t.first?.location(in: self), bounds.width > 0, bounds.height > 0 else { return }
+        emulatore?.toccoX(x.x / bounds.width, y: 0.5 + 0.5 * min(1, max(0, x.y / bounds.height)), premuto: giu)
+    }
+    override func touchesBegan(_ t: Set<UITouch>, with e: UIEvent?) { manda(t, true) }
+    override func touchesMoved(_ t: Set<UITouch>, with e: UIEvent?) { manda(t, true) }
+    override func touchesEnded(_ t: Set<UITouch>, with e: UIEvent?) { manda(t, false) }
+    override func touchesCancelled(_ t: Set<UITouch>, with e: UIEvent?) { manda(t, false) }
 }

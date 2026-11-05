@@ -259,6 +259,7 @@
 "Backup restored: %ld files." = "Copia rimessa: %ld file.";
 "Bar" = "Barra";
 "Based on LinuxRunner" = "Basata su LinuxRunner";
+"Big Main Screen" = "Schermo principale grande";
 "Bigger Screen" = "Schermo più grande";
 "Blinking Cursor" = "Cursore lampeggiante";
 "Block" = "Blocco";
@@ -384,6 +385,8 @@
 "Cursor" = "Cursore";
 "DISPLAY and Xauthority are set for each GUI session. Install GUI Support before launching X11 applications." = "DISPLAY e Xauthority vengono impostati per ogni sessione grafica. Installa il supporto grafico prima delle applicazioni X11.";
 "DS 3D and PlayStation at double resolution, SNES Mode 7 in HD. Turn it off if a game slows down." = "3D del DS e PlayStation a risoluzione doppia, Mode 7 dello SNES in HD. Spegnila se un gioco rallenta.";
+"DS Screens in Landscape" = "Schermi DS in orizzontale";
+"DS Screens in Landscape…" = "Schermi DS in orizzontale…";
 "Dark" = "Scuro";
 "Debian 13.7 ARM64 · authenticated official packages" = "Debian 13.7 ARM64 · pacchetti ufficiali verificati";
 "Debian Applications" = "Applicazioni Debian";
@@ -1191,6 +1194,7 @@
 "Show Desktop on This Device" = "Mostra il desktop su questo dispositivo";
 "Show Details" = "Mostra dettagli";
 "Shows the Linux desktop in a separate connected-display window. Keyboard, mouse and touch input stay on this device. Closing the viewer keeps output running while LinuxRunner stays in the foreground. Disconnecting returns control to this device; it does not stop Linux." = "Mostra il desktop Linux su uno schermo collegato. Tastiera, mouse e tocco restano su questo telefono. Chiudendo il visore l'uscita continua finché FMLAB Linux resta davanti. Scollegando, i comandi tornano al telefono; Linux non si ferma.";
+"Side by Side" = "Affiancati";
 "Slide to move, tap to click, hold and slide to drag; two fingers scroll or tap for right click in touchpad mode. Clipboard text is sent only when requested." = "Scorri per muovere, tocca per cliccare, tieni premuto e scorri per trascinare; con due dita scorri o tocchi per il tasto destro in modalità touchpad. Il testo copiato si manda solo quando lo chiedi.";
 "Slot %ld" = "Posto %ld";
 "Small" = "Piccoli";

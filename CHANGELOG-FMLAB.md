@@ -2,6 +2,14 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.10.4
+- **DS in orizzontale a tutto schermo**: prima gli schermi affiancati dovevano stare in larghezza, quindi restavano
+  bassi con tanto nero sopra e sotto. Ora l'app divide da sola l'immagine del DS: lo **schermo principale va a
+  tutta altezza** e quello da toccare sta accanto, più piccolo, sotto L/R. Menu del gioco › *Schermi DS in
+  orizzontale…* per scegliere *Schermo principale grande* o *Affiancati* (uguali, da bordo a bordo); *Scambia gli
+  schermi* mette in grande quello che si tocca (per i giochi tutti a tocco). Girando non si riconfigura più il core.
+- I tasti spostati si salvano anche per ognuna delle due disposizioni.
+
 ## 0.10.3
 - **Tasti personalizzabili per gioco/console**: menu del gioco › *Sposta i tasti…*: il gioco va in pausa, trascini
   croce, tasti, Menu e avanti veloce dove vuoi e li ingrandisci o rimpicciolisci pizzicando. Si salvano per console e

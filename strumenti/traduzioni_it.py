@@ -850,6 +850,10 @@ TR.update({
 "TV (scanlines)": "TV (righe)",
 "Use the External Screen for Games": "Usa lo schermo esterno per i giochi",
 "Urgent fix: applied straight away without asking. Normal updates always ask first.": "Correzione urgente: applicata subito senza chiedere. Gli aggiornamenti normali chiedono sempre prima.",
+"DS Screens in Landscape": "Schermi DS in orizzontale",
+"DS Screens in Landscape…": "Schermi DS in orizzontale…",
+"Big Main Screen": "Schermo principale grande",
+"Side by Side": "Affiancati",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo
