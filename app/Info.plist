@@ -45,6 +45,8 @@
 	<string>$(ROOTFS_SHA256)</string>
 	<key>LinuxRunnerSourceCommit</key>
 	<string>$(LINUXRUNNER_SOURCE_COMMIT)</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Connect Arduino, ESP32 and other boards that offer a Bluetooth serial (UART) link, so Linux programs can use them as /dev/ttyBLE serial ports.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Allow Linux applications to connect to computers and services on your local network.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -107,6 +109,10 @@
 			</array>
 		</dict>
 	</dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).linuxtask.*</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

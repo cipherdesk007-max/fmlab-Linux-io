@@ -6,7 +6,7 @@ Real Linux on the iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), the FMLAB e
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. No jailbreak, no virtual machine: ARM64 Linux programs
 run inside the app through an interpreter and a layer that translates system calls.
 
-> **Status: 0.12.0.** LinuxRunner 1.1.0 (build 900), same engine (ARM64 interpreter, JIT, Metal GPU), with the FMLAB
+> **Status: 0.13.0.** LinuxRunner 1.1.1 (build 905), same engine (ARM64 interpreter, JIT, Metal GPU), with the FMLAB
 > name, logo and red-and-black colours, its own identifier (`dev.fmlab.linux`, so it installs **next to**
 > LinuxRunner without touching its data), in-app updates and the improvements listed below.
 
@@ -48,7 +48,7 @@ The app is in English by default; Settings → FMLAB → Language switches it to
 
 ## What's better than LinuxRunner
 
-Base: LinuxRunner 1.1.0 (build 900) with the same engine (ARM64 interpreter, JIT, Metal GPU). Version history:
+Base: LinuxRunner 1.1.1 (build 905) with the same engine (ARM64 interpreter, JIT, Metal GPU). Version history:
 [CHANGELOG-FMLAB.md](CHANGELOG-FMLAB.md) (in Italian).
 
 **App and installation**
@@ -122,7 +122,7 @@ removes it):
 ## How it's made
 
 - Starting source: LinuxRunner at commit
-  [`d141978`](https://github.com/mxhm11cr/LinuxRunner/commit/d141978) ("Release LinuxRunner 1.1.0 (900)").
+  [`4a35211`](https://github.com/mxhm11cr/LinuxRunner/commit/4a35211) ("Release LinuxRunner 1.1.1 (905)").
   The original README is in [README.LinuxRunner.md](README.LinuxRunner.md), build instructions in
   [docs/BUILDING.md](docs/BUILDING.md).
 - Built **for free by GitHub Actions on a Mac** ([.github/workflows/build.yml](.github/workflows/build.yml)) with

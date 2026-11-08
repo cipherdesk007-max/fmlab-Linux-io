@@ -2,6 +2,22 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.13.0
+- **Base aggiornata a LinuxRunner 1.1.1 (build 905)** di Leminos, unita a mano con tutto quello che è FMLAB:
+  - nuove **Home** (anteprima del desktop dal vivo, riquadri Terminale, App Store, File, GPU, Dispositivi,
+    Diagnostica, attività lunghe), **Distribuzioni** (schede con il logo di ogni distribuzione, griglia "Aggiungi una
+    distribuzione", elimina dal menu) e **Impostazioni** a categorie;
+  - **App Store** di Linux: le app dei repository della distribuzione, da installare con un tocco;
+  - nuove distribuzioni: **Fedora Linux 44**, **Kali Linux** (con strumenti facoltativi), **SteamOS ARM64**
+    (sperimentale); KDE Plasma più veloce (manda solo i pezzi di schermo cambiati);
+  - **seriale Bluetooth e USB MIDI** per Arduino/ESP32 (/dev/ttyBLE, /dev/ttyMIDI), terminale più nitido con appunti;
+    salvaschermo durante le installazioni lunghe; installazioni lunghe che non si fermano più dopo un'ora.
+- Restano tutte le cose FMLAB: scheda **Giochi** e *Solo giochi*, aggiornamenti FMLAB, import da LinuxRunner,
+  **RunnerKit** (ora come scheda nella nuova Home), misura **Telefono** a tutto schermo e rotazione, desktop da bordo a
+  bordo con la Dynamic Island, schermo esterno per i giochi, nome/logo/colori FMLAB.
+- **Tutto il nuovo è in italiano** (254 testi nuovi tradotti).
+- La scheda *Sessioni* non c'è più (come nell'originale): lo stato del desktop è nella Home.
+
 ## 0.12.0
 - **Salvataggi del gioco al sicuro** (il caso delle medaglie perse): prima "Riprendi" si aggiornava solo uscendo
   bene dal gioco; se l'app veniva chiusa in sfondo, alla riapertura Riprendi era vecchio e caricandolo riportava
