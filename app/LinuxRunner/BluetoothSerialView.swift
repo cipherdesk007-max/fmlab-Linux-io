@@ -83,7 +83,7 @@ struct BluetoothSerialView: View {
         switch state {
         case "poweredOn": return scanning ? "Scanning" : "Ready"
         case "poweredOff": return "Bluetooth is off. Turn it on in Control Center."
-        case "unauthorized": return "Bluetooth access is off for LinuxRunner. Allow it in iOS Settings › Privacy › Bluetooth."
+        case "unauthorized": return LF("Bluetooth access is off for FMLAB Linux. Allow it in iOS Settings › Privacy › Bluetooth.")
         case "unsupported": return "This device does not support Bluetooth LE."
         default: return "Tap Scan to start Bluetooth."
         }

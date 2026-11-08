@@ -136,10 +136,15 @@ import BackgroundTasks
     private func requestContinuedProcessing(_ token: String, title: String, detail: String) {
         #if canImport(BackgroundTasks)
         guard #available(iOS 26.0, *), let bundle = Bundle.main.bundleIdentifier else { return }
+        // FMLAB: dentro LiveContainer il processo vero è LiveContainer, che non permette questi identificativi:
+        // registrarli farebbe chiudere l'app. Lì basta il tempo in sottofondo normale.
+        guard getenv("LC_HOME_PATH") == nil else { LRRuntimeBridge.logCategory("BACKGROUND", event: "continued processing skipped inside LiveContainer"); return }
         let identifier = bundle + ".linuxtask." + token
         // Continued-processing registrations may happen after launch; each
         // identifier is registered exactly once (the token is unique).
-        let registered = BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: .main) { [weak self] task in
+        var registered = false
+        // un identificativo non permesso fa lanciare un'eccezione Objective-C invece di restituire false
+        let senzaEccezioni = FMLABSenzaEccezioni { registered = BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: .main) { [weak self] task in
             guard let task = task as? BGContinuedProcessingTask else { task.setTaskCompleted(success: false); return }
             Task { @MainActor in
                 guard let self, let index = self.entries.firstIndex(where: { $0.id == token }), self.entries[index].ended == nil else { task.setTaskCompleted(success: true); return }
@@ -155,14 +160,14 @@ import BackgroundTasks
                             self.entries[i].state = .pausedByIOS
                             LRRuntimeBridge.logCategory("BACKGROUND", event: "iOS expired continued processing title=\(self.entries[i].title)")
                             if UIApplication.shared.applicationState != .active {
-                                self.notify(title: self.entries[i].title, body: "iOS paused this task. Open LinuxRunner to continue.", success: false)
+                                self.notify(title: self.entries[i].title, body: LF("iOS paused this task. Open FMLAB Linux to continue."), success: false)
                             }
                         }
                     }
                 }
             }
-        }
-        guard registered else { LRRuntimeBridge.logCategory("BACKGROUND", event: "continued processing unavailable: identifier not permitted"); return }
+        } }
+        guard senzaEccezioni, registered else { LRRuntimeBridge.logCategory("BACKGROUND", event: "continued processing unavailable: identifier not permitted"); return }
         let request = BGContinuedProcessingTaskRequest(identifier: identifier, title: title, subtitle: detail.isEmpty ? "Linux task in progress" : detail)
         request.strategy = .fail     // now or not at all; the assertion still applies
         do { try BGTaskScheduler.shared.submit(request) }

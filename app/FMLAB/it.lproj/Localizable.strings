@@ -362,6 +362,7 @@
 "Blinking Cursor" = "Cursore lampeggiante";
 "Block" = "Blocco";
 "Bluetooth Serial" = "Seriale Bluetooth";
+"Bluetooth access is off for FMLAB Linux. Allow it in iOS Settings › Privacy › Bluetooth." = "L'accesso al Bluetooth è spento per FMLAB Linux. Permettilo in Impostazioni di iOS › Privacy › Bluetooth.";
 "Boot failed (%d)" = "Avvio non riuscito (%d)";
 "Boot result: %@" = "Esito dell'avvio: %@";
 "Boot result: %lf" = "Esito dell'avvio: %lf";
@@ -1597,6 +1598,7 @@
 "Starting the display and window manager." = "Avvio dello schermo e del gestore finestre.";
 "State" = "Stato";
 "State loaded" = "Stato caricato";
+"State loaded. On DS the in-game save goes back to this state too: the previous one is in Save Backups." = "Stato caricato. Sul DS anche il salvataggio del gioco torna a questo stato: quello di prima è in Copie dei salvataggi.";
 "State saved" = "Stato salvato";
 "Status" = "Stato";
 "SteamOS ARM64 — experimental" = "SteamOS ARM64 — sperimentale";
@@ -1920,6 +1922,7 @@
 "You stay on this distribution: the change you chose is cancelled." = "Resti su questa distribuzione: il cambio che avevi scelto viene annullato.";
 "Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched). DS games show their own icon; for the others put a picture with the same name next to the game (e.g. Zelda.png beside Zelda.sfc) or in Giochi/Copertine." = "Le tue cartelle restano dove sono: FMLAB le legge e basta. Scorri a sinistra per togliere una cartella dall'elenco (i file non vengono toccati). I giochi DS mostrano la loro icona; per gli altri metti un'immagine con lo stesso nome accanto al gioco (es. Zelda.png vicino a Zelda.sfc) o in Giochi/Copertine.";
 "before loading a state" = "prima di caricare uno stato";
+"before restoring" = "prima di ripristinare";
 "empty" = "vuoto";
 "iOS 26 and later: StikDebug attaches with its universal script; return here and LinuxRunner prepares its code region while it is attached. Support on iOS 26 has not been verified on a device yet." = "iOS 26 e successivi: StikDebug si collega con il suo script universale; torna qui e FMLAB Linux prepara la sua zona di codice mentre è collegato. Su iOS 26 non è ancora stato provato su un dispositivo.";
 "iOS Files: On My iPhone/iPad → LinuxRunner → Shared → " = "App File: Sul mio iPhone/iPad → FMLAB Linux → Shared → ";
@@ -1927,6 +1930,7 @@
 "iOS Screen Modes · Read Only" = "Modalità dello schermo iOS · solo lettura";
 "iOS allows one Linux runtime per app launch, so this restart is needed once." = "iOS permette un solo Linux per ogni apertura dell'app, quindi questo riavvio serve una volta.";
 "iOS does not let any app start Screen Mirroring by itself: it is only in Control Center. The iPhone and the TV must be on the same Wi-Fi. A USB-C/HDMI cable works too, with nothing to tap." = "iOS non lascia a nessuna app avviare Duplica schermo da sola: è solo nel Centro di Controllo. iPhone e TV devono essere sulla stessa Wi-Fi. Va bene anche un cavo USB-C/HDMI, senza toccare niente.";
+"iOS paused this task. Open FMLAB Linux to continue." = "iOS ha messo in pausa questa attività. Apri FMLAB Linux per continuare.";
 "iOS screen capability: up to %@ Hz. This is not measured Linux frame rate." = "Lo schermo iOS arriva fino a %@ Hz. Non è la velocità misurata di Linux.";
 "iOS screen capability: up to %lf Hz. This is not measured Linux frame rate." = "Lo schermo iOS arriva fino a %lf Hz. Non è la velocità misurata di Linux.";
 "iOS screen capability: up to %lld Hz. This is not measured Linux frame rate." = "Lo schermo iOS arriva fino a %lld Hz. Non è la velocità misurata di Linux.";

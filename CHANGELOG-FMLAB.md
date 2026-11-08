@@ -2,6 +2,28 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.13.1
+Revisione a freddo prima del congelamento.
+- **Salvataggi senza scatti**: sul filo del gioco si fanno solo le copie in memoria (SRAM e stato); i file si
+  scrivono su una coda in sottofondo, uno alla volta. All'uscita si aspetta che sia tutto su disco; andando in
+  sottofondo si chiede a iOS il tempo per finire.
+- **Meno scritture**: il controllo è a orologio (ogni ~2 s, anche con l'avanti veloce) e salva solo quando il gioco
+  ha *finito* di scrivere (due controlli uguali di fila). Copia datata al massimo una al minuto, e quella saltata si
+  fa dopo; Riprendi al massimo uno al minuto se cambia solo la SRAM (subito sul DS).
+- **Copie più solide**: una copia compare solo se completa (si scrive in una cartella temporanea e poi si sposta);
+  due copie nello stesso secondo non si sovrascrivono; si tengono 15 copie "salvato nel gioco" e 10 degli altri
+  tipi, e la più recente del gioco non si cancella mai.
+- **DS**: DeSmuME, caricando uno stato, riscrive da sé il .dsv con quello dello stato (BackupDevice::load_state).
+  La copia di prima ora è fatta in modo sincrono, quindi prima che il core lo tocchi; il .dsv riscritto non viene
+  scambiato per un salvataggio nuovo; dopo il caricamento l'app lo dice.
+- **Riprendi confrontato per contenuto**: accanto a Riprendi si tengono le impronte dei file di salvataggio;
+  all'apertura si confronta il contenuto, non la data (niente falsi avvisi se il core tocca solo la data).
+- **TV + DS**: con la TV gli schermi sono sempre con quello da toccare sotto, anche se li avevi scambiati
+  (tappetino e puntino tornano giusti); il puntino segue i cambi di misura dell'immagine sulla TV.
+- **Niente crash sotto LiveContainer** con le installazioni lunghe: la richiesta di tempo extra a iOS (attività in
+  sottofondo di iOS 26) si salta dentro LiveContainer e comunque un'eccezione non chiude più l'app.
+- *Copia rapporto* dice se lo schermo esterno di iOS 27 è registrato; due messaggi dicono FMLAB Linux.
+
 ## 0.13.0
 - **Base aggiornata a LinuxRunner 1.1.1 (build 905)** di Leminos, unita a mano con tutto quello che è FMLAB:
   - nuove **Home** (anteprima del desktop dal vivo, riquadri Terminale, App Store, File, GPU, Dispositivi,

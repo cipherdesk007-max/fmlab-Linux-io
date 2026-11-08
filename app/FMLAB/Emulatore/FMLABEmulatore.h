@@ -4,6 +4,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/// Esegue il blocco e intercetta un'eccezione Objective-C (Swift non può): NO se ne è arrivata una.
+FOUNDATION_EXPORT BOOL FMLABSenzaEccezioni(NS_NOESCAPE void (^blocco)(void));
+
 /// Tasti del controller (stessi numeri di libretro, RETRO_DEVICE_ID_JOYPAD_*).
 typedef NS_ENUM(NSInteger, FMLABTasto) {
     FMLABTastoB NS_SWIFT_NAME(b) = 0, FMLABTastoY NS_SWIFT_NAME(y) = 1, FMLABTastoSelect NS_SWIFT_NAME(select) = 2, FMLABTastoStart NS_SWIFT_NAME(start) = 3,

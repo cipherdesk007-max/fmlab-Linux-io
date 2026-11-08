@@ -1173,18 +1173,19 @@ static NSString *DesktopDegradedNotice(NSString *state);
         Class accessorio=NSClassFromString(@"UISceneAccessory");
         SEL crea=NSSelectorFromString(@"externalNonInteractiveSceneAccessoryWithConfiguration:"), registra=NSSelectorFromString(@"registerSceneAccessory:");
         if(!accessorio||![accessorio respondsToSelector:crea]||![controller respondsToSelector:registra]){
-            [LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 accessory API not found at runtime"];return;}
+            [LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 accessory API not found at runtime"];[NSUserDefaults.standardUserDefaults setObject:@"API non trovata" forKey:@"FMLAB.esterno.accessorio"];return;}
         UISceneConfiguration *configuration=[[UISceneConfiguration alloc]initWithName:@"Linux Desktop" sessionRole:UIWindowSceneSessionRoleExternalDisplayNonInteractive];
         configuration.delegateClass=LRExternalDisplaySceneDelegate.class;
         id acc=((id(*)(id,SEL,id))objc_msgSend)(accessorio,crea,configuration);
         id reg=acc?((id(*)(id,SEL,id))objc_msgSend)(controller,registra,acc):nil;
-        if(!reg){[LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 accessory registration failed"];return;}
+        if(!reg){[LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 accessory registration failed"];[NSUserDefaults.standardUserDefaults setObject:@"registrazione non riuscita" forKey:@"FMLAB.esterno.accessorio"];return;}
         SEL abilita=NSSelectorFromString(@"setEnabled:");
         if([reg respondsToSelector:abilita])((void(*)(id,SEL,BOOL))objc_msgSend)(reg,abilita,LRExternalSceneWanted());
         id osservatore=[NSNotificationCenter.defaultCenter addObserverForName:NSUserDefaultsDidChangeNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note){
             if([reg respondsToSelector:abilita])((void(*)(id,SEL,BOOL))objc_msgSend)(reg,abilita,LRExternalSceneWanted());}];
         objc_setAssociatedObject(controller,&LRExternalAccessoryKey,@[reg,osservatore],OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 external-display accessory registered at runtime (older SDK)"];
+        [NSUserDefaults.standardUserDefaults setObject:@"registrato" forKey:@"FMLAB.esterno.accessorio"];
     }
 #endif
 }

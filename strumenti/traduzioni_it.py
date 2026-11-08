@@ -1173,6 +1173,10 @@ TR.update({
 "iPhone and iPad cannot open the USB serial chips on Arduino or ESP32 boards. A board with native USB (Raspberry Pi Pico, ESP32-S2/S3, Arduino Leonardo/Micro, Teensy) running LinuxRunner's serial-over-MIDI firmware connects through iOS's built-in USB MIDI support instead, as its own serial port or as an adapter for another board, including its reset lines for flashing.": "iPhone e iPad non possono aprire i chip seriali USB delle schede Arduino o ESP32. Una scheda con USB nativo (Raspberry Pi Pico, ESP32-S2/S3, Arduino Leonardo/Micro, Teensy) con il firmware seriale-su-MIDI di LinuxRunner si collega invece tramite il supporto USB MIDI di iOS, come porta seriale sua o come adattatore per un'altra scheda, linee di reset per la programmazione comprese.",
 "picocom -b 115200 /dev/ttyMIDI0 · esptool.py --port /dev/ttyMIDI0 flash_id · arduino-cli monitor -p /dev/ttyMIDI0": "picocom -b 115200 /dev/ttyMIDI0 · esptool.py --port /dev/ttyMIDI0 flash_id · arduino-cli monitor -p /dev/ttyMIDI0",
 "the previous Metal GPU start did not finish; software rendering this time. Select Metal GPU in Settings › Graphics to try again": "l'avvio precedente della GPU Metal non è finito; questa volta disegno software. Scegli GPU Metal in Impostazioni › Grafica per riprovare",
+"before restoring": "prima di ripristinare",
+"iOS paused this task. Open FMLAB Linux to continue.": "iOS ha messo in pausa questa attività. Apri FMLAB Linux per continuare.",
+"Bluetooth access is off for FMLAB Linux. Allow it in iOS Settings › Privacy › Bluetooth.": "L'accesso al Bluetooth è spento per FMLAB Linux. Permettilo in Impostazioni di iOS › Privacy › Bluetooth.",
+"State loaded. On DS the in-game save goes back to this state too: the previous one is in Save Backups.": "Stato caricato. Sul DS anche il salvataggio del gioco torna a questo stato: quello di prima è in Copie dei salvataggi.",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo
