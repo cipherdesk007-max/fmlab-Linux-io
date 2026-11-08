@@ -6,7 +6,7 @@ Linux vero sull'iPhone (Debian GNU/Linux, Arch Linux ARM, Alpine), versione FMLA
 **[LinuxRunner](https://github.com/mxhm11cr/LinuxRunner)**. Niente jailbreak, niente macchina virtuale:
 i programmi Linux ARM64 girano dentro l'app grazie a un interprete e a uno strato che traduce le chiamate di sistema.
 
-> **Stato: 0.12.0.** È LinuxRunner 1.1.0 (build 900) con nome, logo e colori FMLAB (rosso e nero), identificativo
+> **Stato: 0.13.0.** È LinuxRunner 1.1.1 (build 905) con nome, logo e colori FMLAB (rosso e nero), identificativo
 > proprio (`dev.fmlab.linux`, si installa **accanto** a LinuxRunner senza toccarne i dati), aggiornamenti dall'app
 > come FMLAB Cleaner e avviso quando esce un LinuxRunner originale più nuovo. Le altre migliorie arrivano una alla
 > volta, ognuna misurata contro l'originale.
@@ -59,7 +59,7 @@ LiveContainer → **+** → **Installa dall'URL** e incolla:
 
 ## Cosa c'è in più rispetto a LinuxRunner
 
-Base: LinuxRunner 1.1.0 (build 900), con lo stesso motore (interprete ARM64, JIT, GPU Metal). Le versioni sono in
+Base: LinuxRunner 1.1.1 (build 905), con lo stesso motore (interprete ARM64, JIT, GPU Metal). Le versioni sono in
 [CHANGELOG-FMLAB.md](CHANGELOG-FMLAB.md).
 
 **App e installazione**
@@ -132,7 +132,7 @@ la prima volta che Debian è pronto (Home → FMlab - RunnerKit; da Gestione app
 ## Come è fatta
 
 - Sorgente di partenza: LinuxRunner al commit
-  [`d141978`](https://github.com/mxhm11cr/LinuxRunner/commit/d141978) ("Release LinuxRunner 1.1.0 (900)").
+  [`4a35211`](https://github.com/mxhm11cr/LinuxRunner/commit/4a35211) ("Release LinuxRunner 1.1.1 (905)").
   Il README originale è in [README.LinuxRunner.md](README.LinuxRunner.md), le istruzioni di compilazione in
   [docs/BUILDING.md](docs/BUILDING.md).
 - Compilata **gratis da GitHub Actions su Mac** ([.github/workflows/build.yml](.github/workflows/build.yml)) con
