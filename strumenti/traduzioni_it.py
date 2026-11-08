@@ -901,6 +901,23 @@ TR.update({
 "iOS does not let any app start Screen Mirroring by itself: it is only in Control Center. The iPhone and the TV must be on the same Wi-Fi. A USB-C/HDMI cable works too, with nothing to tap.": "iOS non lascia a nessuna app avviare Duplica schermo da sola: è solo nel Centro di Controllo. iPhone e TV devono essere sulla stessa Wi-Fi. Va bene anche un cavo USB-C/HDMI, senza toccare niente.",
 "FMLAB Linux opens straight into the Game Emulator and Linux does not start, even with Start Runtime on Launch: all the power goes to the games. The Linux button brings back everything else and starts Linux if it should.": "FMLAB Linux si apre direttamente nel Game Emulator e Linux non parte, anche con Avvia runtime all'apertura: tutta la potenza va ai giochi. Il tasto Linux riporta tutto il resto e avvia Linux se deve.",
 "Game on the TV": "Gioco sulla TV",
+"Touch Screen · look at the TV": "Schermo touch · guarda la TV",
+"FMLAB Linux\n\nOpen a game or the Linux desktop to show it here.": "FMLAB Linux\n\nApri un gioco o il desktop Linux per vederlo qui.",
+"FMLAB Linux\n\nOpen a game to show it here.": "FMLAB Linux\n\nApri un gioco per vederlo qui.",
+"A copy is made every time you save in the game and before loading a state. Choose one: the game closes and next time it starts from that save.": "Si fa una copia ogni volta che salvi nel gioco e prima di caricare uno stato. Scegline una: il gioco si chiude e la prossima volta parte da quel salvataggio.",
+"Continue Anyway (older)": "Riprendi comunque (più vecchio)",
+"Continue where you left off? Your in-game save is kept either way.": "Riprendere da dove eri? Il salvataggio fatto nel gioco resta comunque.",
+"From the In-Game Save": "Dal salvataggio del gioco",
+"No backups yet: one is made every time the game saves.": "Ancora nessuna copia: se ne fa una ogni volta che il gioco salva.",
+"Open from the In-Game Save": "Apri dal salvataggio del gioco",
+"Restore": "Ripristina",
+"Restore this save?": "Ripristinare questo salvataggio?",
+"Save Backups": "Copie dei salvataggi",
+"Save Backups…": "Copie dei salvataggi…",
+"The game closes now. The current save is kept among the backups.": "Il gioco si chiude adesso. Il salvataggio attuale resta tra le copie.",
+"You saved in the game after the last Continue point (for example the app was closed suddenly). The game opens from your in-game save, which is newer.": "Hai salvato nel gioco dopo l'ultimo punto di Riprendi (per esempio l'app si è chiusa di colpo). Il gioco si apre dal salvataggio fatto nel gioco, che è più recente.",
+"before loading a state": "prima di caricare uno stato",
+"in-game save": "salvato nel gioco",
 })
 
 # Testi della parte Objective-C (schermo del desktop, menu, avvisi). Chiave = testo vero com'è a schermo

@@ -601,11 +601,16 @@ enum { LRStartIdle, LRStartChecking, LRStartRepairing, LRStartSession, LRStartFa
 NSNotificationName const LRExternalDisplayChangedNotification = @"LRExternalDisplayChanged";
 NSString *const LRExternalDisplayEnabledKey = @"LinuxRunnerDesktop.externalDisplay";
 static BOOL LRExternalOutputEnabled(void) {
-    // FMLAB: con un gioco aperto (Game Emulator) lo schermo esterno serve al gioco anche se l'uscita del desktop è spenta
-    NSUserDefaults *d=NSUserDefaults.standardUserDefaults;
-    if([d boolForKey:@"FMLAB.giochi.inCorso"]){id g=[d objectForKey:@"FMLAB.giochi.esterno"];if(!g||[g boolValue])return YES;}
-    id value=[d objectForKey:LRExternalDisplayEnabledKey];
+    // Uscita del desktop Linux (Impostazioni › Dispositivi): decide solo se il DESKTOP va sulla TV.
+    id value=[NSUserDefaults.standardUserDefaults objectForKey:LRExternalDisplayEnabledKey];
     return !value || [value boolValue]; // Preserve the existing automatic output default.
+}
+// FMLAB: lo schermo esterno separato si chiede a iOS se lo vuole Linux O i giochi (Giochi › AirPlay e TV).
+// Deve essere già acceso quando parte Duplica schermo: iOS decide in quel momento se dare all'app uno schermo
+// suo o duplicare e basta, e non cambia più finché la duplicazione non si ferma.
+static BOOL LRExternalSceneWanted(void) {
+    id g=[NSUserDefaults.standardUserDefaults objectForKey:@"FMLAB.giochi.esterno"];
+    return LRExternalOutputEnabled() || !g || [g boolValue];
 }
 @interface LRExternalDisplayController : UIViewController
 @property(nullable) LRMetalFramebufferView *metal;
@@ -682,7 +687,7 @@ static __weak LRExternalDisplayController *LRCurrentExternalDisplay;
 }
 - (void)showPlaceholder{
     _frameGeneration++;_frameScheduled=NO;_pendingPixels=nil;_pendingDamage=(LRFrameDamage){0};_lastPresentationTime=0;
-    _placeholder.text=LRExternalOutputEnabled()?@"LinuxRunner\n\nOpen a Linux desktop to show it on this display.":@"LinuxRunner\n\nExternal Desktop Output is off. Enable it in Settings › Devices.";
+    _placeholder.text=LRExternalOutputEnabled()?@"FMLAB Linux\n\nOpen a game or the Linux desktop to show it here.":@"FMLAB Linux\n\nOpen a game to show it here.";
     _placeholder.hidden=NO;_image.hidden=YES;_image.image=nil;_pixelWidth=_pixelHeight=0;[_metal clearFrame];
 }
 @end
@@ -701,7 +706,7 @@ static __weak LRExternalDisplayController *LRCurrentExternalDisplay;
     [self refreshOutput];
 }
 - (void)refreshOutput {
-    if(!LRExternalOutputEnabled()){[self hideOutput];return;}
+    if(!LRExternalSceneWanted()){[self hideOutput];return;}
     if(!_outputScene||_window)return;
     _window=[[UIWindow alloc] initWithWindowScene:_outputScene];
     _window.rootViewController=[LRExternalDisplayController new];
@@ -744,9 +749,9 @@ API_AVAILABLE(ios(27.0))
         UISceneConfiguration *configuration=[[UISceneConfiguration alloc]initWithName:@"Linux Desktop" sessionRole:UIWindowSceneSessionRoleExternalDisplayNonInteractive];
         configuration.delegateClass=LRExternalDisplaySceneDelegate.class;
         _registration=[controller registerSceneAccessory:[UISceneAccessory externalNonInteractiveSceneAccessoryWithConfiguration:configuration]];
-        _registration.enabled=LRExternalOutputEnabled();
+        _registration.enabled=LRExternalSceneWanted();
         __weak typeof(self) weak=self;
-        _observer=[NSNotificationCenter.defaultCenter addObserverForName:NSUserDefaultsDidChangeNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note){weak.registration.enabled=LRExternalOutputEnabled();}];
+        _observer=[NSNotificationCenter.defaultCenter addObserverForName:NSUserDefaultsDidChangeNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note){weak.registration.enabled=LRExternalSceneWanted();}];
         [LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 external-display accessory registered for cable or AirPlay"];
     }return self;
 }
@@ -783,9 +788,9 @@ static NSString *DesktopDegradedNotice(NSString *state);
         id reg=acc?((id(*)(id,SEL,id))objc_msgSend)(controller,registra,acc):nil;
         if(!reg){[LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 accessory registration failed"];return;}
         SEL abilita=NSSelectorFromString(@"setEnabled:");
-        if([reg respondsToSelector:abilita])((void(*)(id,SEL,BOOL))objc_msgSend)(reg,abilita,LRExternalOutputEnabled());
+        if([reg respondsToSelector:abilita])((void(*)(id,SEL,BOOL))objc_msgSend)(reg,abilita,LRExternalSceneWanted());
         id osservatore=[NSNotificationCenter.defaultCenter addObserverForName:NSUserDefaultsDidChangeNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note){
-            if([reg respondsToSelector:abilita])((void(*)(id,SEL,BOOL))objc_msgSend)(reg,abilita,LRExternalOutputEnabled());}];
+            if([reg respondsToSelector:abilita])((void(*)(id,SEL,BOOL))objc_msgSend)(reg,abilita,LRExternalSceneWanted());}];
         objc_setAssociatedObject(controller,&LRExternalAccessoryKey,@[reg,osservatore],OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [LRRuntimeBridge logCategory:@"EXTERNAL_DISPLAY" event:@"iOS 27 external-display accessory registered at runtime (older SDK)"];
     }

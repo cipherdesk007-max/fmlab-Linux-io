@@ -364,6 +364,10 @@ static __weak FMLABEmulatore *G_attivo;
     AVAudioEngine *_motore;
     FMLABVistaGioco *_vista;
     BOOL _caricato, _fermoDaSfondo;
+    uint64_t _impronta;          // impronta della memoria di salvataggio (per vedere quando il gioco salva)
+    NSDate *_ultimoFile;          // ultima modifica dei file di salvataggio scritti dal core (es. .dsv del DS)
+    uint64_t _ultimaCopia, _ultimoRiprendi;   // per non fare copie a raffica se un gioco scrive spesso
+    NSURL *_ripristino;           // copia da rimettere dopo la chiusura
 }
 
 + (NSURL *)cartellaGiochi {
@@ -656,6 +660,89 @@ static NSError *fmlabErrore(NSString *messaggio) {
 - (NSURL *)fileSalvataggio:(NSString *)estensione {
     return [[FMLABEmulatore.cartellaSalvataggi URLByAppendingPathComponent:_nomeGioco] URLByAppendingPathExtension:estensione];
 }
+#pragma mark - Salvataggi del gioco al sicuro
+// Il salvataggio del gioco (quello che fai dentro il gioco) è la cosa più preziosa: non deve mai tornare indietro.
+//  - quando il gioco salva, si scrive subito su file, se ne tiene una copia datata e si aggiorna "riprendi"
+//  - caricare uno stato (riprendi o posti) NON rimette la memoria di salvataggio vecchia (come l'opzione di RetroArch
+//    "non sovrascrivere la SaveRAM"): il salvataggio del gioco resta l'ultimo fatto
+//  - prima di caricare uno stato si fa comunque una copia dei file
+static uint64_t fmlabImpronta(const void *p, size_t n) {
+    uint64_t h = 1469598103934665603ULL; const uint8_t *b = p;
+    for (size_t i = 0; i < n; i++) { h ^= b[i]; h *= 1099511628211ULL; }
+    return h ? h : 1;
+}
+/// File di salvataggio del gioco (non gli stati): .srm nostro e quelli che il core scrive da sé (es. .dsv)
+- (NSArray<NSURL *> *)fileDelGioco {
+    NSMutableArray *r = [NSMutableArray array];
+    NSString *pre = [_nomeGioco stringByAppendingString:@"."];
+    for (NSURL *u in [NSFileManager.defaultManager contentsOfDirectoryAtURL:FMLABEmulatore.cartellaSalvataggi includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:nil]) {
+        NSString *n = u.lastPathComponent, *resto = [n hasPrefix:pre] ? [n substringFromIndex:pre.length] : nil;
+        if (!resto || [resto hasPrefix:@"state"] || [resto isEqual:@"auto.state"] || [resto hasSuffix:@".png"]) continue;
+        [r addObject:u];
+    }
+    return r;
+}
+- (NSDate *)ultimaModificaFileCore {
+    NSDate *ultima = nil;
+    for (NSURL *u in [self fileDelGioco]) {
+        if ([u.pathExtension isEqual:@"srm"]) continue;   // quello lo scriviamo noi
+        NSDate *d = [NSFileManager.defaultManager attributesOfItemAtPath:u.path error:nil][NSFileModificationDate];
+        if (d && (!ultima || [d compare:ultima] == NSOrderedDescending)) ultima = d;
+    }
+    return ultima;
+}
+/// Copia datata dei salvataggi in Salvataggi/Copie/<gioco>/ (si tengono le ultime 20)
+- (void)copiaDiSicurezza:(NSString *)motivo {
+    NSArray *file = [self fileDelGioco]; if (!file.count) return;
+    NSFileManager *fm = NSFileManager.defaultManager;
+    NSURL *cartella = [[FMLABEmulatore.cartellaSalvataggi URLByAppendingPathComponent:@"Copie" isDirectory:YES] URLByAppendingPathComponent:_nomeGioco isDirectory:YES];
+    NSDateFormatter *f = [NSDateFormatter new]; f.dateFormat = @"yyyy-MM-dd HH.mm.ss"; f.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+    NSURL *qui = [cartella URLByAppendingPathComponent:[NSString stringWithFormat:@"%@ %@", [f stringFromDate:NSDate.date], motivo] isDirectory:YES];
+    [fm createDirectoryAtURL:qui withIntermediateDirectories:YES attributes:nil error:nil];
+    for (NSURL *u in file) [fm copyItemAtURL:u toURL:[qui URLByAppendingPathComponent:u.lastPathComponent] error:nil];
+    NSArray *tutte = [[fm contentsOfDirectoryAtPath:cartella.path error:nil] sortedArrayUsingSelector:@selector(compare:)];
+    for (NSUInteger i = 0; i + 20 < tutte.count; i++) [fm removeItemAtURL:[cartella URLByAppendingPathComponent:tutte[i]] error:nil];
+}
+- (void)scriviStatoAutomatico {
+    size_t n = F.serSize(); NSMutableData *d = [NSMutableData dataWithLength:n];
+    if (n && F.ser(d.mutableBytes, n)) [d writeToURL:[self fileSalvataggio:@"auto.state"] atomically:YES];
+}
+/// Sul filo del gioco, ogni pochi secondi: il gioco ha salvato? allora file, copia e "riprendi" aggiornati.
+- (void)controllaSalvataggioGioco {
+    BOOL salvato = NO;
+    size_t n = F.memSize(RETRO_MEMORY_SAVE_RAM); void *p = F.memData(RETRO_MEMORY_SAVE_RAM);
+    if (p && n) { uint64_t h = fmlabImpronta(p, n); if (_impronta && h != _impronta) salvato = YES; _impronta = h; }
+    NSDate *d = [self ultimaModificaFileCore];
+    if (d && _ultimoFile && [d compare:_ultimoFile] == NSOrderedDescending) salvato = YES;
+    if (d) _ultimoFile = d;
+    if (!salvato) return;
+    [self scriviMemoria];
+    uint64_t ora = (uint64_t)NSDate.date.timeIntervalSince1970;
+    if (ora - _ultimaCopia >= 60) { _ultimaCopia = ora; [self copiaDiSicurezza:@"gioco"]; }
+    if (_salvaUscita && ora - _ultimoRiprendi >= 10) { _ultimoRiprendi = ora; [self scriviStatoAutomatico]; }
+}
+/// Carica uno stato senza riportare indietro il salvataggio del gioco.
+- (BOOL)caricaDati:(NSData *)d {
+    if (!d) return NO;
+    [self copiaDiSicurezza:@"prima di caricare"];
+    size_t n = F.memSize(RETRO_MEMORY_SAVE_RAM); void *p = F.memData(RETRO_MEMORY_SAVE_RAM);
+    NSData *memoria = (p && n) ? [NSData dataWithBytes:p length:n] : nil;
+    BOOL ok = F.unser(d.bytes, d.length);
+    if (ok && memoria) { void *q = F.memData(RETRO_MEMORY_SAVE_RAM); if (q && F.memSize(RETRO_MEMORY_SAVE_RAM) == memoria.length) memcpy(q, memoria.bytes, memoria.length); }
+    if (memoria) _impronta = fmlabImpronta(memoria.bytes, memoria.length);
+    return ok;
+}
+/// Il salvataggio del gioco è più nuovo di "riprendi"? (es. il telefono si è spento dopo un salvataggio)
+- (BOOL)salvataggioPiuNuovoDelRiprendi {
+    NSDate *stato = [NSFileManager.defaultManager attributesOfItemAtPath:[self fileSalvataggio:@"auto.state"].path error:nil][NSFileModificationDate];
+    if (!stato) return NO;
+    for (NSURL *u in [self fileDelGioco]) {
+        NSDate *d = [NSFileManager.defaultManager attributesOfItemAtPath:u.path error:nil][NSFileModificationDate];
+        if (d && [d timeIntervalSinceDate:stato] > 5) return YES;
+    }
+    return NO;
+}
+
 - (void)leggiMemoria {
     size_t n = F.memSize(RETRO_MEMORY_SAVE_RAM); void *p = F.memData(RETRO_MEMORY_SAVE_RAM);
     NSData *d = [NSData dataWithContentsOfURL:[self fileSalvataggio:@"srm"]];
@@ -707,7 +794,11 @@ static NSError *fmlabErrore(NSString *messaggio) {
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(primoPiano) name:UIApplicationDidBecomeActiveNotification object:nil];
 }
 // in sfondo si ferma e salva la memoria del gioco; tornando, riparte da solo se l'aveva fermato l'app
-- (void)sfondo { if (!self.inPausa) { _fermoDaSfondo = YES; self.inPausa = YES; } [self lavoro:^{ [self scriviMemoria]; }]; }
+- (void)sfondo {
+    if (!self.inPausa) { _fermoDaSfondo = YES; self.inPausa = YES; }
+    // se l'app viene chiusa o il telefono la chiude in sfondo, "riprendi" è già aggiornato
+    [self lavoro:^{ [self scriviMemoria]; if (self->_salvaUscita) [self scriviStatoAutomatico]; }];
+}
 - (void)primoPiano { if (_fermoDaSfondo) { _fermoDaSfondo = NO; self.inPausa = NO; } }
 
 static uint32_t fmlabPad(GCExtendedGamepad *g) {
@@ -768,7 +859,8 @@ static uint32_t fmlabTastiera(void) {
             G_statoAudio(true, occ, occ < 25);
         }
         @autoreleasepool { F.run(); }
-        atomic_fetch_add(&G_fotogrammi, 1);
+        uint32_t fatti = atomic_fetch_add(&G_fotogrammi, 1);
+        if (fatti % 180 == 179) { @autoreleasepool { [self controllaSalvataggioGioco]; } }
         uint32_t forza = atomic_exchange(&G_vibra, 0);
         NSUserDefaults *preferenze = NSUserDefaults.standardUserDefaults;
         if (forza > 8000 && ([preferenze objectForKey:@"FMLAB.comandi.vibra"] ? [preferenze boolForKey:@"FMLAB.comandi.vibra"] : YES)) {
@@ -794,16 +886,32 @@ static uint32_t fmlabTastiera(void) {
     }
     os_unfair_lock_lock(&_lockLavori); NSArray *rimasti = [_lavori copy]; [_lavori removeAllObjects]; os_unfair_lock_unlock(&_lockLavori);
     for (dispatch_block_t b in rimasti) b();
-    if (_salvaUscita) {   // "riprendi da dove eri"
-        size_t n = F.serSize(); NSMutableData *d = [NSMutableData dataWithLength:n];
-        if (n && F.ser(d.mutableBytes, n)) [d writeToURL:[self fileSalvataggio:@"auto.state"] atomically:YES];
-    }
+    [self controllaSalvataggioGioco];
+    if (_salvaUscita) [self scriviStatoAutomatico];   // "riprendi da dove eri"
     [self scriviMemoria];
     fmlabFermaGPU();
     F.unload(); F.deinit();
     fmlabChiudiGPU();
     _caricato = NO;
+    if (_ripristino) {   // "ripristina questa copia": a gioco chiuso, così nessuno la riscrive
+        NSFileManager *fm = NSFileManager.defaultManager;
+        [self copiaDiSicurezza:@"prima di ripristinare"];
+        for (NSString *n in [fm contentsOfDirectoryAtPath:_ripristino.path error:nil]) {
+            NSURL *dest = [FMLABEmulatore.cartellaSalvataggi URLByAppendingPathComponent:n];
+            [fm removeItemAtURL:dest error:nil]; [fm copyItemAtURL:[_ripristino URLByAppendingPathComponent:n] toURL:dest error:nil];
+        }
+        [fm removeItemAtURL:[self fileSalvataggio:@"auto.state"] error:nil];
+        _ripristino = nil;
+    }
 }
+- (NSString *)nomeGioco { return _nomeGioco; }
+- (NSArray<NSURL *> *)copieDiSicurezza {
+    NSURL *c = [[FMLABEmulatore.cartellaSalvataggi URLByAppendingPathComponent:@"Copie" isDirectory:YES] URLByAppendingPathComponent:_nomeGioco isDirectory:YES];
+    NSArray *n = [[[NSFileManager.defaultManager contentsOfDirectoryAtPath:c.path error:nil] sortedArrayUsingSelector:@selector(compare:)] reverseObjectEnumerator].allObjects;
+    NSMutableArray *r = [NSMutableArray array]; for (NSString *x in n) [r addObject:[c URLByAppendingPathComponent:x isDirectory:YES]];
+    return r;
+}
+- (void)ripristinaAllaChiusura:(NSURL *)copia { _ripristino = copia; _salvaUscita = NO; }
 
 - (void)ferma {
     if (!_caricato && !_filo) return;
@@ -864,7 +972,7 @@ static uint32_t fmlabTastiera(void) {
 - (void)caricaStato:(NSInteger)posto fatto:(void (^)(NSError *))fatto {
     [self lavoro:^{
         NSData *d = [NSData dataWithContentsOfURL:[self fileSalvataggio:[self nomePosto:posto]]];
-        NSError *e = (!d || !F.unser(d.bytes, d.length)) ? fmlabErrore(@"The saved state could not be loaded.") : nil;
+        NSError *e = ![self caricaDati:d] ? fmlabErrore(@"The saved state could not be loaded.") : nil;
         dispatch_async(dispatch_get_main_queue(), ^{ fatto(e); });
     }];
 }
@@ -878,7 +986,7 @@ static uint32_t fmlabTastiera(void) {
 - (void)caricaAutomatico:(void (^)(NSError *))fatto {
     [self lavoro:^{
         NSData *d = [NSData dataWithContentsOfURL:[self fileSalvataggio:@"auto.state"]];
-        NSError *e = (!d || !F.unser(d.bytes, d.length)) ? fmlabErrore(@"The saved state could not be loaded.") : nil;
+        NSError *e = ![self caricaDati:d] ? fmlabErrore(@"The saved state could not be loaded.") : nil;
         dispatch_async(dispatch_get_main_queue(), ^{ fatto(e); });
     }];
 }
@@ -896,7 +1004,7 @@ static uint32_t fmlabTastiera(void) {
 - (void)caricaStato:(void (^)(NSError *))fatto {
     [self lavoro:^{
         NSData *d = [NSData dataWithContentsOfURL:[self fileSalvataggio:@"state"]];
-        NSError *e = (!d || !F.unser(d.bytes, d.length)) ? fmlabErrore(@"The saved state could not be loaded.") : nil;
+        NSError *e = ![self caricaDati:d] ? fmlabErrore(@"The saved state could not be loaded.") : nil;
         dispatch_async(dispatch_get_main_queue(), ^{ fatto(e); });
     }];
 }

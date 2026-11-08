@@ -2,6 +2,24 @@
 
 Storico delle versioni FMLAB. Le novità di LinuxRunner originale sono in [CHANGELOG.md](CHANGELOG.md).
 
+## 0.12.0
+- **Salvataggi del gioco al sicuro** (il caso delle medaglie perse): prima "Riprendi" si aggiornava solo uscendo
+  bene dal gioco; se l'app veniva chiusa in sfondo, alla riapertura Riprendi era vecchio e caricandolo riportava
+  indietro anche il salvataggio fatto nel gioco. Ora:
+  - quando salvi **nel gioco**, l'app se ne accorge (entro 3 s), scrive subito il salvataggio, ne fa una **copia
+    datata** e aggiorna anche **Riprendi**;
+  - andando in sfondo (o se chiudi l'app) Riprendi si aggiorna subito;
+  - **caricare uno stato non riporta più indietro il salvataggio del gioco** (come "non sovrascrivere la SaveRAM"
+    di RetroArch); prima di caricare se ne fa comunque una copia;
+  - se il salvataggio del gioco è più nuovo di Riprendi (es. telefono spento), l'app lo dice e apre da quello;
+  - menu del gioco › **Copie dei salvataggi…**: le ultime 20 copie con data, da ripristinare (anche in File ›
+    FMLAB Linux › Giochi › Salvataggi › Copie).
+- **AirPlay per i giochi come per Linux**: lo schermo esterno si chiede a iOS da subito (non solo a gioco aperto),
+  perché iOS decide all'avvio di Duplica schermo se dare all'app uno schermo suo o duplicare e basta. La TV mostra
+  "Apri un gioco" finché non lo apri; il desktop Linux va sulla TV solo se la sua uscita è accesa.
+- **DS sulla TV**: sul telefono niente immagine del gioco, solo i tasti e un tappetino per il pennino (guardi la TV,
+  un puntino mostra dove tocchi).
+
 ## 0.11.8
 - **Telefono come controller con la TV**: in alto *Gioco sulla TV* e il tasto **Impostazioni** (immagine, tasti,
   salvataggi, velocità); sotto solo i tasti, grandi. Il gioco si vede solo sulla TV (sul DS il telefono tiene solo

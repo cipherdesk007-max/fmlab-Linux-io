@@ -165,6 +165,7 @@
 "640 × 480" = "640 × 480";
 "800 × 600" = "800 × 600";
 "960 × 540 · Wide" = "960 × 540 · Larga";
+"A copy is made every time you save in the game and before loading a state. Choose one: the game closes and next time it starts from that save." = "Si fa una copia ogni volta che salvi nel gioco e prima di caricare uno stato. Scegline una: il gioco si chiude e la prossima volta parte da quel salvataggio.";
 "A debugger is attached: choose Automatic or JIT to use it" = "Un debugger è collegato: scegli Automatico o JIT per usarlo";
 "A display session is already running. Close it first." = "C'è già una sessione grafica aperta. Chiudila prima.";
 "A file with that name already exists. Rename the source before importing." = "Esiste già un file con quel nome. Rinomina l'originale prima di importarlo.";
@@ -347,8 +348,10 @@
 "Connection" = "Connessione";
 "Consoles" = "Console";
 "Continue" = "Continua";
+"Continue Anyway (older)" = "Riprendi comunque (più vecchio)";
 "Continue in Linux Terminal" = "Continua nel terminale Linux";
 "Continue where you left off?" = "Continuare da dove eri rimasto?";
+"Continue where you left off? Your in-game save is kept either way." = "Riprendere da dove eri? Il salvataggio fatto nel gioco resta comunque.";
 "Control" = "Control";
 "Control Center › Screen Mirroring › your Apple TV or AirPlay TV (or a USB-C/HDMI cable). With a game open, it goes full screen on the TV and the iPhone becomes the controller (on DS the iPhone keeps the screens for touch). The Linux desktop has its own setting in Settings › Desktop." = "Centro di Controllo › Duplica schermo › la tua Apple TV o TV AirPlay (o un cavo USB-C/HDMI). Con un gioco aperto va a tutto schermo sulla TV e l'iPhone diventa il controller (sul DS l'iPhone tiene gli schermi per il tocco). Il desktop Linux ha la sua impostazione in Impostazioni › Desktop.";
 "Controls Opacity" = "Trasparenza dei comandi";
@@ -570,6 +573,8 @@
 "FMLAB" = "FMLAB";
 "FMLAB Emulatore" = "FMLAB Emulatore";
 "FMLAB Linux" = "FMLAB Linux";
+"FMLAB Linux\n\nOpen a game or the Linux desktop to show it here." = "FMLAB Linux\n\nApri un gioco o il desktop Linux per vederlo qui.";
+"FMLAB Linux\n\nOpen a game to show it here." = "FMLAB Linux\n\nApri un gioco per vederlo qui.";
 "FMLAB Linux %@ available" = "FMLAB Linux %@ disponibile";
 "FMLAB Linux %lf available" = "FMLAB Linux %lf disponibile";
 "FMLAB Linux %lld available" = "FMLAB Linux %lld disponibile";
@@ -624,6 +629,7 @@
 "Freed %lf." = "Liberati %lf.";
 "Freed %lld." = "Liberati %lld.";
 "From LinuxRunner" = "Da LinuxRunner";
+"From the In-Game Save" = "Dal salvataggio del gioco";
 "Full Report" = "Rapporto completo";
 "Full Screen" = "Schermo intero";
 "GPU" = "GPU";
@@ -943,6 +949,7 @@
 "Next launch" = "Al prossimo avvio";
 "No GUI session has started since LinuxRunner opened." = "Nessuna sessione grafica è partita da quando hai aperto FMLAB Linux.";
 "No applications match this filter." = "Nessuna applicazione con questo filtro.";
+"No backups yet: one is made every time the game saves." = "Ancora nessuna copia: se ne fa una ogni volta che il gioco salva.";
 "No connection to GitHub: try again later." = "Nessuna connessione con GitHub: riprova più tardi.";
 "No connection to the Debian servers" = "Nessuna connessione ai server Debian";
 "No connection: using the saved copy" = "Nessuna connessione: uso la copia salvata";
@@ -1002,6 +1009,7 @@
 "Open Terminal" = "Apri terminale";
 "Open a destination subfolder, then Import File Here to select a file from iOS Files." = "Apri una cartella di destinazione, poi Importa file qui per scegliere un file dall'app File.";
 "Open a game: the TV shows only the game, the iPhone is the controller." = "Apri un gioco: la TV mostra solo il gioco, l'iPhone è il controller.";
+"Open from the In-Game Save" = "Apri dal salvataggio del gioco";
 "Open in" = "Apri in";
 "Open the Linux desktop: it goes on the TV." = "Apri il desktop Linux: va sulla TV.";
 "OpenGL Processes" = "Processi OpenGL";
@@ -1128,7 +1136,9 @@
 "Resources" = "Risorse";
 "Restart Desktop" = "Riavvia desktop";
 "Restart Desktop?" = "Riavviare il desktop?";
+"Restore" = "Ripristina";
 "Restore Backup…" = "Rimetti una copia…";
+"Restore this save?" = "Ripristinare questo salvataggio?";
 "Resume" = "Riprendi";
 "Resume Desktop" = "Riprendi desktop";
 "Resume Where I Left Off" = "Riprendi da dove ero";
@@ -1169,6 +1179,8 @@
 "Runtime initialization failed (%lld). " = "Avvio di Linux non riuscito (%lld). ";
 "Runtime running" = "Linux in funzione";
 "Save" = "Salva";
+"Save Backups" = "Copie dei salvataggi";
+"Save Backups…" = "Copie dei salvataggi…";
 "Save Launcher" = "Salva avviatore";
 "Save State" = "Salva stato";
 "Save State…" = "Salva stato…";
@@ -1352,6 +1364,7 @@
 "The executable cannot be read or executed. Check guest permissions." = "Il programma non si può leggere o avviare. Controlla i permessi in Linux.";
 "The executable or its required ELF interpreter is missing. Check the command and installed packages." = "Manca il programma o il suo interprete ELF. Controlla il comando e i pacchetti installati.";
 "The first-start configuration has made no progress for 15 minutes. Details shows the package and process; keep LinuxRunner open and tap Retry." = "La configurazione del primo avvio è ferma da 15 minuti. Dettagli mostra pacchetto e processo; tieni aperta FMLAB Linux e tocca Riprova.";
+"The game closes now. The current save is kept among the backups." = "Il gioco si chiude adesso. Il salvataggio attuale resta tra le copie.";
 "The game file could not be read." = "Non è stato possibile leggere il file del gioco.";
 "The game file is deleted. Its saves in Giochi/Salvataggi are kept." = "Il file del gioco viene eliminato. I suoi salvataggi in Giochi/Salvataggi restano.";
 "The game takes all the space it can and the controls sit on top, see-through (above all on DS and in landscape)." = "Il gioco prende tutto lo spazio che può e i comandi gli stanno sopra, trasparenti (soprattutto sul DS e in orizzontale).";
@@ -1415,6 +1428,7 @@
 "To delete this distribution, first choose another one with Use on Next Launch and reopen the app." = "Per eliminare questa distribuzione, prima scegline un'altra con Usa al prossimo avvio e riapri l'app.";
 "Took %lld settings from LinuxRunner (theme, terminal, mouse, graphics, desktop…). Close and reopen FMLAB Linux to see them all." = "Prese %lld impostazioni da LinuxRunner (tema, terminale, mouse, grafica, desktop…). Chiudi e riapri FMLAB Linux per vederle tutte.";
 "Touch Gestures" = "Gesti touch";
+"Touch Screen · look at the TV" = "Schermo touch · guarda la TV";
 "TouchPad, Center (system, cleanup, processes), RunnerBoost and the rk command, made for this Debian. It comes preinstalled; removing it restores the system as it was." = "TouchPad, Centro (sistema, pulizia, processi), RunnerBoost e il comando rk, fatti per questo Debian. È già installato; togliendolo il sistema torna com'era.";
 "Touchpad sensitivity" = "Sensibilità del touchpad";
 "Touchpad sensitivity: %.2g×" = "Sensibilità del touchpad: %.2g×";
@@ -1529,8 +1543,10 @@
 "You already have the latest version (%lf)." = "Hai già l'ultima versione (%lf).";
 "You already have the latest version (%lld)." = "Hai già l'ultima versione (%lld).";
 "You already have these distributions in LinuxRunner. Take them here without reinstalling anything (close LinuxRunner first)." = "Hai già queste distribuzioni in LinuxRunner. Prendile qui senza reinstallare niente (chiudi prima LinuxRunner).";
+"You saved in the game after the last Continue point (for example the app was closed suddenly). The game opens from your in-game save, which is newer." = "Hai salvato nel gioco dopo l'ultimo punto di Riprendi (per esempio l'app si è chiusa di colpo). Il gioco si apre dal salvataggio fatto nel gioco, che è più recente.";
 "You stay on this distribution: the change you chose is cancelled." = "Resti su questa distribuzione: il cambio che avevi scelto viene annullato.";
 "Your folders stay where they are: FMLAB only reads them. Swipe left to remove a folder from the list (the files are not touched). DS games show their own icon; for the others put a picture with the same name next to the game (e.g. Zelda.png beside Zelda.sfc) or in Giochi/Copertine." = "Le tue cartelle restano dove sono: FMLAB le legge e basta. Scorri a sinistra per togliere una cartella dall'elenco (i file non vengono toccati). I giochi DS mostrano la loro icona; per gli altri metti un'immagine con lo stesso nome accanto al gioco (es. Zelda.png vicino a Zelda.sfc) o in Giochi/Copertine.";
+"before loading a state" = "prima di caricare uno stato";
 "empty" = "vuoto";
 "iOS 26 and later: StikDebug attaches with its universal script; return here and LinuxRunner prepares its code region while it is attached. Support on iOS 26 has not been verified on a device yet." = "iOS 26 e successivi: StikDebug si collega con il suo script universale; torna qui e FMLAB Linux prepara la sua zona di codice mentre è collegato. Su iOS 26 non è ancora stato provato su un dispositivo.";
 "iOS Files: On My iPhone/iPad → LinuxRunner → Shared → " = "App File: Sul mio iPhone/iPad → FMLAB Linux → Shared → ";
@@ -1542,6 +1558,7 @@
 "iOS screen capability: up to %lf Hz. This is not measured Linux frame rate." = "Lo schermo iOS arriva fino a %lf Hz. Non è la velocità misurata di Linux.";
 "iOS screen capability: up to %lld Hz. This is not measured Linux frame rate." = "Lo schermo iOS arriva fino a %lld Hz. Non è la velocità misurata di Linux.";
 "idle" = "fermo";
+"in-game save" = "salvato nel gioco";
 "running guest processes" = "processi Linux in funzione";
 "see Details" = "vedi Dettagli";
 "“%@” is already running. Wait for it to finish, then try again." = "“%@” è già in corso. Aspetta che finisca, poi riprova.";

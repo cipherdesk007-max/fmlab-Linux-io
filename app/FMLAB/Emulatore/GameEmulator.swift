@@ -999,9 +999,16 @@ final class FMLABGiocoController: UIViewController {
         e.salvaUscita = riprendi
         e.velocita = UserDefaults.standard.object(forKey: "FMLAB.veloce.velocita") as? Double ?? 3
         guard riprendi, e.statoAutomaticoEsiste else { e.avvia(); return }
-        let m = UIAlertController(title: gioco.nome, message: LF("Continue where you left off?"), preferredStyle: .alert)
+        if e.salvataggioPiuNuovoDelRiprendi() {
+            // hai salvato nel gioco dopo l'ultimo "riprendi" (es. app chiusa di colpo): vince il salvataggio del gioco
+            let m = UIAlertController(title: gioco.nome, message: LF("You saved in the game after the last Continue point (for example the app was closed suddenly). The game opens from your in-game save, which is newer."), preferredStyle: .alert)
+            m.addAction(UIAlertAction(title: LF("Open from the In-Game Save"), style: .default) { _ in e.avvia() })
+            m.addAction(UIAlertAction(title: LF("Continue Anyway (older)"), style: .destructive) { _ in e.avvia(); e.caricaAutomatico { _ in } })
+            present(m, animated: true); return
+        }
+        let m = UIAlertController(title: gioco.nome, message: LF("Continue where you left off? Your in-game save is kept either way."), preferredStyle: .alert)
         m.addAction(UIAlertAction(title: LF("Continue"), style: .default) { _ in e.avvia(); e.caricaAutomatico { _ in } })
-        m.addAction(UIAlertAction(title: LF("Start Over"), style: .cancel) { _ in e.avvia() })
+        m.addAction(UIAlertAction(title: LF("From the In-Game Save"), style: .cancel) { _ in e.avvia() })
         present(m, animated: true)
     }
     override func viewWillDisappear(_ animated: Bool) {
@@ -1012,6 +1019,11 @@ final class FMLABGiocoController: UIViewController {
     // MARK: schermo esterno (AirPlay, monitor, TV): il gioco va lì, il telefono fa da controller
     private var esterno: UIView?
     private var specchio: CALayer?
+    private let puntoTV: CALayer = {
+        let p = CALayer(); p.bounds = CGRect(x: 0, y: 0, width: 22, height: 22); p.cornerRadius = 11
+        p.backgroundColor = UIColor(white: 1, alpha: 0.55).cgColor; p.borderColor = UIColor.black.withAlphaComponent(0.5).cgColor
+        p.borderWidth = 2; p.isHidden = true; return p
+    }()
     private var giroEsterno: CADisplayLink?
     private static func scenaEsterna() -> UIWindowScene? {
         UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first { $0.session.role.rawValue.contains("ExternalDisplay") }
@@ -1043,6 +1055,14 @@ final class FMLABGiocoController: UIViewController {
                 let v = UIView(frame: w.bounds); v.backgroundColor = .black; v.autoresizingMask = [.flexibleWidth, .flexibleHeight]
                 let l = CALayer(); l.magnificationFilter = .nearest; l.contentsGravity = .resizeAspect; v.layer.addSublayer(l)
                 w.addSubview(v); esterno = v; specchio = l
+                l.addSublayer(puntoTV)
+                toccoDS.toccato = { [weak self] p in
+                    guard let self, let l = self.specchio else { return }
+                    CATransaction.begin(); CATransaction.setDisableActions(true)
+                    if let p { self.puntoTV.isHidden = false; self.puntoTV.position = CGPoint(x: p.x * l.bounds.width, y: l.bounds.height * (0.5 + 0.5 * p.y)) }
+                    else { self.puntoTV.isHidden = true }
+                    CATransaction.commit()
+                }
                 let g = CADisplayLink(target: self, selector: #selector(copiaSuEsterno)); g.add(to: .main, forMode: .common); giroEsterno = g
                 mostra(LF("Game on the external screen: the iPhone is the controller"))
             }
@@ -1051,7 +1071,7 @@ final class FMLABGiocoController: UIViewController {
     }
     private func staccaEsterno() {
         giroEsterno?.invalidate(); giroEsterno = nil
-        esterno?.removeFromSuperview(); esterno = nil; specchio = nil
+        esterno?.removeFromSuperview(); esterno = nil; specchio = nil; toccoDS.toccato = nil; puntoTV.removeFromSuperlayer()
         finestraPropria?.isHidden = true; finestraPropria = nil
     }
     /// Gioco aperto: lo schermo esterno (AirPlay Duplica schermo o cavo) lo prende il gioco.
@@ -1114,15 +1134,23 @@ final class FMLABGiocoController: UIViewController {
         }
         // DS con la TV: sulla TV i due schermi, sul telefono SOLO lo schermo da toccare (serve per il pennino) e i tasti
         if esterno != nil && ds, let e = emulatore {
-            e.vista.isHidden = false
+            // il gioco si vede solo sulla TV: qui un tappetino per il pennino (guardi la TV e tocchi qui)
             dividiDS(true); secondoSchermo.isHidden = true
-            e.vista.layer.contentsRect = CGRect(x: 0, y: 0.5, width: 1, height: 0.5)
+            e.vista.isHidden = true
+            toccoDS.backgroundColor = UIColor(white: 1, alpha: 0.06); toccoDS.layer.cornerRadius = 16
+            toccoDS.layer.borderWidth = 1; toccoDS.layer.borderColor = UIColor(white: 1, alpha: 0.25).cgColor
+            if toccoDS.viewWithTag(77) == nil {
+                let t = UILabel(); t.tag = 77; t.text = LF("Touch Screen · look at the TV"); t.textColor = UIColor(white: 1, alpha: 0.45)
+                t.font = .preferredFont(forTextStyle: .footnote); t.textAlignment = .center; t.autoresizingMask = [.flexibleWidth, .flexibleTopMargin, .flexibleBottomMargin]
+                t.isUserInteractionEnabled = false; toccoDS.addSubview(t)
+            }
             avviso.frame = .zero
             let v = b.height >= b.width
             var w: CGFloat, h: CGFloat, q: CGRect
             if v { w = s.width; h = w * 0.75; if h > b.height * 0.40 { h = b.height * 0.40; w = h / 0.75 }; q = CGRect(x: s.midX - w / 2, y: s.minY + 56, width: w, height: h) }
             else { h = s.height - 60; w = h / 0.75; q = CGRect(x: s.midX - w / 2, y: s.minY + 54, width: w, height: h) }
             e.vista.frame = aiPixel(q); toccoDS.frame = e.vista.frame
+            if let t = toccoDS.viewWithTag(77) { t.frame = CGRect(x: 0, y: toccoDS.bounds.midY - 12, width: toccoDS.bounds.width, height: 24) }
             pad.modo = v ? .verticale : .orizzontale
             pad.frame = v ? CGRect(x: 0, y: q.maxY, width: b.width, height: b.maxY - q.maxY) : b
             pad.areaSicura = UIEdgeInsets(top: v ? 0 : s.minY, left: s.minX, bottom: b.maxY - s.maxY, right: b.maxX - s.maxX)
@@ -1131,6 +1159,7 @@ final class FMLABGiocoController: UIViewController {
             aggiornaFiltro(); pad.setNeedsLayout(); return
         }
         emulatore?.vista.isHidden = false
+        toccoDS.backgroundColor = .clear; toccoDS.layer.borderWidth = 0; toccoDS.viewWithTag(77)?.removeFromSuperview()
         let r = max(0.3, emulatore?.rapporto ?? 4.0 / 3.0)
         avviso.frame = s.insetBy(dx: 24, dy: 80)
         // Nintendo DS: il core dà sempre gli schermi uno sopra l'altro; in orizzontale l'app li divide
@@ -1391,6 +1420,7 @@ final class FMLABGiocoController: UIViewController {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) { self.apriMenu() }
             })
         }
+        m.addAction(UIAlertAction(title: LF("Save Backups…"), style: .default) { [weak self] _ in self?.copieSalvataggi() })
         m.addAction(UIAlertAction(title: LF("Quit Game"), style: .destructive) { [weak self] _ in self?.emulatore?.ferma(); self?.chiudi() })
         if e != nil { m.addAction(UIAlertAction(title: LF("Cancel"), style: .cancel) { _ in e?.inPausa = false }) }
         m.popoverPresentationController?.sourceView = pad
@@ -1461,6 +1491,31 @@ final class FMLABGiocoController: UIViewController {
         Schermo esterno: \(Self.nomeSchermoEsterno() ?? "nessuno") · usato: \(esterno != nil ? "sì" : "no")
         Errore: \(avviso.text ?? "-")
         """
+    }
+
+    /// Copie datate dei salvataggi del gioco (fatte quando il gioco salva e prima di caricare uno stato):
+    /// se ne sceglie una, il gioco si chiude e alla prossima apertura riparte da lì.
+    private func copieSalvataggi() {
+        guard let e = emulatore else { return }
+        let copie = e.copieDiSicurezza()
+        let f = DateFormatter(); f.dateStyle = .medium; f.timeStyle = .short
+        let m = UIAlertController(title: LF("Save Backups"), message: copie.isEmpty ? LF("No backups yet: one is made every time the game saves.") :
+                                    LF("A copy is made every time you save in the game and before loading a state. Choose one: the game closes and next time it starts from that save."), preferredStyle: .actionSheet)
+        let lettore = DateFormatter(); lettore.dateFormat = "yyyy-MM-dd HH.mm.ss"; lettore.locale = Locale(identifier: "en_US_POSIX")
+        for c in copie.prefix(12) {
+            let nome = c.lastPathComponent, data = lettore.date(from: String(nome.prefix(19)))
+            let tipo = nome.hasSuffix("gioco") ? LF("in-game save") : LF("before loading a state")
+            m.addAction(UIAlertAction(title: "\(data.map { f.string(from: $0) } ?? nome) · \(tipo)", style: .default) { [weak self] _ in
+                let ok = UIAlertController(title: LF("Restore this save?"), message: LF("The game closes now. The current save is kept among the backups."), preferredStyle: .alert)
+                ok.addAction(UIAlertAction(title: LF("Restore"), style: .destructive) { _ in e.ripristinaAllaChiusura(c); e.ferma(); self?.chiudi() })
+                ok.addAction(UIAlertAction(title: LF("Cancel"), style: .cancel) { _ in e.inPausa = false })
+                self?.present(ok, animated: true)
+            })
+        }
+        m.addAction(UIAlertAction(title: LF("Cancel"), style: .cancel) { _ in e.inPausa = false })
+        m.popoverPresentationController?.sourceView = view
+        m.popoverPresentationController?.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 1, height: 1)
+        present(m, animated: true)
     }
 
     /// Come mandare il gioco sulla TV: Duplica schermo (immagine) è solo nel Centro di Controllo; qui solo il suono.
@@ -1809,9 +1864,13 @@ final class FMLABDebole: NSObject {
 /// (nell'immagine del core lo schermo di sotto è la metà bassa).
 final class FMLABToccoDS: UIView {
     weak var emulatore: FMLABEmulatore?
+    /// Dove si tocca (0…1 nello schermo di sotto), per il puntino sulla TV; nil quando si alza il dito
+    var toccato: ((CGPoint?) -> Void)?
     private func manda(_ t: Set<UITouch>, _ giu: Bool) {
         guard let x = t.first?.location(in: self), bounds.width > 0, bounds.height > 0 else { return }
-        emulatore?.toccoX(x.x / bounds.width, y: 0.5 + 0.5 * min(1, max(0, x.y / bounds.height)), premuto: giu)
+        let p = CGPoint(x: min(1, max(0, x.x / bounds.width)), y: min(1, max(0, x.y / bounds.height)))
+        emulatore?.toccoX(p.x, y: 0.5 + 0.5 * p.y, premuto: giu)
+        toccato?(giu ? p : nil)
     }
     override func touchesBegan(_ t: Set<UITouch>, with e: UIEvent?) { manda(t, true) }
     override func touchesMoved(_ t: Set<UITouch>, with e: UIEvent?) { manda(t, true) }

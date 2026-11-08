@@ -84,6 +84,13 @@ typedef NS_ENUM(NSInteger, FMLABTasto) {
 /// Salvataggio automatico all'uscita (per "riprendi da dove eri"). Di base sì.
 @property (nonatomic) BOOL salvaUscita;
 @property (readonly) BOOL statoAutomaticoEsiste;
+/// Il salvataggio fatto nel gioco è più nuovo di "riprendi" (es. il telefono si è spento dopo aver salvato).
+- (BOOL)salvataggioPiuNuovoDelRiprendi;
+@property (readonly) NSString *nomeGioco;
+/// Copie datate dei salvataggi del gioco (la più nuova prima): cartelle con dentro i file.
+- (NSArray<NSURL *> *)copieDiSicurezza;
+/// Alla chiusura del gioco rimette questa copia dei salvataggi (e toglie "riprendi").
+- (void)ripristinaAllaChiusura:(NSURL *)copia;
 - (void)caricaAutomatico:(void (^)(NSError * _Nullable))fatto;
 @end
 
